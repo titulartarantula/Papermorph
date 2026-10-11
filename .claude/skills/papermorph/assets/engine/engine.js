@@ -4,18 +4,18 @@
 // A fast follow-up navigation can abort the incoming page transition.
 addEventListener('pagereveal', e => e.viewTransition?.ready.catch(() => {}));
 document.body.insertAdjacentHTML('afterbegin', `<div id="frame">
-  <svg id="stage" viewBox="0 0 1600 900" role="img" aria-label="Lesson animation">
+  <svg id="stage" viewBox="0 0 1600 900" role="group" aria-label="Lesson animation"><!-- a group, not img: it holds citation links -->
     <defs>
       <filter id="grain" x="0" y="0" width="100%" height="100%">
         <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" />
-        <feColorMatrix values="0 0 0 0 .92  0 0 0 0 .95  0 0 0 0 .9  0 0 0 .07 0" />
+        <feColorMatrix values="0 0 0 0 .02  0 0 0 0 .05  0 0 0 0 .14  0 0 0 .1 0" /><!-- dark grain: never lightens the board below the palette's contrast -->
       </filter>
       <radialGradient id="vignette" cx=".5" cy=".45" r=".75">
         <stop offset=".6" stop-color="#000" stop-opacity="0" />
         <stop offset="1" stop-color="#000" stop-opacity=".35" />
       </radialGradient>
     </defs>
-    <rect width="1600" height="900" fill="#1d2b27" />
+    <rect width="1600" height="900" fill="#1E3765" />
     <rect width="1600" height="900" filter="url(#grain)" />
     <rect width="1600" height="900" fill="url(#vignette)" />
     <g id="scene"></g>
@@ -67,6 +67,9 @@ document.body.insertAdjacentHTML('afterbegin', `<div id="frame">
     <button class="icon" id="bBack" aria-label="Previous step (left arrow)">
       <svg viewBox="0 0 18 18"><path d="M3 2h2.5v14H3zM16 2v14L6.5 9z"/></svg>
     </button>
+    <button class="icon" id="bNext" aria-label="Next step (right arrow)">
+      <svg viewBox="0 0 18 18"><path d="M15 2h-2.5v14H15zM2 2v14l9.5-7z"/></svg>
+    </button>
     <button class="icon" id="bRestart" aria-label="Restart lesson">
       <svg viewBox="0 0 18 18"><path d="M9 2.5a6.5 6.5 0 1 1-6.3 8.1l2-.5A4.5 4.5 0 1 0 9 4.5V7L4.5 3.5 9 0z"/></svg>
     </button>
@@ -91,8 +94,11 @@ document.body.insertAdjacentHTML('afterbegin', `<div id="frame">
 
 /* ---------- drawing helpers ---------- */
 const NS = 'http://www.w3.org/2000/svg';
-const COL = { nat: '#f4a48c', whole: '#86c9e8', int: '#f3c95c', rat: '#e8a0c8', irr: '#8fd6b0', real: '#bba8ee',
-  chalk: '#ece8dc', dim: '#9aaba3', faint: '#5d7068', task: '#f0b45a', good: '#8fd6b0', bad: '#f08c7a', board: '#1d2b27' };
+// University of Toronto palette on a U of T Blue board (references/palette.md). Every colour except faint and board
+// reaches WCAG AA (≥ 5:1) as text on the board; faint (3.2:1) is for lines and shapes only. Text drawn on a filled
+// accent shape uses COL.board. Category colours: Warm Red, Cool Blue, Teal, Fuchsia, Light Green, Purple (tints where needed).
+const COL = { nat: '#EA9287', whole: '#6FC7EA', int: '#47BBAA', rat: '#D995BB', irr: '#8DBF2E', real: '#BF9FC4',
+  chalk: '#FFFFFF', dim: '#D0D1C9', faint: '#7B8799', task: '#F1C500', good: '#8DBF2E', bad: '#EA9287', board: '#1E3765' };
 const UI = '"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif';
 const MATH = '"STIX Two Text","Cambria Math","Iowan Old Style",Palatino,Georgia,serif';
 const NAME = { nat: 'Natural', whole: 'Whole', int: 'Integers', rat: 'Rational', irr: 'Irrational', real: 'Real' };
@@ -139,6 +145,77 @@ function T(parent, str, { x = 0, y = 0, size = 30, fill = COL.chalk, font = UI, 
   t.textContent = str;
   t.style.whiteSpace = 'pre';
   return put(t, { x, y, o });
+}
+// A citation drawn in the picture that opens its source (REFS from ../refs.js, built by scripts/refs.py) in a new tab.
+// cite(p, key, opts) takes T's options; str overrides the label (default REFS[key].cite). Returns the <a>; animate it like T.
+const CITED = new Set();
+function cite(parent, key, { str, ...opts } = {}) {
+  const r = (typeof REFS === 'object' && REFS) ? REFS[key] : null;
+  if (!r) throw new Error(`cite: no reference "${key}" in refs.js`);
+  CITED.add(key);
+  if (!r.url) return T(parent, str || r.cite, opts);
+  const a = mk('a', { class: 'cite', href: r.url, target: '_blank', rel: 'noopener', 'aria-label': `${r.cite}, opens the source in a new tab` }, parent);
+  const { o = 1, x = 0, y = 0, ...rest } = opts;
+  T(a, str || r.cite, { ...rest, fill: rest.fill || COL.chalk });
+  return put(a, { x, y, o });
+}
+// Any text in the picture or a card that equals a reference's cite label or one of its match strings (case-insensitive)
+// becomes a link to the source, so chapters write citations as plain text. Watched by citeObs (set up after the player).
+let CITE_RE = null, CITE_KEY = null;
+function citeIndex() {
+  if (CITE_RE !== null) return CITE_RE;
+  CITE_KEY = new Map();
+  for (const [k, r] of Object.entries(typeof REFS === 'object' && REFS ? REFS : {}))
+    for (const s of [r.cite, ...(r.match || [])]) if (s) CITE_KEY.set(s.toLowerCase(), k);
+  const alts = [...CITE_KEY.keys()].sort((a, b) => b.length - a.length).map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return (CITE_RE = alts.length ? new RegExp(alts.join('|'), 'gi') : false);
+}
+function autoCite(root) {
+  const re = citeIndex();
+  if (!re) return;
+  const nodes = [];
+  if (root.nodeType === 3) nodes.push(root);
+  else if (root.nodeType === 1) for (let w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n; (n = w.nextNode());) nodes.push(n);
+  for (const n of nodes) {
+    const host = n.parentElement;
+    if (!host || host.closest('a, button, input, script, style, kbd')) continue;   // no links inside controls
+    const ms = [...n.data.matchAll(re)];
+    if (!ms.length) continue;
+    const svg = host.namespaceURI === NS, frag = document.createDocumentFragment();
+    let i = 0, made = 0;
+    for (const m of ms) {
+      const k = CITE_KEY.get(m[0].toLowerCase()), r = REFS[k];
+      CITED.add(k);
+      if (!r.url) continue;   // a work with no reliable online record stays plain text but is still listed
+      frag.append(n.data.slice(i, m.index));
+      const a = svg ? mk('a', { href: r.url }) : document.createElement('a');
+      if (!svg) a.href = r.url;
+      a.setAttribute('class', 'cite');
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener');
+      a.setAttribute('aria-label', `${m[0]}, opens the source in a new tab`);
+      if (svg) mk('tspan', {}, a).textContent = m[0]; else a.textContent = m[0];
+      frag.append(a);
+      i = m.index + m[0].length;
+      made++;
+    }
+    if (!made) continue;   // replacing the node unchanged would re-trigger the observer
+    frag.append(n.data.slice(i));
+    n.replaceWith(frag);
+  }
+}
+// Links that have faded out (or sit in a faded group) must not take clicks or Tab focus.
+function syncLinks() {
+  for (const a of scene.querySelectorAll('a.cite')) {
+    let o = 1;
+    for (let e = a; e && e !== scene; e = e.parentNode) o *= +(e.getAttribute('opacity') ?? 1);
+    const on = o > .5;
+    if (on === a._on) continue;
+    a._on = on;
+    a.style.pointerEvents = on ? '' : 'none';
+    if (on) { a.removeAttribute('tabindex'); a.removeAttribute('aria-hidden'); }
+    else { a.setAttribute('tabindex', '-1'); a.setAttribute('aria-hidden', 'true'); }
+  }
 }
 const ctx2d = document.createElement('canvas').getContext('2d');
 function textW(str, size, italic = false) { ctx2d.font = `${italic ? 'italic ' : ''}${size}px ${MATH}`; return ctx2d.measureText(str).width; }
@@ -919,13 +996,26 @@ function finishCard() {
     : (e.key === 'r' || e.key === 'R') ? (restart(), true) : false;
   const guide = mascotEl(240);
   c.append(h('div', 'finwrap', [guide, h('p', 'kicker', `Chapter ${CHAPTER.number} complete`), h('p', 'prompt', CHAPTER.title),
-    line('Quick checks', sum('c-')), line('Chapter practice', sum('p-')), h('div', 'acts', next ? [home, again, next] : [home, again])]));
+    line('Quick checks', sum('c-')), line('Chapter practice', sum('p-')), h('div', 'acts', next ? [home, again, next] : [home, again]), sources()].filter(Boolean)));
   setTimeout(() => mood(guide, 'happy'), 400);
 }
 
 /* ---------- in-picture cards ---------- */
 const $ = id => document.getElementById(id);
 const kbd = s => h('kbd', '', s);
+// The chapter's sources: every key passed to cite() plus CHAPTER.refs, as full references that link to the source.
+function sources() {
+  for (const m of citeObs.takeRecords()) for (const n of m.addedNodes) autoCite(n);   // link text added just now (a seek to the end)
+  const keys = [...new Set([...(CHAPTER.refs || []), ...CITED])].filter(k => typeof REFS === 'object' && REFS?.[k]);
+  if (!keys.length) return null;
+  const items = keys.map(k => REFS[k]).sort((a, b) => a.ref.localeCompare(b.ref)).map(r => {
+    if (!r.url) return h('li', '', r.ref);
+    const a = h('a', '', r.url.replace(/^https?:\/\//, ''));
+    Object.assign(a, { href: r.url, target: '_blank', rel: 'noopener' });
+    return h('li', '', [r.ref + ' ', a]);
+  });
+  return h('section', 'srcs', [h('h2', '', 'Sources in this chapter'), h('ol', '', items)]);
+}
 const uiW = (str, size) => { ctx2d.font = `600 ${size}px ${UI}`; return ctx2d.measureText(str).width; };
 const RING_KEYS = ['nat', 'whole', 'int', 'rat', 'irr', 'real'];   // number keys 1–6 in sorting questions
 const SCORE = {};                                          // question id -> first-attempt {right, total}
@@ -1056,6 +1146,13 @@ const choice = (opts, right, yes, no, onRight) => (body, api) => {
     key(e) { const b = bs[+e.key - 1]; if (!b || b.disabled) return false; b.click(); return true; },
   };
 };
+// A choice question from the chapter's item bank: ITEMS from ./items.js, built by scripts/items.py from the
+// mcq-item-writer JSON. mcq('ID', onRight?) returns a quiz entry, so quiz(TOPR, [mcq('MB-03-01')], done) asks it.
+function mcq(id, onRight) {
+  const it = (typeof ITEMS === 'object' && ITEMS) ? ITEMS[id] : null;
+  if (!it) throw new Error(`mcq: no item "${id}" in items.js`);
+  return { id, prompt: it.prompt, build: choice(it.opts, it.right, it.why, it.no, onRight) };
+}
 // Tap a point on the stage number line.
 const tap = (values, right, yes, no, onRight) => (body, api) => {
   const L = qlayer(), hits = {};
@@ -1525,6 +1622,7 @@ function frame(now) {
     evalTo(P.t);
     if (P.t >= P.end) beatDone();
   }
+  syncLinks();
   ui();
   requestAnimationFrame(frame);
 }
@@ -1543,6 +1641,7 @@ function buildSegs() {
 function ui() {
   segs.forEach((f, k) => { f.style.width = (k < P.i || P.done ? 100 : k > P.i ? 0 : Math.min(100, P.t / P.end * 100)) + '%'; });
   $('frame').classList.toggle('is-playing', P.playing && !P.done && !P.waiting);
+  $('bNext').disabled = P.i >= BEATS.length - 1;
   $('frame').classList.toggle('paused', P.started && !P.playing && !P.waiting && !P.done && !BEATS[P.i].ask);
   $('stepName').textContent = `${P.i + 1} / ${BEATS.length}   ${BEATS[P.i].title}`;
   const b = BEATS[P.i];
@@ -1570,9 +1669,13 @@ const back1 = () => seek(P.t > 2.5 || P.i === 0 ? P.i : P.i - 1);
 const restart = () => { for (const k in SCORE) delete SCORE[k]; hideCover(); seek(0, true); };
 $('cover').onclick = togglePlay;
 $('stage').addEventListener('click', e => {
+  if (e.target.closest('a.cite')) { if (P.playing && !P.waiting) setPlaying(false); return; }   // opening a source pauses the lesson
   const b = BEATS[P.i];
   if (!b.ask && !e.target.closest('.qlayer')) togglePlay();
 });
+const citeObs = new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) autoCite(n); });
+citeObs.observe(scene, { childList: true, subtree: true });
+citeObs.observe($('ui'), { childList: true, subtree: true });
 $('bPlay').onclick = togglePlay;
 $('bVolume').onclick = () => $('volume').focus();
 $('volume').oninput = () => {
@@ -1580,6 +1683,8 @@ $('volume').oninput = () => {
   if (P.audio) P.audio.volume = +$('volume').value;
 };
 $('bBack').onclick = () => { hideCover(); back1(); };
+// Next step: the button equivalent of → and of the small progress segments (WCAG 2.5.8 target size).
+$('bNext').onclick = () => { hideCover(); if (P.i < BEATS.length - 1) seek(P.i + 1); };
 $('bRestart').onclick = restart;
 $('bCC').onclick = () => setCaptions(!captions);
 $('bFull').onclick = () => toggleFull();

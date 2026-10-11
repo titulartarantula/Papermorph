@@ -16,6 +16,8 @@ cp "$SKILL/assets/templates/book.html" "$BOOK_SITE/index.html"
 cp "$SKILL/assets/templates/unit-art.js" "$BOOK_SITE/unit-art.js"
 cp "$SKILL/assets/templates/chapter.html" "$BOOK_SITE/ch01/index.html"
 cp "$SKILL/assets/templates/narration.en.json" "content/$BOOK_ID/ch01/narration.en.json"
+echo '[]' > "$BOOK_WORK/refs.json"
+python "$SKILL/scripts/refs.py" build "$BOOK_WORK/refs.json" "$BOOK_SITE/refs.js"
 ```
 
 Use the agreed primary language: rename the narration source, load `audio/<lang>/timings.js`, and set `CHAPTER.language` to match (default `en`). Choose the voice and translate the template's visible UI text as needed before the pilot.
@@ -26,11 +28,13 @@ A chapter returns to its book's index. Preserve cover → contents → chapter n
 
 ## Cover and contents (`index.html`)
 
-One page: no hash or `#book` shows the cover, `#contents` or `#chNN` the contents; a lesson's home button returns to `#chNN`, and the card grows into the lesson frame through a view transition.
+One page: no hash or `#book` shows the cover, `#references` the reference list, `#acknowledgements` the acknowledgements, `#contents` or `#chNN` the contents; a lesson's home button returns to `#chNN`, and the card grows into the lesson frame through a view transition.
 
 - Edit the title, kicker, lede, the faint chalk phrases on the cover (a few formulas or lines from the book), and the `<title>`.
 - `UNITS`: `[unit title, [[chapter title, minutes], …]]`; chapters are numbered in order. Add a chapter when its lesson is ready; also set the previous chapter's `CHAPTER.next = '../chNN/'`.
-- `HUES`: one colour per unit, cycling.
+- `HUES`: one colour per unit, cycling; keep the template's U of T accents ([palette.md](palette.md)).
+- Acknowledgements: fill `ACK` in `index.html` for every book. `sources` lists the `refs.json` keys of the works the book retells (shown in full, linked); `note` says in one or two sentences how the book uses them (what it follows, what is the book's own, any change of setting); `made` (rows `[label, text, link?]`, where `link` is a URL or a list of URLs) credits Papermorph (DozenTwelve, MIT, linked to its GitHub repository) and the editor's fork it was made with, the editor (name, affiliation, ORCID link), Claude as the drafting tool with the editor's review, the actual narration provider, voice and model, the question approach (books with mcq-item-writer banks link https://github.com/titulartarantula/mcq-item-writer), citation checking and the palette. The contents shows an Acknowledgements link under References; an empty `ACK` hides it. Update `made` if the voice or model changes.
+- References: the page loads `refs.js`. The contents ends with one link to the separate `#references` view, which lists every entry in APA style, linked to its DOI or catalogue record. Keep the full list off the contents page. Rebuild `refs.js` whenever `refs.json` changes (see authoring.md, *Citations*).
 
 ## Unit sketches (`unit-art.js`)
 
@@ -48,7 +52,7 @@ Serve the static output over HTTP for audio playback:
 python3 -m http.server 8765 -d site
 ```
 
-Open `http://localhost:8765/<book>/`. Confirm the cover opens the contents, ready chapter links load their lessons, and lessons return to the book's contents. Deliver `site/<book>/` with its HTML, scripts, styles and audio, the preview command and entry URL, available chapter count and unresolved issues. Source PDFs, extracted pages, narration drafts and development environments are not part of the static book.
+Open `http://localhost:8765/<book>/`. Confirm the cover opens the contents, ready chapter links load their lessons, lessons return to the book's contents, and the reference list's links open their works. Deliver `site/<book>/` with its HTML, scripts (including `refs.js`), styles and audio, the preview command and entry URL, available chapter count and unresolved issues. Source PDFs, extracted pages, narration drafts and development environments are not part of the static book.
 
 ## Languages
 
