@@ -10,6 +10,16 @@
   <strong>A Skill that turns PDFs into animated interactive web books.</strong>
 </p>
 
+> **About this fork.** This is a fork of [DozenTwelve/Papermorph](https://github.com/DozenTwelve/Papermorph), maintained by [Jordan Holmes](https://orcid.org/0000-0003-0917-4616) (University of Toronto). The Skill in `.claude/skills/papermorph` adds:
+>
+> - the **University of Toronto** brand palette on a U of T Blue board, with text checked for WCAG AA contrast (`references/palette.md`, `scripts/check_contrast.py`);
+> - **verified citations**: every work cited on screen links to a DOI, ISBN or catalogue record checked against Crossref or Open Library (`scripts/refs.py`);
+> - **choice questions** written with [MCQ Item Writer](https://github.com/titulartarantula/mcq-item-writer), which follows evidence-based item-writing rules, as a linted item bank per chapter (`scripts/items.py`). Install that skill alongside this one, at `.claude/skills/mcq-item-writer`;
+> - **ElevenLabs narration** as an option to Edge TTS (key from `ELEVENLABS_API_KEY` or a git-ignored `.env`);
+> - an **Acknowledgements** page on each book's contents, crediting sources, the editor and how the book was made.
+>
+> The rest of this README is from the original project. The live bookshelf and demo show the original's books.
+
 You've seen Opus 5.5 one-shot videos.
 This Skill takes it further: books you can explore, listen to, and interact with.
 
