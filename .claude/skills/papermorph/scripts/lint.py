@@ -16,7 +16,7 @@ Warnings: a beat's m('name') not among that beat's own marks (beats built by sha
   no beats recognised in a chapter.
 --content defaults to content/<book> (content/ for the first book's legacy layout), --brief to books/<book>.
 """
-import argparse, json, re, sys
+import argparse, json, re, sys, unicodedata
 from pathlib import Path
 
 DECL = re.compile(r'(?<![\w$.])(?:async\s+)?(function\*?|const|let|var|class)\s+([A-Za-z_$][\w$]*)')
@@ -25,6 +25,7 @@ INLINE = re.compile(r'<script>(.*?)</script>', re.S)
 BEAT = re.compile(r"\[\s*'(\w+)'\s*,\s*(['\"`])(?:\\.|(?!\2).)*\2\s*,\s*(?:\(\s*(?:m\b|\))|m\s*=>)")   # ['id', 'title', (m, D) =>
 MCALL = re.compile(r"(?<![\w$.])m\(\s*'(\w+)'\s*[,)]")
 MARK = re.compile(r'\[\[(\w+)\]\]')
+SAY = re.compile(r'\{\{([^|{}]+)\|([^{}]+)\}\}')   # {{shown|spoken}}, as in tts.py: captions carry "shown"
 
 
 def depth0(text):
@@ -97,7 +98,8 @@ def timings(path):
 
 
 def words(s):
-    return re.sub(r'[^\w]+', ' ', MARK.sub('', s)).lower().split()
+    s = unicodedata.normalize('NFC', SAY.sub(lambda m: m.group(1), MARK.sub('', s)))
+    return re.sub(r'[^\w]+', ' ', s).lower().split()
 
 
 def lint_chapter(ch, content, out):
