@@ -10,13 +10,15 @@
   <strong>A Skill that turns PDFs into animated interactive web books.</strong>
 </p>
 
-> **About this fork.** This is a fork of [DozenTwelve/Papermorph](https://github.com/DozenTwelve/Papermorph), maintained by [Jordan Holmes](https://orcid.org/0000-0003-0917-4616) (University of Toronto). The Skill in `.claude/skills/papermorph` adds:
+> **About this fork.** This is a fork of [DozenTwelve/Papermorph](https://github.com/DozenTwelve/Papermorph), maintained by [Jordan Holmes](https://orcid.org/0000-0003-0917-4616) (University of Toronto). The Skill in `.claude/skills/papermorph` and the engine in `engine/` add:
 >
-> - the **University of Toronto** brand palette on a U of T Blue board, with text checked for WCAG AA contrast (`references/palette.md`, `scripts/check_contrast.py`);
-> - **verified citations**: every work cited on screen links to a DOI, ISBN or catalogue record checked against Crossref or Open Library (`scripts/refs.py`);
-> - **choice questions** written with [MCQ Item Writer](https://github.com/titulartarantula/mcq-item-writer), which follows evidence-based item-writing rules, as a linted item bank per chapter (`scripts/items.py`). Install that skill alongside this one, at `.claude/skills/mcq-item-writer`;
-> - **ElevenLabs narration** as an option to Edge TTS (key from `ELEVENLABS_API_KEY` or a git-ignored `.env`);
-> - an **Acknowledgements** page on each book's contents, crediting sources, the editor and how the book was made.
+> - the **University of Toronto** brand palette on a U of T Blue board, with text checked for WCAG AA contrast (`engine/engine.css`, `engine/contents.css`, `references/palette.md`, `scripts/check_contrast.py`);
+> - **verified citations**: every work cited on screen links to a DOI, ISBN or catalogue record checked against Crossref or Open Library (`scripts/refs.py`; `cite()` in `engine/engine.js`);
+> - **choice questions** written with [MCQ Item Writer](https://github.com/titulartarantula/mcq-item-writer), which follows evidence-based item-writing rules, as a linted item bank per chapter (`scripts/items.py`; `mcq()` in the engine). Install that skill alongside this one, at `.claude/skills/mcq-item-writer`;
+> - **ElevenLabs narration** as a third engine beside Edge TTS and Kokoro (key from `ELEVENLABS_API_KEY` or a git-ignored `.env`);
+> - **References** and **Acknowledgements** views on each book's contents page (`engine/contents.js`), crediting sources, the editor and how the book was made, and a next-step button in the player.
+>
+> `scripts/engine.py` copies this fork's engine into a book by default (`--from DozenTwelve/Papermorph@main` for the original). The demo books under `site/` are the original project's and keep its chalkboard look.
 >
 > The rest of this README is from the original project. The live bookshelf and demo show the original's books.
 
@@ -38,15 +40,17 @@ This Skill takes it further: books you can explore, listen to, and interact with
 </p>
 
 ```text
-PDF -> Book plan -> Storyboards -> Narration -> Animation & quizzes -> Web book
+PDF -> A short conversation (style.json) -> Storyboards -> Narration -> Animation & quizzes -> Web book
 ```
+
+The Skill starts by asking: it finds your PDF, says what the book is, suggests a chapter to try and an animation tier, and offers options at every step, so you can just pick the recommended one. Your choices are saved in `style.json`, the style every later chapter is made against.
 
 **Today:** Built with Opus 5.5, and tested with other models (see [Models](#models)). No image models, multilingual support, or BGM yet.
 
 ## Roadmap
 
 - [x] **Math books:** formulas and diagrams that change step by step, with quizzes. Two books on the shelf.
-- [ ] **Physics books:** illustrated scenes, acting characters and camera work. Chapters 9–11 are on the shelf; the new Skill that makes them is being refined.
+- [ ] **Physics books:** illustrated scenes, acting characters and camera work. Chapters 9–12 are on the shelf; chapter 12 was made by the new Skill.
 - [ ] **Picture books:** image models and storyboards for interactive picture books. In local testing.
 - [ ] **Humanities documentaries:** history and social science titles.
 
@@ -63,12 +67,33 @@ npx skills add DozenTwelve/Papermorph --skill papermorph --agent claude-code
 In Claude Code with Opus 5.5, run:
 
 ```text
-/papermorph Turn /path/to/book.pdf into
-an animated interactive web book.
-
-Target readers: [your audience].
-Start with one English chapter for review.
+/papermorph
 ```
+
+It looks for the PDF in your project, then asks the rest. Diagrams that change (tier 1) suit maths and other abstract topics; illustrated scenes (tier 2) suit physics and stories. Picture books and documentaries are coming.
+
+Before you review a chapter, `scripts/lint.py` catches broken names, missing audio and stale narration in under a second.
+
+## Player and engine
+
+Every book plays in the same player: speed control (`<` `>`), click anywhere on a step to jump there, captions, keyboard shortcuts, and progress saved per book.
+
+The player engine lives in [`engine/`](engine), apart from the Skill, so a fix reaches every book without touching the Skill. Fork it if you like, and point the Skill at your fork:
+
+```bash
+python3 .claude/skills/papermorph/scripts/engine.py site --from you/your-fork@main
+```
+
+## Export to video
+
+Any chapter can be rendered to MP4 (1080p) with an `.srt` for YouTube or Bilibili:
+
+```bash
+uv run --with playwright .claude/skills/papermorph/scripts/export.py ch12 \
+  --url http://localhost:8765/science/ --link https://papermorph.diamonddoge.org/science/ch12/
+```
+
+Frames come straight from the lesson clock, so the video matches the page. Quizzes stay in the interactive version; the video ends by pointing there.
 
 ## Models
 

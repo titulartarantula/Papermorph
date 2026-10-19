@@ -4,10 +4,11 @@
     python check_contrast.py site/<book>                 # engine palette + every colour literal in the book
     python check_contrast.py site/<book> --strict        # also fail on literals below 3:1 (lines and shapes)
 
-Reads the --tokens in lib/engine.css and COL in lib/engine.js, then checks:
+Reads the --tokens in lib/engine.css and COL in lib/engine.js (and lib/contents.css for the cover and contents), then checks:
   - text colours (chalk, dim, task, quiz, good, bad and the six category colours) ≥ 4.5:1 on board, panel and page;
   - faint ≥ 3:1 on board (lines, axes and shapes that carry meaning);
-  - board-coloured text on each accent fill ≥ 4.5:1.
+  - board-coloured text on each accent fill ≥ 4.5:1;
+  - the cover/contents text tokens (lib/contents.css, overridable in index.html's own <style>) ≥ 4.5:1 on its board and panel.
 Then lists every other hex or rgba() colour in the book's HTML/JS/CSS with its contrast on the board
 (rgba blended over the board): AA text ≥ 4.5, large text and graphics ≥ 3, below that decoration only.
 A literal used for text must reach 4.5 (3 for text ≥ 24 px, or ≥ 18.5 px bold); one used for a meaningful
@@ -19,6 +20,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+# The engine's own files in lib/ (scripts/engine.py copies them; their palette is checked above, not listed below).
+ENGINE = {"engine.js", "engine.css", "contents.js", "contents.css", "units.js", "units.css", "volume.js", "volume.css", "mathjax.js"}
 TEXT = ["chalk", "dim", "task", "quiz", "good", "bad", "nat", "whole", "int", "rat", "irr", "real"]
 
 
@@ -75,10 +78,26 @@ def main():
     if r < 3:
         fails.append("faint")
 
+    contents = a.book / "lib/contents.css"
+    if contents.exists():
+        ctok = {k: rgb(v) for k, v in re.findall(r"--([a-z]+):\s*(#[0-9a-fA-F]{3,6})\b", contents.read_text(encoding="utf-8").split("}")[0])}
+        cb = ctok.get("board", board)
+        csurf = {"board": cb, "panel": ctok.get("panel", cb)}
+        print("\nCover and contents (lib/contents.css; a <style> in index.html may override it)")
+        for k in ("chalk", "dim", "task", "quiz", "good"):
+            if k not in ctok:
+                continue
+            rs = {s_: ratio(ctok[k], v) for s_, v in csurf.items()}
+            worst = min(rs.values())
+            if worst < 4.5:
+                fails.append(f"contents {k}")
+            print(f"  {'ok ' if worst >= 4.5 else 'FAIL'} {k:6} #{'%02X%02X%02X' % ctok[k]}  " + "  ".join(f"{s_} {r:5.2f}" for s_, r in rs.items()))
+        tok = {**{f"contents-{k}": v for k, v in ctok.items()}, **tok}
+
     known = {v for v in col.values()} | set(tok.values())
     seen = defaultdict(set)
     for p in sorted(a.book.rglob("*")):
-        if p.suffix not in (".html", ".js", ".css") or "audio" in p.parts or p.name in ("engine.js", "engine.css"):
+        if p.suffix not in (".html", ".js", ".css") or "audio" in p.parts or p.name in ENGINE:
             continue
         for i, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
             for hx in re.findall(r"(?<![\w&])#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b", line):

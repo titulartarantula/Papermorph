@@ -17,9 +17,9 @@
   const books = [
     { id: 'elementary-algebra', key: 'progress', chapterBase: 'elementary-algebra/', chapters: 68 },
     { id: 'math-notebook', key: 'animebook:progress:' + new URL('math-notebook/', location.href).pathname,
-      chapterBase: 'math-notebook/', chapters: 22 },
+      chapterBase: 'math-notebook/', chapters: 23 },
     { id: 'science', key: 'animebook:progress:' + new URL('science/', location.href).pathname,
-      chapterBase: 'science/', chapters: 11 },
+      chapterBase: 'science/', chapters: 19 },
   ];
   for (const book of books) {
     const cover = document.querySelector(`[data-book="${book.id}"]`);

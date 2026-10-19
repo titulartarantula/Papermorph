@@ -1,6 +1,6 @@
 # Palette: University of Toronto, WCAG AA
 
-Books use the University of Toronto brand palette (brand.utoronto.ca, Guidelines → Colours and Websites → Web styling → Colour, read 2026-10-08) on a U of T Blue board. The engine, cover/contents template and `COL` already carry it. Check it with `scripts/check_contrast.py site/<book>`.
+Books use the University of Toronto brand palette (brand.utoronto.ca, Guidelines → Colours and Websites → Web styling → Colour, read 2026-10-08) on a U of T Blue board. The engine (`engine/engine.css`, `COL` in `engine/engine.js`, the cover/contents styles `engine/contents.css` and `contents.js`'s unit hues) already carries it, and `scripts/engine.py` copies it into each book's `lib/`. Check it with `scripts/check_contrast.py site/<book>`.
 
 ## Brand colours
 
@@ -43,8 +43,8 @@ Unit colours on the contents page (`HUES`) cycle through Cool Blue, Yellow, Ligh
 - **Lines, axes, arrows and shape outlines that carry meaning** need ≥ 3:1: any palette colour or `faint`. Translucent washes (`rgba(255,255,255,.08)` and the like) are decoration and must not be the only cue.
 - **Colour is never the only signal.** Right/wrong also shows ✓/✗ or a crossing-out; categories also carry a label or position.
 - **Close pairs.** The purple and fuchsia tints (`real`/`rat`) are close for everyone, and yellow and light green (`task`/`good`, `irr`) merge under protanopia. Don't let either pair be the only way to tell two things apart; give each a label, shape or position. Blue, teal and green separate well.
-- **New colours** come from the table: an accent, or a tint mixed toward white until ≥ 4.5:1 on the board. A darker shade of U of T Blue is fine for surfaces. Avoid literals; add a named constant (`COL`, or the book's `book.js`) and record its meaning in BOOK.md.
+- **New colours** come from the table: an accent, or a tint mixed toward white until ≥ 4.5:1 on the board. A darker shade of U of T Blue is fine for surfaces. Avoid literals; add a named constant (`COL`, or the book's `book.js`) and record its meaning in `style.json` (`look.meaning`).
 - Tweened colours need hex values (`c_fill`, `c_stroke`).
 - **Texture only darkens.** The board's grain is dark navy, so the board renders at U of T Blue or darker. A light grain, glow or wash behind text raises the board's luminance and erodes the margins above: a white 7% grain once cut the tints from 5.0:1 to 4.2:1 on the rendered board. Check contrast on the rendered page, not only against the hex values.
 
-A book that has to follow another brand replaces these tokens in `lib/engine.css`, `COL` in `lib/engine.js`, and `:root`/`HUES`/the guide colour in `index.html` together, then reruns `check_contrast.py`.
+A book that has to follow another brand overrides these tokens in its own `lib/book.css` (lesson) and a `<style>` after `lib/contents.css` in `index.html` (cover and contents), passes its `hues` to `Contents.book`, and draws with its own named colours (in its library) instead of `COL`, then reruns `check_contrast.py`. Never edit the engine copies in `lib/`; `engine.py` replaces them.

@@ -93,7 +93,7 @@ button[hidden] { display: none; }
 .hit:hover .ring, .hit:focus .ring { stroke-opacity: .7; }
 .hit.bad .ring { stroke: var(--bad); stroke-opacity: 1; }
 .hit.good .ring { stroke: var(--good); stroke-opacity: 1; stroke-width: 4; }
-.tok { cursor: grab; }
+.tok { cursor: grab; touch-action: none; }   /* a finger drags the chip instead of scrolling the page */
 
 /* Controls strip, part of the frame. */
 #bar { position: absolute; left: 0; top: 900px; width: 1600px; height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: #16211d; border-top: 1px solid #2a3b35; }
@@ -116,6 +116,8 @@ button[hidden] { display: none; }
     transform: scale(calc(1 / var(--k))); transform-origin: left top; border-radius: 0 0 12px 12px; }
   #bar .icon { width: 36px; height: 40px; }
   .step { display: none; }
+  #bHelp { display: none; }   /* keyboard shortcuts; room for the speed button on a phone */
+  #bar .icon.speed { width: 36px; min-width: 0; padding: 0; font-size: 12px; letter-spacing: -.3px; }
   .segs { order: 1; }
   .segs { min-width: 80px; margin: 0; }
 }
@@ -230,3 +232,4 @@ a.btn { text-decoration: none; display: inline-block; }
 /* The finish screen speaks the same type as the chapter cover and the contents page. */
 .fin .kicker { font-size: 20px; letter-spacing: .14em; text-transform: uppercase; }
 .fin .prompt { margin: 6px 0 14px; font: 500 56px/1.15 "Iowan Old Style", Palatino, Georgia, serif; }
+.icon.speed { width: auto; min-width: 44px; padding: 0 10px; border-radius: 22px; font-size: 16px; }

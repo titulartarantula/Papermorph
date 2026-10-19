@@ -2,7 +2,7 @@
 
 ## Shape
 
-The algebra book used roughly 5–11 minute chapters and 5–40 second beats. Let the content determine length and the number of checks/practice sets.
+Chapters have run 5–18 minutes with 5–40 second beats; a long chapter can hold several parts (each a short title beat, lessons, a quick check and a wrap). Let the content determine length and the number of checks/practice sets.
 
 | Beat | Purpose |
 | --- | --- |
@@ -10,29 +10,18 @@ The algebra book used roughly 5–11 minute chapters and 5–40 second beats. Le
 | lesson beats | One idea each, built up in the picture while the narration explains it. |
 | `q1`, `q2`, … | A check of already taught content, separated from the next check by a lesson beat. |
 | `wrap` | Three or four numbered takeaways. |
-| `final1` … | Consecutive full-screen practice sets labelled "Chapter practice N of M", covering the whole chapter. |
+| `final1` … | Full-screen practice covering the whole chapter. With several sets, label them like `'Chapter practice, set 1 of 2 · question'` (the engine appends "k of n"). |
 | `finish` | Score card (`finishCard`): first-try results for quick checks and practice. |
 
 Beat ids are shared by the page (`BEATS`) and the narration file; a beat with `ask` waits for the answers before moving on.
 
-## Storyboard
+## Beats
 
-Before writing code, write the chapter's objectives (three to five things the reader can do afterwards: "classify a thought by theme", "predict which explanation keeps a learner trying"); every question tests one of them. Then list the beats. For each lesson beat decide:
+Before writing code, write the chapter's objectives (three to five things the reader can do afterwards: "classify a thought by theme", "predict which explanation keeps a learner trying"); every question tests one of them. Then list the beats. For each lesson beat decide what the eye should watch and what changes; why that change is true (the animation is the argument); which words trigger which actions (these become `[[marks]]`); what text appears, beside the thing it names; and what carries over from the previous beat. Then lay out the key moments as pictures (storyboard): [diagrams.md](diagrams.md) and [scenes.md](scenes.md).
 
-- what the eye should watch, and what changes;
-- why that change is true (the animation is the argument, not decoration);
-- which words trigger which actions (these become `[[marks]]`);
-- what text appears on screen: the key formula, rule or label, placed beside the thing it names;
-- what is still on screen from the previous beat, and what fades.
-
-Principles that held up over a whole book:
-
-- **Open on the subject.** When a beat clears the picture, the new topic (expression, diagram, question) appears right away; labels and steps then follow the words. The engine moves an opening group forward if nothing appears in the first 0.8 s, but design for it. Normal transitions and short pauses for thought are fine; the picture need not move all the time.
-- **One new thing at a time.** Don't introduce several objects, colours and texts at once.
-- **Same colour, same meaning** within a chapter (and, where it fits, across the book).
-- **Be exact.** Number lines, grids and areas are to scale; a deliberately enlarged drawing says "drawn larger" on screen. Approximations are written as approximations (≈ 4.47…, never = 4.47).
-- **Teach the chapter's scope.** If the book jumps ahead or uses something not yet taught, leave it out or say so.
-- **Show the common mistake** where one exists (e.g. squaring the coefficient too), visually crossed out, then the right way.
+- **Open on the subject.** When a beat clears the picture, the new topic appears right away; labels and steps follow the words. Short pauses for thought are fine.
+- **One new thing at a time**, and **the same colour means the same thing** across the chapter and, where it fits, the book.
+- **Teach the chapter's scope**, choosing sections by idea; note any reordering in `chapters/chNN.md`.
 
 ## Narration
 
@@ -43,26 +32,26 @@ Principles that held up over a whole book:
   "beats": { "intro": "Chapter five. [[sub]]Subtraction undoes addition.", "...": "..." } }
 ```
 
-ElevenLabs instead of Edge TTS, when the user names a voice for the book (record it in BOOK.md; every chapter of a book uses the same voice):
+- `[[name]]` goes right before the word an action waits for; `m('name', offset)` in the page returns when that word starts. Names are unique within a beat; a misspelt mark makes the page throw, and a mark that matches no spoken word makes `tts.py` stop.
+- Write for the ear: short sentences, one idea each. Say symbols and units in words ("negative seven halves", "meters per second squared"); the picture shows the symbols.
+- Match the audience: plain, warm, never childish. Explain why, not only how.
+- Question beats get one short line ("Quick check. Find the mean."); the card holds the question.
+- `tts.py` writes `<beat>.mp3` and `timings.js` (duration, marks, captions) and caches each finished beat beside the narration JSON: moving `[[marks]]` reuses the cache, and after a failure the same command resumes rather than starting over.
+- Engine: `"engine": "edge"` (default, online), `"kokoro"` (local, Apache 2.0; English word timings; voices such as `am_michael`, `af_heart`, `bm_george`) or `"elevenlabs"` (below), set at the top of the narration file with `voice` and `rate`. Keep one engine and voice per book, recorded in `style.json` `voice`.
+- Respell for the voice with `{{shown|spoken}}` (e.g. `{{honne|honneh}}`): the voice reads `spoken`, captions show `shown`. The spoken text keys the audio cache, so wrapping an already-synthesized respelling costs nothing.
+
+ElevenLabs, when the user names an ElevenLabs voice for the book (`style.json` `voice`; every chapter of a book uses the same voice):
 
 ```json
-{ "provider": "elevenlabs", "voice": "<voice id>", "model": "eleven_v4",
+{ "engine": "elevenlabs", "voice": "<voice id>", "model": "eleven_v4",
   "settings": { "speed": 0.96 }, "beats": { "...": "..." } }
 ```
 
-- Model: `eleven_v4` for every ElevenLabs book (user decision, 2026-10-10). Books narrated earlier keep the model named in their narration files; changing it re-synthesises every chapter.
-- The API key comes from `ELEVENLABS_API_KEY` or a `.env` file in the project root (git-ignored). Never put the key in a narration file, BOOK.md or the site. It is a secret starting with `sk_`; a 64-character hex string is a key ID and is rejected.
+- Model: `eleven_v4` for every ElevenLabs book (user decision, 2026-10-10). Books narrated earlier keep the model named in their narration files; changing it re-synthesises every chapter. Older narration files that say `"provider": "elevenlabs"` still work.
+- The API key comes from `ELEVENLABS_API_KEY` or a `.env` file in the project root (git-ignored). Never put the key in a narration file, `style.json` or the site. It is a secret starting with `sk_`; a 64-character hex string is a key ID and is rejected.
 - Same command (`uv run --with edge-tts … tts.py …`); the script needs no extra package for ElevenLabs. Word times come from the API's character alignment, so marks and captions work as with Edge.
 - ElevenLabs bills per character. Tell the user the chapter's character count before the first synthesis of a book; afterwards only changed beats are re-synthesised. A voice, model or settings change re-synthesises the whole chapter.
 - Pacing differs from Edge: check marks land on the intended words in the delivery pass.
-- Respell for the voice with `{{shown|spoken}}` (e.g. `{{honne|honneh}}`): the voice reads `spoken`, captions show `shown`. The spoken text keys the audio cache, so wrapping an already-synthesized respelling costs nothing.
-
-- `[[name]]` goes right before the word an action waits for; `m('name', offset)` in the page returns when that word starts. Names are unique within a beat; a misspelt mark makes the page throw, and a mark that matches no spoken word makes `tts.py` stop.
-- Write for the ear: short sentences, one idea each. Say math in words ("negative seven halves", "x squared"); the picture shows the symbols.
-- Match the audience: plain, warm, never childish. Explain why, not only how.
-- Question beats get one short line ("Quick check. Find the mean."); the card holds the question.
-- `tts.py` caches word timings beside the narration JSON; the output folder receives `<beat>.mp3` and `timings.js` (duration, marks, sentence captions). Moving or adding `[[marks]]` reuses the spoken-text cache and recalculates timings. Existing caches made with raw-text keys are reused for an unchanged beat and then upgraded; changing its marks before that upgrade may require one new synthesis.
-- Audio is replaced only after synthesis and timing validation succeed, and each completed beat is cached immediately. After a later failure, rerun the same command to reuse completed beats rather than regenerating the chapter.
 
 ## Questions
 
@@ -73,8 +62,8 @@ Every `choice` question is written with the **mcq-item-writer** skill (`MCQ`), n
 ```yaml
 objectives: [the storyboard's objectives for this chapter]
 source: books/<book>/pages/chNN/text.md
-learner_level: <BOOK.md readers>
-purpose: learning            # both, if BOOK.md says scores reach a gradebook (SCORM)
+learner_level: <style.json book.readers>
+purpose: learning            # both, if style.json questions.purpose says scores reach a gradebook (SCORM)
 assessment_type: formative
 options_per_item: 3          # cards fit three; four only on SCREEN practice, with four real distractors
 export: [markdown]           # the review sheet; the page needs only the JSON
@@ -122,12 +111,14 @@ New types are welcome when the content calls for one; each needs keyboard play (
 - Feedback: right → `why` (and an animation via `fx`/`onRight`); wrong → a hint aimed at that mistake; after a wrong try, Show answer.
 - Grade meaning: equal values match (6/8 = 3/4) unless the lowest form is asked for; sets and pairs in any order; no denominators of zero; never judge irrationality from finitely many digits.
 - The built-in numeric parser uses safe integer numerators and denominators and exact integer products for equality. For answers outside that range, use a subject-specific input and grader rather than allowing rounded values to pass.
-- Place cards so they don't cover the object being asked about (`BAND` under a number line, `TOPR` top right, a custom `{x, y, w, cls: 'side'}` beside a figure, `SCREEN` for practice).
+- Compose the question beat for its card: the picture the question is about stays visible (for example in the top 60 % with a `BAND` card below, or beside a `{x, y, w, cls: 'side'}` card); `SCREEN` for practice.
+- Units in typed answers: write the unit as a word after the box (`{ box: '60' }, ' kilograms'`) so it is not set as a math variable.
 
 ## Content rules
 
 - Follow the agreed chapter scope and order. Verify facts, calculations and answers actually used in the finished lesson; correct or replace source errors and note them in `books/<book>/chapters/chNN.md` for the user.
-- Use BOOK.md's definitions, notation and rounding conventions. Record new shared decisions there.
+- Check worked examples as the subject, not only as arithmetic (a push on someone standing on the ground is not the net force).
+- Use the notation and rounding in `style.json` (`look.notation`). Record new shared decisions there.
 - Colours follow [palette.md](palette.md): `COL` names, text ≥ 4.5:1, `COL.board` text on accent fills, never colour alone.
 
 ## Citations

@@ -1,61 +1,87 @@
-"""Optional interaction-test example; adapt the cases to the behavior being changed.
+"""Chapter checks, derived from BEATS: playback, replay of every lesson beat, quiz card layout at two viewport sizes,
+the answers, practice and finish card. Copy to tools/<book>/e2e_chNN.py and fill ANSWERS; add checks of your own
+(readouts that must agree with the motion at a moment, wrong-answer feedback) where the chapter needs them.
 
-    python3 -m http.server 8765 -d site &
-    URL=http://localhost:8765/BOOK/chNN/ uv run --with playwright tools/BOOK/e2e_chNN.py
-
-Beat numbers follow BEATS in the chapter page. Run relevant existing cases after engine changes.
+    python3 SKILL/scripts/serve.py 8765 site &
+    URL=http://localhost:8765/BOOK/chNN/ uv run --with playwright tools/BOOK/e2e_chNN.py      # BROWSER=firefox too
 """
 import asyncio, os
 from playwright.async_api import async_playwright
-CH = "ch01"
-URL = os.environ.get("URL", f"http://localhost:8765/{CH}/index.html")
+URL = os.environ.get("URL", "http://localhost:8765/BOOK/ch01/")
+# Question beat id -> keys for each question in turn: '1'..'9' picks a choice; '=a,b' fills the boxes and checks.
+ANSWERS = {"q1": ["=7"], "final1": ["1"]}
 
+# The frame reached by seeking straight to t equals the one reached by stepping through the beat (replays are exact).
+SAME_FRAME = r"""
+([i, t]) => {
+  const snap = () => scene.innerHTML.replace(/(cam)\d+/g, '$1#').replace(/(\d+\.\d{2})\d+/g, '$1');
+  seek(i, false); P.t = t; evalTo(t); const a = snap();
+  seek(i, false); for (let u = 0; u < t; u += 1 / 60) evalTo(u); evalTo(t);
+  return a === snap();
+}
+"""
+# The open quiz card: prompt width and lines, every control inside the card, card bottom on the 900-high stage.
+CARD = r"""
+() => {
+  const st = document.getElementById('stage').getBoundingClientRect(), k = st.width / 1600;
+  const c = document.querySelector('.card.quiz'), cr = c.getBoundingClientRect(), pr = c.querySelector('.prompt').getBoundingClientRect();
+  const lines = pr.height / (parseFloat(getComputedStyle(c.querySelector('.prompt')).lineHeight) * k);
+  const ctl = [...c.querySelectorAll('.opt, input.box, .btn:not([hidden])')].map(b => b.getBoundingClientRect());
+  const inside = b => b.width > 0 && b.left >= cr.left - 1 && b.right <= cr.right + 1 && b.top >= cr.top - 1 && b.bottom <= cr.bottom + 1;
+  return { promptW: pr.width / k, lines, ok: ctl.length > 0 && ctl.every(inside), bottom: (cr.bottom - st.top) / k };
+}
+"""
 
 async def main():
     async with async_playwright() as p:
-        b = await p.chromium.launch(args=["--autoplay-policy=no-user-gesture-required"])
+        ff = os.environ.get("BROWSER") == "firefox"
+        b = await (p.firefox.launch(firefox_user_prefs={"media.autoplay.default": 0}) if ff else p.chromium.launch(args=["--autoplay-policy=no-user-gesture-required"]))
         pg = await b.new_page(viewport={"width": 1440, "height": 900})
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.on("console", lambda m: m.type == "error" and errs.append(m.text))
-        await pg.goto(URL); await pg.wait_for_timeout(400)
-        ev = pg.evaluate
+        await pg.goto(URL); await pg.wait_for_timeout(600)
+        ev, key = pg.evaluate, (lambda k: pg.keyboard.press(k))
+        ids = await ev("BEATS.map(b => b.id)")
+        asks = await ev("BEATS.map(b => !!b.ask)")
 
-        async def keys(*ks):
-            for k in ks:
-                await pg.keyboard.press(k); await pg.wait_for_timeout(60)
+        await key("Space"); await pg.wait_for_timeout(2500)
+        assert await ev("P.playing && P.t > 1"), "lesson plays"
+        await key("Space"); t1 = await ev("P.t"); await pg.wait_for_timeout(600)
+        assert await ev(f"!P.playing && P.t === {t1}"), "pause freezes"
 
-        async def typed(*vals):                      # fills answer boxes in order (Tab between them)
-            for i, v in enumerate(vals):
-                if i: await keys("Tab")
-                await pg.keyboard.type(v); await pg.wait_for_timeout(40)
+        for i, bid in enumerate(ids):
+            if asks[i]: continue
+            d = await ev(f"TIMINGS['{bid}'].dur")
+            for t in (round(d * .55, 2), round(d - .3, 2)):
+                assert await ev(SAME_FRAME, [i, t]), f"beat {bid} at {t} s replays the same frame"
 
-        async def at(i):                             # jump to beat i, playing
-            await ev(f"seek({i}, true)"); await pg.wait_for_timeout(250)
+        for vw, vh in [(1280, 800), (1920, 1080)]:
+            await pg.set_viewport_size({"width": vw, "height": vh})
+            for i, bid in enumerate(ids):
+                if not asks[i] or bid == "finish": continue
+                await ev(f"seek({i}, true)"); await pg.wait_for_timeout(700)
+                m = await ev(CARD)
+                assert m["promptW"] > 400 and m["lines"] <= 4 and m["ok"] and m["bottom"] <= 901, (vw, bid, m)
+        await pg.set_viewport_size({"width": 1440, "height": 900})
 
-        async def ok():
-            assert "Correct" in await pg.inner_text(".card .fb"), await pg.inner_text(".card .fb")
+        for bid, steps in ANSWERS.items():
+            await ev(f"seek({ids.index(bid)}, true)"); await pg.wait_for_timeout(500)
+            for s in steps:
+                if s.startswith("="):
+                    for j, v in enumerate(s[1:].split(",")): await pg.locator(".card input.box").nth(j).fill(v)
+                    await key("Enter")
+                else: await key(s)
+                assert "Correct" in await pg.inner_text(".card .fb"), (bid, s)
+                await key("Enter"); await pg.wait_for_timeout(250)
+        assert await ev("BEATS[P.i].id") == "finish" and await pg.is_visible(".card.fin"), "practice leads to the finish card"
+        n = await ev("CHAPTER.number")
+        assert f"chapter {n} complete" in (await pg.inner_text(".card.fin")).lower()
+        assert n in (await ev("JSON.parse(localStorage.getItem(BOOK_PROGRESS_KEY))"))["done"], "chapter marked done"
 
-        score = lambda k: ev(f"SCORE['{k}'] && SCORE['{k}'].right")   # first-try score of question id k
-        await keys("Space"); await pg.wait_for_timeout(1500)
-        assert await ev("P.playing && P.t > .5"), "lesson plays"
-
-        await at(2)                                  # q1: wrong first, then right
-        await typed("6"); await keys("Enter"); assert await score("c-first") == 0
-        await pg.locator(".box").nth(0).fill("7"); await keys("Enter"); await ok()
-        await keys("Enter"); assert await ev("P.i") == 3
-
-        await at(4)                                  # practice: one wrong, then Show answer (Esc first if a box has focus)
-        await keys("2"); assert await score("p-one") == 0
-        await keys("s"); assert "Answer" in await pg.inner_text(".card .fb")
-        await keys("Enter"); await pg.wait_for_timeout(200)
-        assert f"chapter {int(CH[2:])} complete" in (await pg.inner_text(".card")).lower()
-        await keys("r"); await pg.wait_for_timeout(200); assert await ev("P.i") == 0   # Enter on the finish card opens the next chapter
-
-        for i in range(await ev("BEATS.length")):     # every beat must rebuild without errors
-            await ev(f"seek({i}, false)")
+        for i in range(len(ids)): await ev(f"seek({i}, false)")   # every beat rebuilds without errors
         assert not errs, errs
-        print(f"{CH} keyboard walk-through passed")
+        print(f"{URL} ({len(ids)} beats, {'firefox' if ff else 'chromium'}): playback, replay, quiz layout, answers, finish - passed")
         await b.close()
 
 asyncio.run(main())

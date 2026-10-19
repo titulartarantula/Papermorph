@@ -9,7 +9,7 @@
 book_dir holds the chNN folders; --url is where that folder is served. For each lesson beat
 (question beats are skipped) whose picture stays empty longer than LIMIT seconds (default 1)
 near its start, prints: chapter, beat index, beat id, empty from, empty until, seconds.
-No output means no opening blank. Exit status 1 when something is found.
+Otherwise it prints one line saying none were found. Exit status 1 when something is found.
 """
 import argparse, asyncio, os, sys
 from pathlib import Path
@@ -22,7 +22,7 @@ PROBE = r"""
   const b = BEATS[i], tm = TIMINGS[b.id], first = (tm.cues[0] || [0])[0];
   const visible = () => {   // drawn leaves whose opacity, multiplied up to the scene, is above .05
     let n = 0;
-    for (const e of scene.querySelectorAll('text,path,circle,rect,ellipse,line,polygon')) {
+    for (const e of scene.querySelectorAll('text,path,circle,rect,ellipse,line,polygon,image')) {
       if (e.closest('.qlayer')) continue;
       let o = 1, x = e;
       while (x && x !== scene) { o *= +(x.getAttribute('opacity') ?? 1); if (x.style && x.style.visibility === 'hidden') o = 0; x = x.parentNode; }
@@ -59,6 +59,7 @@ async def main(book: Path, chapters, url):
         await browser.close()
     for row in found:
         print(*row)
+    if not found: print(f"no opening blanks in {', '.join(chapters)}")
     return 1 if found else 0
 
 

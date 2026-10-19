@@ -3,65 +3,231 @@
 'use strict';
 // A fast follow-up navigation can abort the incoming page transition.
 addEventListener('pagereveal', e => e.viewTransition?.ready.catch(() => {}));
+
+/* ---------- interface language ---------- */
+// The page's <html lang> picks the interface text; CHAPTER.language picks the audio folder. Set both alike.
+// A value is a string or plural forms { one, few, many, other } chosen by vars.n. Missing keys fall back to English.
+const TRANSLATIONS = {
+  en: {
+    decimalSign: '.', stageLabel: 'Lesson animation', stageLabelTitled: 'Lesson animation: {title}',
+    shortcuts: 'Keyboard shortcuts', lesson: 'Lesson', questions: 'Questions',
+    helpPlay: 'Play or pause', helpStep: 'Previous or next step', helpStepInQuestion: 'Change step during a question', helpRestart: 'Start over',
+    helpCaptions: 'Captions on or off', helpSpeed: 'Slower or faster', helpFullScreen: 'Full screen', helpList: 'Show this list',
+    helpChoose: 'Choose an answer or a ring', helpTrueFalse: 'True or false', helpRows: 'Move between rows',
+    helpNumberLine: 'Move along the number line, or pick a number to sort', helpEnter: 'Check, then continue',
+    helpShowAnswer: 'Show the answer', helpLeaveBox: 'Leave an answer box', helpClose: 'Press {key} to close.',
+    paused: 'Paused. Press space or click to continue.',
+    soundFailed: 'Sound could not play. The lesson continues with the on-screen text.',
+    startLesson: 'Start lesson', coverKeys: 'Press {space} to start, {help} for shortcuts.', spaceKey: 'Space',
+    chapterNumber: 'Chapter {n}', aboutMinutes: 'About {n} minutes, with sound and quick checks.',
+    allChapters: 'All chapters', playLabel: 'Play or pause (space)', backLabel: 'Previous step (left arrow)', restartLabel: 'Restart lesson',
+    volumeLabel: 'Adjust volume', volumeTitle: 'Volume (0 = muted)', volumeSlider: 'Volume',
+    helpLabel: 'Keyboard shortcuts (?)', speedLabel: 'Playback speed (< and >)', captionsLabel: 'Captions (C)', fullScreenLabel: 'Full screen', goToStep: 'Go to step {n}: {title}',
+    quickCheck: 'Quick check', countOf: '{k} of {n}', check: 'Check', showAnswer: 'Show answer', nextQuestion: 'Next question', continue: 'Continue',
+    correct: 'Correct. ', notQuite: 'Not quite. ', answerPrefix: 'Answer: ', keysPrefix: 'Keys: ',
+    hintMove: ' move, ', hintChoose: ' choose', hintChooseOrClickGrid: ' choose, or click the grid', hintMoveAlongLine: ' move along the line, ',
+    hintChooseOrClick: ' choose, or click', hintRow: ' row, ', hintTypeFraction: 'type numbers like 3/4 or −2 1/4, ', hintTypeNumber: 'type the number, ',
+    hintTypeDecimal: 'type the number, ', hintNextBox: ' next box, ', hintCheck: ' check, ', hintLeaveBox: ' leave the box',
+    hintPickNumber: ' pick a number, ', hintPickRing: ' choose its ring',
+    rowsRight: '{r} of {n} right. Fix the rows marked ✗ and check again.',
+    choicesShown: 'the correct choices are now selected.', numbersShown: 'the correct numbers are filled in.',
+    notPlacedYet: '{x} is not placed yet.',
+    realRingIsEmpty: '{x}: every real number is rational or irrational, so that space has no numbers of its own.',
+    ringsRight: '{r} of {n} in the right ring.', ringsShown: 'every number is now in its smallest ring.',
+    chipPlaced: '{x}, placed in {ring}', chipNotPlaced: '{x}, not placed', pointLabel: 'The point {v}', answerBox: 'Answer',
+    stepsLeftOfZero: '{n} steps left of 0',
+    natural: 'Natural', whole: 'Whole', integers: 'Integers', rational: 'Rational', irrational: 'Irrational', real: 'Real', integerColumn: 'Integer',
+    trueLabel: 'True', falseLabel: 'False',
+    chapterComplete: 'Chapter {n} complete', quickChecks: 'Quick checks', chapterPractice: 'Chapter practice',
+    firstTryScore: '{name}: {r} of {t} right on the first try.', notAttempted: '{name}: not attempted.',
+    watchAgain: 'Watch again', nextChapter: 'Next chapter',
+  },
+  ru: {
+    decimalSign: ',', stageLabel: 'Анимация урока', stageLabelTitled: 'Анимация урока: {title}',
+    shortcuts: 'Горячие клавиши', lesson: 'Урок', questions: 'Вопросы',
+    helpPlay: 'Пуск или пауза', helpStep: 'Предыдущий или следующий шаг', helpStepInQuestion: 'Сменить шаг во время вопроса', helpRestart: 'Начать сначала',
+    helpCaptions: 'Субтитры вкл. или выкл.', helpSpeed: 'Медленнее или быстрее', helpFullScreen: 'Полноэкранный режим', helpList: 'Показать этот список',
+    helpChoose: 'Выбрать ответ или круг', helpTrueFalse: 'Верно или неверно', helpRows: 'Перейти между строками',
+    helpNumberLine: 'Двигаться по числовой прямой или выбрать число для сортировки', helpEnter: 'Проверить, затем продолжить',
+    helpShowAnswer: 'Показать ответ', helpLeaveBox: 'Выйти из поля ответа', helpClose: 'Нажмите {key}, чтобы закрыть.',
+    paused: 'Пауза. Нажмите пробел или щёлкните, чтобы продолжить.',
+    soundFailed: 'Звук не воспроизводится. Урок продолжится с текстом на экране.',
+    startLesson: 'Начать урок', coverKeys: '{space} — начать, {help} — горячие клавиши.', spaceKey: 'Пробел',
+    chapterNumber: 'Глава {n}',
+    aboutMinutes: { one: 'Около {n} минуты, со звуком и проверками.', few: 'Около {n} минут, со звуком и проверками.',
+      many: 'Около {n} минут, со звуком и проверками.', other: 'Около {n} минуты, со звуком и проверками.' },
+    allChapters: 'Все главы', playLabel: 'Пуск или пауза (пробел)', backLabel: 'Предыдущий шаг (стрелка влево)', restartLabel: 'Начать урок заново',
+    volumeLabel: 'Настроить громкость', volumeTitle: 'Громкость (0 — без звука)', volumeSlider: 'Громкость',
+    helpLabel: 'Горячие клавиши (?)', speedLabel: 'Скорость воспроизведения (< и >)', captionsLabel: 'Субтитры (C)', fullScreenLabel: 'Полный экран', goToStep: 'Перейти к шагу {n}: {title}',
+    quickCheck: 'Проверь себя', countOf: '{k} из {n}', check: 'Проверить', showAnswer: 'Показать ответ', nextQuestion: 'Следующий вопрос', continue: 'Продолжить',
+    correct: 'Верно. ', notQuite: 'Не совсем. ', answerPrefix: 'Ответ: ', keysPrefix: 'Клавиши: ',
+    hintMove: ' двигаться, ', hintChoose: ' выбрать', hintChooseOrClickGrid: ' выбрать или щёлкнуть по сетке', hintMoveAlongLine: ' двигаться по прямой, ',
+    hintChooseOrClick: ' выбрать или щёлкнуть', hintRow: ' строка, ', hintTypeFraction: 'вводите числа вида 3/4 или −2 1/4, ', hintTypeNumber: 'введите число, ',
+    hintTypeDecimal: 'вводите числа вида 0,75, ', hintNextBox: ' следующее поле, ', hintCheck: ' проверить, ', hintLeaveBox: ' выйти из поля',
+    hintPickNumber: ' выбрать число, ', hintPickRing: ' выбрать его круг',
+    rowsRight: 'Верно {r} из {n}. Исправьте строки с ✗ и проверьте снова.',
+    choicesShown: 'правильные варианты отмечены.', numbersShown: 'правильные числа вписаны.',
+    notPlacedYet: '{x}: ещё не размещено.',
+    realRingIsEmpty: '{x}: каждое действительное число рационально или иррационально, поэтому своих чисел у этой области нет.',
+    ringsRight: 'В нужном круге: {r} из {n}.', ringsShown: 'каждое число теперь в своём наименьшем круге.',
+    chipPlaced: '{x}, в круге «{ring}»', chipNotPlaced: '{x}, не размещено', pointLabel: 'Точка {v}', answerBox: 'Ответ',
+    stepsLeftOfZero: { one: '{n} шаг влево от 0', few: '{n} шага влево от 0', many: '{n} шагов влево от 0', other: '{n} шага влево от 0' },
+    natural: 'Натуральные', whole: 'Целые неотрицательные', integers: 'Целые', rational: 'Рациональные', irrational: 'Иррациональные', real: 'Действительные', integerColumn: 'Целые',
+    trueLabel: 'Верно', falseLabel: 'Неверно',
+    chapterComplete: 'Глава {n} пройдена', quickChecks: 'Проверь себя', chapterPractice: 'Практика по главе',
+    firstTryScore: '{name}: {r} из {t} верно с первой попытки.', notAttempted: '{name}: не выполнялось.',
+    watchAgain: 'Смотреть снова', nextChapter: 'Следующая глава',
+  },
+  zh: {
+    decimalSign: '.', stageLabel: '课程动画', stageLabelTitled: '课程动画：{title}',
+    shortcuts: '键盘快捷键', lesson: '课程', questions: '题目',
+    helpPlay: '播放或暂停', helpStep: '上一步或下一步', helpStepInQuestion: '答题时切换步骤', helpRestart: '从头开始',
+    helpCaptions: '打开或关闭字幕', helpSpeed: '减速或加速', helpFullScreen: '全屏', helpList: '显示此列表',
+    helpChoose: '选择答案或圆环', helpTrueFalse: '对或错', helpRows: '在各行之间移动',
+    helpNumberLine: '在数轴上移动，或选一个数来分类', helpEnter: '检查，然后继续',
+    helpShowAnswer: '显示答案', helpLeaveBox: '离开答题框', helpClose: '按 {key} 关闭。',
+    paused: '已暂停。按空格键或点击继续。',
+    soundFailed: '声音无法播放。课程将借助屏幕上的文字继续。',
+    startLesson: '开始上课', coverKeys: '按 {space} 开始，按 {help} 查看快捷键。', spaceKey: '空格',
+    chapterNumber: '第 {n} 章', aboutMinutes: '约 {n} 分钟，含配音和随堂小测。',
+    allChapters: '全部章节', playLabel: '播放或暂停（空格）', backLabel: '上一步（左方向键）', restartLabel: '重新开始本课',
+    volumeLabel: '调节音量', volumeTitle: '音量（0 为静音）', volumeSlider: '音量',
+    helpLabel: '键盘快捷键（?）', speedLabel: '播放速度（< 和 >）', captionsLabel: '字幕（C）', fullScreenLabel: '全屏', goToStep: '跳到第 {n} 步：{title}',
+    quickCheck: '小测', countOf: '{k} / {n}', check: '检查', showAnswer: '显示答案', nextQuestion: '下一题', continue: '继续',
+    correct: '正确。', notQuite: '还不对。', answerPrefix: '答案：', keysPrefix: '按键：',
+    hintMove: ' 移动，', hintChoose: ' 选择', hintChooseOrClickGrid: ' 选择，或点击网格', hintMoveAlongLine: ' 沿数轴移动，',
+    hintChooseOrClick: ' 选择，或点击', hintRow: ' 换行，', hintTypeFraction: '可输入 3/4 或 −2 1/4 这样的数，', hintTypeNumber: '输入数字，',
+    hintTypeDecimal: '输入数字，', hintNextBox: ' 下一个框，', hintCheck: ' 检查，', hintLeaveBox: ' 离开答题框',
+    hintPickNumber: ' 选一个数，', hintPickRing: ' 选它所在的圆环',
+    rowsRight: '{n} 行中对了 {r} 行。改正标 ✗ 的行，再检查一次。',
+    choicesShown: '正确选项已经选上。', numbersShown: '正确的数已经填上。',
+    notPlacedYet: '{x} 还没有放好。',
+    realRingIsEmpty: '{x}：每个实数不是有理数就是无理数，所以这一块没有只属于它的数。',
+    ringsRight: '{n} 个中有 {r} 个放在了正确的圆环里。', ringsShown: '每个数现在都在它所属的最小圆环里。',
+    chipPlaced: '{x}，放在「{ring}」', chipNotPlaced: '{x}，未放置', pointLabel: '点 {v}', answerBox: '答案',
+    stepsLeftOfZero: '0 左边 {n} 步',
+    natural: '正整数', whole: '非负整数', integers: '整数', rational: '有理数', irrational: '无理数', real: '实数', integerColumn: '整数',
+    trueLabel: '对', falseLabel: '错',
+    chapterComplete: '第 {n} 章完成', quickChecks: '小测', chapterPractice: '本章练习',
+    firstTryScore: '{name}：第一次就答对 {r} / {t}。', notAttempted: '{name}：未作答。',
+    watchAgain: '再看一遍', nextChapter: '下一章',
+  },
+  ja: {
+    decimalSign: '.', stageLabel: '授業アニメーション', stageLabelTitled: '授業アニメーション：{title}',
+    shortcuts: 'キーボードショートカット', lesson: '授業', questions: '問題',
+    helpPlay: '再生／一時停止', helpStep: '前または次のステップ', helpStepInQuestion: '問題の途中でステップを移動', helpRestart: '最初から',
+    helpCaptions: '字幕のオン／オフ', helpSpeed: '遅く／速く', helpFullScreen: '全画面', helpList: 'この一覧を表示',
+    helpChoose: '答えまたは輪を選ぶ', helpTrueFalse: '正しい／誤り', helpRows: '行を移動',
+    helpNumberLine: '数直線上を移動、または分類する数を選ぶ', helpEnter: '答え合わせ、そして次へ',
+    helpShowAnswer: '答えを表示', helpLeaveBox: '解答欄から出る', helpClose: '{key} で閉じる。',
+    paused: '一時停止中。スペースキーかクリックで再開します。',
+    soundFailed: '音声を再生できません。画面の文字で授業を続けます。',
+    startLesson: '授業を始める', coverKeys: '{space} で開始、{help} でショートカット一覧。', spaceKey: 'スペース',
+    chapterNumber: '第{n}章', aboutMinutes: '約{n}分、音声と確認問題つき。',
+    allChapters: 'すべての章', playLabel: '再生／一時停止（スペース）', backLabel: '前のステップ（左矢印）', restartLabel: '授業を最初から',
+    volumeLabel: '音量を調整', volumeTitle: '音量（0 でミュート）', volumeSlider: '音量',
+    helpLabel: 'キーボードショートカット（?）', speedLabel: '再生速度（< と >）', captionsLabel: '字幕（C）', fullScreenLabel: '全画面', goToStep: 'ステップ {n}：{title} へ移動',
+    quickCheck: '確認問題', countOf: '{k} / {n}', check: '答え合わせ', showAnswer: '答えを見る', nextQuestion: '次の問題', continue: '続ける',
+    correct: '正解。', notQuite: 'おしい。', answerPrefix: '答え：', keysPrefix: 'キー：',
+    hintMove: ' 移動、', hintChoose: ' 選ぶ', hintChooseOrClickGrid: ' 選ぶ、またはマス目をクリック', hintMoveAlongLine: ' 数直線上を移動、',
+    hintChooseOrClick: ' 選ぶ、またはクリック', hintRow: ' 行、', hintTypeFraction: '3/4 や −2 1/4 のように入力、', hintTypeNumber: '数を入力、',
+    hintTypeDecimal: '数を入力、', hintNextBox: ' 次の欄、', hintCheck: ' 答え合わせ、', hintLeaveBox: ' 欄から出る',
+    hintPickNumber: ' 数を選ぶ、', hintPickRing: ' その輪を選ぶ',
+    rowsRight: '{n} 行中 {r} 行正解。✗ の行を直して、もう一度答え合わせ。',
+    choicesShown: '正しい選択肢を選びました。', numbersShown: '正しい数を入れました。',
+    notPlacedYet: '{x} はまだ置かれていません。',
+    realRingIsEmpty: '{x}：実数はどれも有理数か無理数なので、この部分だけに入る数はありません。',
+    ringsRight: '{n} 個中 {r} 個が正しい輪に入っています。', ringsShown: 'どの数も、入るいちばん小さい輪に移しました。',
+    chipPlaced: '{x}、「{ring}」に配置', chipNotPlaced: '{x}、未配置', pointLabel: '点 {v}', answerBox: '答え',
+    stepsLeftOfZero: '0 から左へ {n}',
+    natural: '自然数', whole: '0 以上の整数', integers: '整数', rational: '有理数', irrational: '無理数', real: '実数', integerColumn: '整数',
+    trueLabel: '正しい', falseLabel: '誤り',
+    chapterComplete: '第{n}章 完了', quickChecks: '確認問題', chapterPractice: '章末練習',
+    firstTryScore: '{name}：1 回目で {t} 問中 {r} 問正解。', notAttempted: '{name}：未挑戦。',
+    watchAgain: 'もう一度見る', nextChapter: '次の章へ',
+  },
+};
+const LANGUAGE = (document.documentElement.lang || 'en').toLowerCase().split('-')[0];
+const pluralRules = {};
+// Interface text in LANGUAGE: translate('chapterNumber', { n: 3 }) → 'Chapter 3'. Chapters may use it too, e.g. for practice labels.
+function translate(key, vars = {}) {
+  const language = TRANSLATIONS[LANGUAGE]?.[key] !== undefined ? LANGUAGE : 'en';
+  let text = TRANSLATIONS[language][key] ?? key;
+  if (typeof text === 'object') {
+    try { pluralRules[language] ??= new Intl.PluralRules(language); } catch { pluralRules[language] = new Intl.PluralRules('en'); }
+    text = text[pluralRules[language].select(vars.n)] ?? text.other;
+  }
+  return text.replace(/\{(\w+)\}/g, (placeholder, name) => name in vars ? vars[name] : placeholder);
+}
+const DECIMAL_SIGN = translate('decimalSign');   // shown by num() and accepted by answer boxes
+const isLatinLetter = key => /^[a-z]$/i.test(key);
+// A letter shortcut on any keyboard layout: the typed letter, or the same physical key when the layout types a non-Latin letter.
+const isShortcut = (event, letter) => event.key.toLowerCase() === letter.toLowerCase()
+  || (isLatinLetter(letter) && !isLatinLetter(event.key) && event.code === 'Key' + letter.toUpperCase());
+// A punctuation shortcut (code 'Comma', 'Period') on a layout that types a non-Latin letter on that key.
+const isShortcutCode = (event, code) => /^\p{L}$/u.test(event.key) && !isLatinLetter(event.key) && event.code === code;
+
 document.body.insertAdjacentHTML('afterbegin', `<div id="frame">
-  <svg id="stage" viewBox="0 0 1600 900" role="img" aria-label="Lesson animation">
+  <svg id="stage" viewBox="0 0 1600 900" role="img" aria-label="${translate('stageLabel')}">
     <g id="scene"></g>
   </svg>
   <div id="ui"></div>
-  <div class="paused-mark"><div>Paused. Press space or click to continue.</div></div>
+  <div class="paused-mark"><div>${translate('paused')}</div></div>
   <div class="caption" id="caption" hidden></div>
-  <div class="help" id="help" hidden role="dialog" aria-label="Keyboard shortcuts">
+  <div class="help" id="help" hidden role="dialog" aria-label="${translate('shortcuts')}">
     <div class="help-box">
-      <h2>Keyboard shortcuts</h2>
+      <h2>${translate('shortcuts')}</h2>
       <div class="help-cols">
-        <div><h3>Lesson</h3><dl>
-          <dt><kbd>Space</kbd></dt><dd>Play or pause</dd>
-          <dt><kbd>←</kbd><kbd>→</kbd></dt><dd>Previous or next step</dd>
-          <dt><kbd>Shift</kbd><kbd>←</kbd><kbd>→</kbd></dt><dd>Change step during a question</dd>
-          <dt><kbd>Home</kbd></dt><dd>Start over</dd>
-          <dt><kbd>C</kbd></dt><dd>Captions on or off</dd>
-          <dt><kbd>F</kbd></dt><dd>Full screen</dd>
-          <dt><kbd>?</kbd></dt><dd>Show this list</dd>
+        <div><h3>${translate('lesson')}</h3><dl>
+          <dt><kbd>${translate('spaceKey')}</kbd></dt><dd>${translate('helpPlay')}</dd>
+          <dt><kbd>←</kbd><kbd>→</kbd></dt><dd>${translate('helpStep')}</dd>
+          <dt><kbd>Shift</kbd><kbd>←</kbd><kbd>→</kbd></dt><dd>${translate('helpStepInQuestion')}</dd>
+          <dt><kbd>Home</kbd></dt><dd>${translate('helpRestart')}</dd>
+          <dt><kbd>C</kbd></dt><dd>${translate('helpCaptions')}</dd>
+          <dt><kbd>&lt;</kbd><kbd>&gt;</kbd></dt><dd>${translate('helpSpeed')}</dd>
+          <dt><kbd>F</kbd></dt><dd>${translate('helpFullScreen')}</dd>
+          <dt><kbd>?</kbd></dt><dd>${translate('helpList')}</dd>
         </dl></div>
-        <div><h3>Questions</h3><dl>
-          <dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>Choose an answer or a ring</dd>
-          <dt><kbd>T</kbd><kbd>F</kbd></dt><dd>True or false</dd>
-          <dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>Move between rows</dd>
-          <dt><kbd>←</kbd><kbd>→</kbd></dt><dd>Move along the number line, or pick a number to sort</dd>
-          <dt><kbd>Enter</kbd></dt><dd>Check, then continue</dd>
-          <dt><kbd>S</kbd></dt><dd>Show the answer</dd>
-          <dt><kbd>Esc</kbd></dt><dd>Leave an answer box</dd>
+        <div><h3>${translate('questions')}</h3><dl>
+          <dt><kbd>1</kbd>–<kbd>6</kbd></dt><dd>${translate('helpChoose')}</dd>
+          <dt><kbd>T</kbd><kbd>F</kbd></dt><dd>${translate('helpTrueFalse')}</dd>
+          <dt><kbd>↑</kbd><kbd>↓</kbd></dt><dd>${translate('helpRows')}</dd>
+          <dt><kbd>←</kbd><kbd>→</kbd></dt><dd>${translate('helpNumberLine')}</dd>
+          <dt><kbd>Enter</kbd></dt><dd>${translate('helpEnter')}</dd>
+          <dt><kbd>S</kbd></dt><dd>${translate('helpShowAnswer')}</dd>
+          <dt><kbd>Esc</kbd></dt><dd>${translate('helpLeaveBox')}</dd>
         </dl></div>
       </div>
-      <p class="help-close">Press <kbd>Esc</kbd> to close.</p>
+      <p class="help-close">${translate('helpClose', { key: '<kbd>Esc</kbd>' })}</p>
     </div>
   </div>
-  <p class="sound-note" id="soundNote" hidden>Sound could not play. The lesson continues with the on-screen text.</p>
+  <p class="sound-note" id="soundNote" hidden>${translate('soundFailed')}</p>
   <button class="cover" id="cover"><div>
     <p class="cover-k" id="coverK"></p>
     <h1 class="cover-t" id="coverT"></h1>
-    <span class="go"><svg width="24" height="24" viewBox="0 0 18 18"><path d="M3 1.5v15l13-7.5z" fill="currentColor"/></svg>Start lesson</span>
-    <small><span id="coverMeta"></span> Press <kbd>Space</kbd> to start, <kbd>?</kbd> for shortcuts.</small>
+    <span class="go"><svg width="24" height="24" viewBox="0 0 18 18"><path d="M3 1.5v15l13-7.5z" fill="currentColor"/></svg>${translate('startLesson')}</span>
+    <small><span id="coverMeta"></span> ${translate('coverKeys', { space: `<kbd>${translate('spaceKey')}</kbd>`, help: '<kbd>?</kbd>' })}</small>
   </div></button>
   <div id="bar">
-    <a class="icon" id="bHome" href="../" aria-label="All chapters" title="All chapters">
+    <a class="icon" id="bHome" href="../" aria-label="${translate('allChapters')}" title="${translate('allChapters')}">
       <svg viewBox="0 0 18 18"><path d="M2 2h6v6H2zM10 2h6v6h-6zM2 10h6v6H2zM10 10h6v6h-6z"/></svg>
     </a>
-    <button class="icon" id="bPlay" aria-label="Play or pause (space)">
+    <button class="icon" id="bPlay" aria-label="${translate('playLabel')}">
       <svg class="i-play" viewBox="0 0 18 18"><path d="M4 2v14l12-7z"/></svg>
       <svg class="i-pause" viewBox="0 0 18 18"><path d="M3.5 2h4v14h-4zM10.5 2h4v14h-4z"/></svg>
     </button>
-    <button class="icon" id="bBack" aria-label="Previous step (left arrow)">
+    <button class="icon" id="bBack" aria-label="${translate('backLabel')}">
       <svg viewBox="0 0 18 18"><path d="M3 2h2.5v14H3zM16 2v14L6.5 9z"/></svg>
     </button>
-    <button class="icon" id="bRestart" aria-label="Restart lesson">
+    <button class="icon" id="bRestart" aria-label="${translate('restartLabel')}">
       <svg viewBox="0 0 18 18"><path d="M9 2.5a6.5 6.5 0 1 1-6.3 8.1l2-.5A4.5 4.5 0 1 0 9 4.5V7L4.5 3.5 9 0z"/></svg>
     </button>
     <div class="segs" id="segs"></div>
     <div class="step" id="stepName"></div>
-    <button class="icon txt" id="bHelp" aria-label="Keyboard shortcuts (?)" title="Keyboard shortcuts (?)">?</button>
-    <button class="icon cc" id="bCC" aria-pressed="false" aria-label="Captions (C)" title="Captions (C)">CC</button>
-    <button class="icon" id="bFull" aria-label="Full screen">
+    <button class="icon txt" id="bHelp" aria-label="${translate('helpLabel')}" title="${translate('helpLabel')}">?</button>
+    <button class="icon txt speed" id="bSpeed" aria-label="${translate('speedLabel')}" title="${translate('speedLabel')}">1×</button>
+    <button class="icon cc" id="bCC" aria-pressed="false" aria-label="${translate('captionsLabel')}" title="${translate('captionsLabel')}">CC</button>
+    <button class="icon" id="bFull" aria-label="${translate('fullScreenLabel')}">
       <svg viewBox="0 0 18 18"><path d="M1 1h6v2H3v4H1zM11 1h6v6h-2V3h-4zM1 11h2v4h4v2H1zM15 11h2v6h-6v-2h4z"/></svg>
     </button>
   </div>
@@ -87,7 +253,7 @@ const UI = '"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif';
 const BOOK = getComputedStyle(document.documentElement);
 const bookSetting = name => BOOK.getPropertyValue(name).trim().replace(/^(["'])([^"']*)\1$/, '$2');   // unquote a lone string only
 const MATH = bookSetting('--math-font') || '"STIX Two Text","Cambria Math","Iowan Old Style",Palatino,Georgia,serif';
-const NAME = { nat: 'Natural', whole: 'Whole', int: 'Integers', rat: 'Rational', irr: 'Irrational', real: 'Real' };
+const NAME = { nat: translate('natural'), whole: translate('whole'), int: translate('integers'), rat: translate('rational'), irr: translate('irrational'), real: translate('real') };
 // Card positions inside the 1600×900 picture.
 const BAND = { x: 96, y: 686, w: 1408, cls: 'band' };      // bottom band (moves up when taller than the space left)
 const RIGHT = { x: 1258, y: 546, w: 330, cls: 'side', maxH: 346 };    // right of the number map
@@ -138,8 +304,51 @@ const VAR = /(?<![A-Za-z°])(?:(?!(?:of|in|is|to|or|at|on|by|as|an|if|it|be|no|s
 const F = (n, d) => ({ f: [String(n), String(d)] });   // fraction
 const R = (x, i) => ({ r: x && x.f ? x : String(x), i: i && String(i) });   // root of a number or of F(n, d); i = index, e.g. 3 for a cube root
 const E = x => ({ sup: String(x) });                    // exponent, raised after the part before it
+const TX = tex => ({ tex: String(tex) });               // LaTeX, drawn by MathJax; the book loads lib/mathjax.js right after this file
+const $tex = tex => $m(TX(tex));                        // LaTeX inline in HTML text
+// MathJax takes this object as its configuration when lib/mathjax.js loads after the engine.
+window.MathJax ??= {
+  startup: { typeset: false },                                   // no page scan; formulas are converted on demand
+  svg: { fontCache: 'none', mtextInheritFont: true },            // self-contained paths; \text{} in the book's math font
+  tex: { packages: { '[-]': ['noerrors', 'noundefined'] },       // a typo stops the page, like a misspelt mark
+         formatError: (_, error) => { throw error; } },
+  options: { enableMenu: false },
+};
+const TEX_CACHE = new Map();   // TeX source -> { graphic, viewBox }; seek() redraws every earlier beat
+// A copy of the formula's MathJax drawing: units of 1/1000 em, baseline at y = 0; viewBox is [x, y, width, height].
+function texGraphic(tex) {
+  let drawn = TEX_CACHE.get(tex);
+  if (!drawn) {
+    if (!window.MathJax?.tex2svg) throw new Error(`TX('${tex}') needs lib/mathjax.js: load ../lib/mathjax.js right after engine.js`);
+    if (!document.getElementById('MJX-SVG-styles')) document.head.append(MathJax.svgStylesheet());   // draws table rules and frames
+    let svg;
+    try { svg = MathJax.tex2svg(tex, { display: false, family: MATH }).querySelector('svg'); }   // family: \text{} is measured in the font it is drawn in
+    catch (error) { throw new Error(`TX('${tex}'): ${error.message}`); }
+    const graphic = mk('g');
+    graphic.append(...svg.childNodes);
+    drawn = { graphic, viewBox: svg.getAttribute('viewBox').split(' ').map(Number) };
+    TEX_CACHE.set(tex, drawn);
+  }
+  return { graphic: drawn.graphic.cloneNode(true), viewBox: drawn.viewBox };
+}
+// The part of a TeX formula marked \class{name}{...}, ready for tw/fx on c_color and o.
+// MathJax places the part with its own transform, so the tweens act on a group inside it.
+function texPart(el, name) {
+  const part = el.querySelector(`g.${CSS.escape(name)}`);
+  if (!part) throw new Error(`texPart: no \\class{${name}}{…} in this formula`);
+  if (!part._tweenGroup) {
+    const group = mk('g');
+    group.append(...part.childNodes);
+    part.append(group);
+    const color = part.closest('[color]')?.getAttribute('color');   // the formula's fill
+    put(group, /^#[\da-f]{6}$/i.test(color) ? { c_color: color } : {});
+    part._tweenGroup = group;
+  }
+  return part._tweenGroup;
+}
 const OV = x => ({ ov: String(x) });                    // digits under a repeat bar: ['0.', OV('3')] is 0.333…
-// Math expression from parts: 'text' | F(n,d) | R(x) | E(exp) | OV(digits). Baseline at y; anchor start/middle/end.
+// Math expression from parts: 'text' | F(n,d) | R(x) | E(exp) | OV(digits) | TX(tex). Baseline at y; anchor start/middle/end.
+// _ascent and _descent are the TeX parts' height above and below the baseline (0 without TX).
 function M(parent, parts, { x = 0, y = 0, size = 36, fill = COL.chalk, anchor = 'middle', o = 1, s = 1 } = {}) {
   const g = G(parent, { x, y, o, s });
   const inner = mk('g', {}, g);
@@ -158,10 +367,18 @@ function M(parent, parts, { x = 0, y = 0, size = 36, fill = COL.chalk, anchor = 
     return w;
   };
   const rule = (x1, x2, yy) => mk('path', { d: `M${x1} ${yy}H${x2}`, stroke: fill, 'stroke-width': lw, 'stroke-linecap': 'round' }, inner);
-  let cx = 0;
+  let cx = 0, ascent = 0, descent = 0;
   for (const p of parts) {
     if (typeof p === 'string') cx += text(p, cx, 0, size);
-    else if (p.f) {
+    else if (p.tex !== undefined) {
+      const { graphic, viewBox: [, top, w, h] } = texGraphic(p.tex), k = size / 1000;   // 1000 units = 1 em = size
+      graphic.setAttribute('transform', `translate(${cx},0) scale(${k})`);
+      graphic.setAttribute('color', fill);   // MathJax paints with currentColor
+      inner.append(graphic);
+      ascent = Math.max(ascent, -top * k);
+      descent = Math.max(descent, (top + h) * k);
+      cx += w * k;
+    } else if (p.f) {
       const fs = size * .72, [n, d] = p.f, wn = textW(n, fs), wd = textW(d, fs);
       const w = Math.max(wn, wd) + size * .2, bar = -size * .3;
       text(n, cx + (w - wn) / 2, bar - size * .12, fs);
@@ -194,6 +411,8 @@ function M(parent, parts, { x = 0, y = 0, size = 36, fill = COL.chalk, anchor = 
   const dx = anchor === 'middle' ? -cx / 2 : anchor === 'end' ? -cx : 0;
   inner.setAttribute('transform', `translate(${dx},0)`);
   g._w = cx;
+  g._ascent = ascent;
+  g._descent = descent;
   return g;
 }
 // Pill-shaped number token, centred on (x, y).
@@ -201,7 +420,13 @@ function chip(parent, parts, color, { x = 0, y = 0, o = 1, s = 1, size = 34 } = 
   const g = G(parent, { x, y, o, s });
   const rect = mk('rect', {}, g);
   const m = M(g, parts, { size, y: size * .3 });
-  const w = Math.max(m._w + 36, 64), h = size * (parts.some(p => p.f) ? 1.75 : 1.45);
+  const w = Math.max(m._w + 36, 64);
+  let h = size * (parts.some(p => p.f) ? 1.75 : 1.45);
+  if (m._ascent) {   // a TeX formula: centre it and grow the pill to fit
+    const above = Math.max(size * 1.05, m._ascent), below = Math.max(size * .45, m._descent);
+    put(m, { y: (above - below) / 2 });
+    h = Math.max(h, m._ascent + m._descent + size * .4);
+  }
   for (const [k, v] of Object.entries({ x: -w / 2, y: -h / 2, width: w, height: h, rx: h / 2, fill: COL.board, stroke: color, 'stroke-width': 2.5 })) rect.setAttribute(k, v);
   g._rect = rect;
   return g;
@@ -228,8 +453,14 @@ function layRow(els, { x, y, size, anchor }, move) {
 function collapse(row, i, j, parts, t0, { color = COL.task, fill = COL.chalk, live = false } = {}) {
   const run = live ? fx : tw, p = row[0].parentNode, { size, y } = row;
   const left = row[i]._px - row[i]._w / 2, right = row[j]._px + row[j]._w / 2;
+  let above = size * .95, height = size * 1.3;
+  const tall = row.slice(i, j + 1).filter(e => e._ascent);   // TeX tokens may reach higher and lower than text
+  if (tall.length) {
+    above = Math.max(above, ...tall.map(e => e._ascent + 8));
+    height = above + Math.max(size * .35, ...tall.map(e => e._descent + 8));
+  }
   const box = put(mk('rect', { rx: 10, fill: 'none', stroke: color, 'stroke-width': 3 }, p),
-    { o: 0, a_x: left - 8, a_y: y - size * .95, a_width: right - left + 16, a_height: size * 1.3 });
+    { o: 0, a_x: left - 8, a_y: y - above, a_width: right - left + 16, a_height: height });
   run(box, { o: 1 }, t0, .3);
   run(box, { o: 0 }, t0 + 1.2, .3);
   const res = M(p, parts, { size, fill, o: 0, x: (left + right) / 2, y });
@@ -691,7 +922,7 @@ const pickPoint = (P, ans, yes, no, onRight, test) => (body, api) => {
   return {
     reveal() { moveTo(...ans); P.dot(ans[0], ans[1], COL.good, 0, { run: fx, into: L }); onRight?.(); return typeof yes === 'function' ? yes(...ans) : yes; },
     lock() { locked = true; },
-    hint: [kbd('←'), kbd('↑'), kbd('↓'), kbd('→'), ' move, ', kbd('Enter'), ' choose, or click the grid'],
+    hint: [kbd('←'), kbd('↑'), kbd('↓'), kbd('→'), translate('hintMove'), kbd('Enter'), translate('hintChooseOrClickGrid')],
     key(e) {
       if (locked) return false;
       const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
@@ -757,11 +988,16 @@ function brace(p, a, b, y, label, color, t0) {
 function mathEl(parts, size = 22) {
   const svg = mk('svg', { class: 'm', 'font-weight': 400 });   // widths are measured at normal weight, so a bold prompt must not thicken the math
   const m = M(svg, parts, { size, anchor: 'start', fill: 'currentColor' });
-  const top = size * 1.05, h = size * 1.5;
+  let top = size * 1.05, bottom = size * .45, h = size * 1.5;
+  if (m._ascent) {   // a TeX formula may reach higher and lower than text
+    top = Math.max(top, m._ascent + size * .1);
+    bottom = Math.max(bottom, m._descent + size * .1);
+    h = top + bottom;
+  }
   svg.setAttribute('viewBox', `0 ${-top} ${m._w + 2} ${h}`);
   svg.setAttribute('width', m._w + 2);
   svg.setAttribute('height', h);
-  svg.style.verticalAlign = `${-size * .45}px`;  // line up the math baseline with the text baseline
+  svg.style.verticalAlign = `${-bottom}px`;  // line up the math baseline with the text baseline
   return svg;
 }
 
@@ -915,7 +1151,7 @@ const scene = document.getElementById('scene');
 const S = {};
 const AXIS = { o: 800, u: 120 };             // number line: x of 0, pixels per unit; a chapter may change it
 const X = v => AXIS.o + AXIS.u * v, Y0 = 610;
-const num = v => (v < 0 ? '−' : '') + Math.abs(v);
+const num = v => (v < 0 ? '−' : '') + String(Math.abs(v)).replace('.', DECIMAL_SIGN);
 function reset() {
   scene.replaceChildren();
   for (const k in S) delete S[k];
@@ -986,29 +1222,29 @@ function hopsFx(n) {
     const a = X(1 - k), b = X(-k);
     fx(path(S.q, `M${a} ${Y0 - 12}Q${(a + b) / 2} ${Y0 - 84} ${b} ${Y0 - 12}`, { stroke: COL.int, 'stroke-width': 3 }, { d: 0 }), { d: 1 }, (k - 1) * .35, .35, lin);
   }
-  floatText(`${-n} steps left of 0`, X(n / 2), Y0 - 100, COL.int);
+  floatText(translate('stepsLeftOfZero', { n: -n }), X(n / 2), Y0 - 100, COL.int);
 }
 
 /* ---------- shared answer columns ---------- */
 const FAMILIES = ['nat', 'whole', 'int', 'rat', 'irr', 'real'];
-const FAM_COLS = FAMILIES.map(k => [k, k === 'int' ? 'Integer' : NAME[k], COL[k]]);
-const TF = [['t', 'True', null, 'T'], ['f', 'False', null, 'F']];
+const FAM_COLS = FAMILIES.map(k => [k, k === 'int' ? translate('integerColumn') : NAME[k], COL[k]]);
+const TF = [['t', translate('trueLabel'), null, 'T'], ['f', translate('falseLabel'), null, 'F']];
 function finishCard() {
   const c = card(SCREEN, 'fin');
   const sum = pre => Object.entries(SCORE).filter(([k]) => k.startsWith(pre)).reduce((a, [, v]) => [a[0] + v.right, a[1] + v.total], [0, 0]);
-  const line = (name, [r, t]) => h('p', 'fb', t ? `${name}: ${r} of ${t} right on the first try.` : `${name}: not attempted.`);
+  const line = (name, [r, t]) => h('p', 'fb', t ? translate('firstTryScore', { name, r, t }) : translate('notAttempted', { name }));
   progress(p => { p.done = [...new Set([...(p.done || []), CHAPTER.number])]; });
-  const home = h('a', 'btn quiet', 'All chapters');
+  const home = h('a', 'btn quiet', translate('allChapters'));
   home.href = $('bHome').href;
-  const again = h('button', 'btn' + (CHAPTER.next ? ' quiet' : ' go'), ['Watch again', kbd(CHAPTER.next ? 'R' : 'Enter')]);
+  const again = h('button', 'btn' + (CHAPTER.next ? ' quiet' : ' go'), [translate('watchAgain'), kbd(CHAPTER.next ? 'R' : 'Enter')]);
   again.onclick = restart;
-  const next = CHAPTER.next && h('button', 'btn go', ['Next chapter', kbd('Enter')]);
+  const next = CHAPTER.next && h('button', 'btn go', [translate('nextChapter'), kbd('Enter')]);
   if (next) next.onclick = () => { location.href = CHAPTER.next; };
   P.keys = e => e.key === 'Enter' ? ((next ? next.onclick() : restart()), true)
-    : (e.key === 'r' || e.key === 'R') ? (restart(), true) : false;
+    : isShortcut(e, 'r') ? (restart(), true) : false;
   const guide = mascotEl(240);
-  c.append(h('div', 'finwrap', [guide, h('p', 'kicker', `Chapter ${CHAPTER.number} complete`), h('p', 'prompt', CHAPTER.title),
-    line('Quick checks', sum('c-')), line('Chapter practice', sum('p-')), h('div', 'acts', next ? [home, again, next] : [home, again])]));
+  c.append(h('div', 'finwrap', [guide, h('p', 'kicker', translate('chapterComplete', { n: CHAPTER.label ?? CHAPTER.number })), h('p', 'prompt', CHAPTER.title),
+    line(translate('quickChecks'), sum('c-')), line(translate('chapterPractice'), sum('p-')), h('div', 'acts', next ? [home, again, next] : [home, again])]));
   setTimeout(() => mood(guide, 'happy'), 400);
 }
 
@@ -1077,15 +1313,15 @@ function mood(el, m) {
   if (m) el.classList.add(m);
 }
 // A sequence of questions in one card. Each question: { id, prompt, build(body, api) -> { check?, reveal, lock? } }.
-function quiz(pos, qs, done, label = 'Quick check') {
+function quiz(pos, qs, done, label = translate('quickCheck')) {
   const c = card(pos, 'quiz');
   let k = 0;
   const show = () => {
     const q = qs[k];
     let first = true, resolved = false;
     const fb = h('div', 'fb'), body = h('div', 'body'), acts = h('div', 'acts');
-    const bCheck = h('button', 'btn', ['Check', kbd('Enter')]), bShow = h('button', 'btn quiet', ['Show answer', kbd('S')]);
-    const bNext = h('button', 'btn go', [k < qs.length - 1 ? 'Next question' : 'Continue', kbd('Enter')]);
+    const bCheck = h('button', 'btn', [translate('check'), kbd('Enter')]), bShow = h('button', 'btn quiet', [translate('showAnswer'), kbd('S')]);
+    const bNext = h('button', 'btn go', [k < qs.length - 1 ? translate('nextQuestion') : translate('continue'), kbd('Enter')]);
     bShow.hidden = bNext.hidden = true;
     const guide = pos.cls === 'band' || pos.cls === 'side' ? mascotEl(pos.cls === 'band' ? 108 : 70) : null;
     const say = (cls, parts) => { fb.className = 'fb ' + cls; fb.replaceChildren(rich(parts, 24)); fb.style.animation = 'none'; void fb.offsetWidth; fb.style.animation = ''; };
@@ -1100,7 +1336,7 @@ function quiz(pos, qs, done, label = 'Quick check') {
       grade(ok, msg, score) {
         if (resolved) return;
         if (first) { if (!Object.hasOwn(SCORE, q.id)) SCORE[q.id] = score || { right: +ok, total: 1 }; first = false; }
-        say(ok ? 'ok' : 'no', [ok ? 'Correct. ' : 'Not quite. ', ...[].concat(msg || [])]);
+        say(ok ? 'ok' : 'no', [ok ? translate('correct') : translate('notQuite'), ...[].concat(msg || [])]);
         if (guide) {
           mood(guide, ok ? 'happy' : 'oops');
           if (!ok) setTimeout(() => { if (guide.classList.contains('oops')) mood(guide, null); }, 1600);
@@ -1111,18 +1347,18 @@ function quiz(pos, qs, done, label = 'Quick check') {
     const ctl = q.build(body, api);
     if (ctl.check) { bCheck.onclick = () => ctl.check(); acts.append(bCheck); }
     acts.append(bShow, bNext);
-    bShow.onclick = () => { say('', ['Answer: ', ...[].concat(ctl.reveal())]); resolve(); };
+    bShow.onclick = () => { say('', [translate('answerPrefix'), ...[].concat(ctl.reveal())]); resolve(); };
     bNext.onclick = () => { if (k < qs.length - 1) { k++; show(); } else done(); };
     P.keys = e => {
       if (e.key === 'Enter' && resolved) { bNext.click(); return true; }
       if (!resolved && ctl.key?.(e)) return true;
       if (e.key === 'Enter' && !resolved && ctl.check) { bCheck.click(); return true; }
-      if ((e.key === 's' || e.key === 'S') && !bShow.hidden) { bShow.click(); return true; }
+      if (isShortcut(e, 's') && !bShow.hidden) { bShow.click(); return true; }
       return false;
     };
-    const kick = label + (qs.length > 1 ? `   ${k + 1} of ${qs.length}` : '');
+    const kick = label + (qs.length > 1 ? '   ' + translate('countOf', { k: k + 1, n: qs.length }) : '');
     const head = h('div', 'head', [h('p', 'kicker', kick), h('p', 'prompt', [rich(q.prompt, pos.cls.startsWith('screen') ? 38 : 28)])]);   // match the prompt's type size
-    if (ctl.hint) head.append(h('p', 'keys', ['Keys: ', ...ctl.hint]));
+    if (ctl.hint) head.append(h('p', 'keys', [translate('keysPrefix'), ...ctl.hint]));
     c.replaceChildren(...(guide ? [guide] : []), head, fb, body, acts);
   };
   show();
@@ -1155,32 +1391,28 @@ const choice = (opts, right, yes, no, onRight) => (body, api) => {
     key(e) { const b = bs[+e.key - 1]; if (!b || b.disabled) return false; b.click(); return true; },
   };
 };
-// Tap a point on the stage number line.
-const tap = (values, right, yes, no, onRight) => (body, api) => {
-  const L = qlayer(), hits = {};
-  let locked = false;
-  for (const v of values) {
-    const g = G(L, { x: X(v), y: Y0 });
+// The shared body of the stage tap questions: each target ring is a focusable button that answers on click or Enter,
+// and ← / → move the focus between them. targets: [{ g, label, ok, wrong }], wrong() shakes and returns the explanation.
+const stageTap = (api, targets, show, yes, onRight, hint) => {
+  let locked = false, cur = -1;
+  const gs = targets.map(({ g, label, ok, wrong }) => {
     g.classList.add('hit');
     g.setAttribute('tabindex', 0);
     g.setAttribute('role', 'button');
-    g.setAttribute('aria-label', `The point ${num(v)}`);
-    mk('circle', { r: 30, class: 'ring' }, g);
+    g.setAttribute('aria-label', label);
     const act = () => {
       if (locked) return;
-      if (v === right) { g.classList.add('good'); onRight?.(); api.grade(true, yes); }
-      else { g.classList.add('bad'); shakeFx(S.dots[v]); api.grade(false, no(v)); }
+      if (ok) { g.classList.add('good'); onRight?.(); api.grade(true, yes); }
+      else { g.classList.add('bad'); api.grade(false, wrong()); }
     };
     g.addEventListener('click', act);
     keyAct(g, act);
-    hits[v] = g;
-  }
-  const gs = values.map(v => hits[v]);
-  let cur = -1;
+    return g;
+  });
   return {
-    reveal() { hits[right].classList.add('good'); onRight?.(); return yes; },
+    reveal() { gs[show].classList.add('good'); onRight?.(); return yes; },
     lock() { locked = true; },
-    hint: [kbd('←'), kbd('→'), ' move along the line, ', kbd('Enter'), ' choose'],
+    hint,
     key(e) {
       const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
       if (!d || locked) return false;
@@ -1190,71 +1422,38 @@ const tap = (values, right, yes, no, onRight) => (body, api) => {
     },
   };
 };
+// Tap a point on the stage number line.
+const tap = (values, right, yes, no, onRight) => (body, api) => {
+  const L = qlayer();
+  const targets = values.map(v => {
+    const g = G(L, { x: X(v), y: Y0 });
+    mk('circle', { r: 30, class: 'ring' }, g);
+    return { g, label: translate('pointLabel', { v: num(v) }), ok: v === right, wrong: () => { shakeFx(S.dots[v]); return no(v); } };
+  });
+  return stageTap(api, targets, values.lastIndexOf(right), yes, onRight,
+    [kbd('←'), kbd('→'), translate('hintMoveAlongLine'), kbd('Enter'), translate('hintChoose')]);
+};
 // Tap one token of a stage token row, e.g. the operation to do first. idx: tappable token indexes.
 const tapEls = (row, idx, right, yes, no, onRight) => (body, api) => {
   const L = qlayer();
-  let locked = false, cur = -1;
-  const hits = idx.map(i => {
+  const targets = idx.map(i => {
     const e = row[i], w = e._w + 18, g = G(L, { x: e._px, y: row.y });
-    g.classList.add('hit');
-    g.setAttribute('tabindex', 0);
-    g.setAttribute('role', 'button');
-    g.setAttribute('aria-label', e.textContent.trim());
     mk('rect', { class: 'ring', x: -w / 2, y: -row.size * .95, width: w, height: row.size * 1.3, rx: 12 }, g);
-    const act = () => {
-      if (locked) return;
-      if (i === right) { g.classList.add('good'); onRight?.(); api.grade(true, yes); }
-      else { g.classList.add('bad'); shakeFx(e); api.grade(false, no(i)); }
-    };
-    g.addEventListener('click', act);
-    keyAct(g, act);
-    return g;
+    return { g, label: e.textContent.trim(), ok: i === right, wrong: () => { shakeFx(e); return no(i); } };
   });
-  return {
-    reveal() { hits[idx.indexOf(right)].classList.add('good'); onRight?.(); return yes; },
-    lock() { locked = true; },
-    hint: [kbd('←'), kbd('→'), ' move, ', kbd('Enter'), ' choose'],
-    key(e) {
-      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-      if (!d || locked) return false;
-      cur = cur < 0 ? (d > 0 ? 0 : hits.length - 1) : (cur + d + hits.length) % hits.length;
-      hits[cur].focus();
-      return true;
-    },
-  };
+  return stageTap(api, targets, idx.indexOf(right), yes, onRight,
+    [kbd('←'), kbd('→'), translate('hintMove'), kbd('Enter'), translate('hintChoose')]);
 };
 // Click one of several stage objects (table cells, bars, small graphs). items: [{ el, box: [x, y, w, h], label }].
 const pickEls = (items, right, yes, no, onRight) => (body, api) => {
   const L = qlayer();
-  let locked = false, cur = -1;
-  const hits = items.map((it, i) => {
+  const targets = items.map((it, i) => {
     const [x, y, w, hh] = it.box, g = G(L);
-    g.classList.add('hit');
-    g.setAttribute('tabindex', 0);
-    g.setAttribute('role', 'button');
-    g.setAttribute('aria-label', it.label);
     mk('rect', { class: 'ring', x, y, width: w, height: hh, rx: 12 }, g);
-    const act = () => {
-      if (locked) return;
-      if (i === right) { g.classList.add('good'); onRight?.(); api.grade(true, yes); }
-      else { g.classList.add('bad'); shakeFx(it.el); api.grade(false, no(i)); }
-    };
-    g.addEventListener('click', act);
-    keyAct(g, act);
-    return g;
+    return { g, label: it.label, ok: i === right, wrong: () => { shakeFx(it.el); return no(i); } };
   });
-  return {
-    reveal() { hits[right].classList.add('good'); onRight?.(); return yes; },
-    lock() { locked = true; },
-    hint: [kbd('←'), kbd('→'), ' move, ', kbd('Enter'), ' choose, or click'],
-    key(e) {
-      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-      if (!d || locked) return false;
-      cur = cur < 0 ? (d > 0 ? 0 : hits.length - 1) : (cur + d + hits.length) % hits.length;
-      hits[cur].focus();
-      return true;
-    },
-  };
+  return stageTap(api, targets, right, yes, onRight,
+    [kbd('←'), kbd('→'), translate('hintMove'), kbd('Enter'), translate('hintChooseOrClick')]);
 };
 // Rows of toggles. items: { parts, ans: [keys], why }. parts are math parts (strings, F, R) unless text: true,
 // where they are rich text (strings and $m(...)). cols: [[key, label, colour?, shortcut?]]. multi: several per row.
@@ -1302,7 +1501,7 @@ const grid = (items, cols, { multi = true, text = false } = {}) => (body, api) =
     check() {
       const right = rows.filter(judge).length;
       const all = right === rows.length;
-      api.grade(all, single ? rows[0].it.why : all ? [] : [`${right} of ${rows.length} right. Fix the rows marked ✗ and check again.`], { right, total: rows.length });
+      api.grade(all, single ? rows[0].it.why : all ? [] : [translate('rowsRight', { r: right, n: rows.length })], { right, total: rows.length });
     },
     reveal() {
       for (const r of rows) {
@@ -1310,10 +1509,10 @@ const grid = (items, cols, { multi = true, text = false } = {}) => (body, api) =
         judge(r);
         if (!single) r.why.replaceChildren(rich(r.it.why, 20));
       }
-      return single ? rows[0].it.why : 'the correct choices are now selected.';
+      return single ? rows[0].it.why : translate('choicesShown');
     },
     lock() { locked = true; showCur(); rows.forEach(r => r.bs.forEach(b => { b.disabled = true; })); },
-    hint: [...(single ? [] : [kbd('↑'), kbd('↓'), ' row, ']), ...(/\d/.test(hot[0]) ? [kbd(hot[0]), '–', kbd(hot[hot.length - 1])] : hot.map(kbd)), ' choose'],
+    hint: [...(single ? [] : [kbd('↑'), kbd('↓'), translate('hintRow')]), ...(/\d/.test(hot[0]) ? [kbd(hot[0]), '–', kbd(hot[hot.length - 1])] : hot.map(kbd)), translate('hintChoose')],
     key(e) {
       if (locked) return false;
       if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !single) {
@@ -1321,7 +1520,7 @@ const grid = (items, cols, { multi = true, text = false } = {}) => (body, api) =
         showCur();
         return true;
       }
-      const j = hot.findIndex(x => x.toLowerCase() === e.key.toLowerCase());
+      const j = hot.findIndex(x => isShortcut(e, x));
       if (j < 0) return false;
       rows[cur].bs[j].click();
       if (!multi && cur < rows.length - 1) { cur++; showCur(); }
@@ -1330,9 +1529,10 @@ const grid = (items, cols, { multi = true, text = false } = {}) => (body, api) =
   };
 };
 // Exact value of a typed answer: integer, decimal, fraction a/b or mixed number "w a/b"; returns [num, den] or null.
-// Accepts −, – or - as the sign. Never evaluates the text as code.
+// Accepts −, – or - as the sign, and a decimal comma when DECIMAL_SIGN is ','. Never evaluates the text as code.
 function rat(str) {
-  const t = String(str).trim().replace(/^[−–]/, '-').replace(/\s+/g, ' ');
+  let t = String(str).trim().replace(/^[−–]/, '-').replace(/\s+/g, ' ');
+  if (DECIMAL_SIGN === ',') t = t.replace(/^(-?\d+),(\d+)$/, '$1.$2');   // 0,75 where the decimal sign is a comma
   let m = t.match(/^(-?)(\d+)(?:\.(\d+))?$/);
   if (m) { const d = 10 ** (m[3] || '').length, n = (m[1] ? -1 : 1) * (Number(m[2]) * d + Number(m[3] || 0)); return Number.isSafeInteger(n) && Number.isSafeInteger(d) ? [n, d] : null; }
   m = t.match(/^(-?)(?:(\d+) )?(\d+) ?\/ ?(\d+)$/);
@@ -1357,7 +1557,7 @@ const blanks = rowsIn => (body, api) => {
         flush();
         const b = h('input', 'box');
         Object.assign(b, { type: 'text', inputMode: 'decimal', autocomplete: 'off', spellcheck: false });
-        b.setAttribute('aria-label', 'Answer');
+        b.setAttribute('aria-label', translate('answerBox'));
         b.dataset.ans = p.box;
         if (p.lowest) b.dataset.lowest = '1';
         b.style.width = `${Math.max(2, String(p.box).length) + 2}ch`;
@@ -1397,7 +1597,7 @@ const blanks = rowsIn => (body, api) => {
     check() {
       const right = rows.filter(judge).length, done = right === rows.length;
       const msg = single ? (done ? rows[0].it.why : rows[0].it.hint ?? rows[0].it.why)
-        : done ? [] : [`${right} of ${rows.length} right. Fix the rows marked ✗ and check again.`];
+        : done ? [] : [translate('rowsRight', { r: right, n: rows.length })];
       api.grade(done, msg, { right, total: rows.length });
     },
     reveal() {
@@ -1406,10 +1606,11 @@ const blanks = rowsIn => (body, api) => {
         judge(r);
         if (!single) r.why.replaceChildren(rich(r.it.why, 20));
       }
-      return single ? rows[0].it.why : 'the correct numbers are filled in.';
+      return single ? rows[0].it.why : translate('numbersShown');
     },
     lock() { all.forEach(b => { b.disabled = true; }); },
-    hint: [all.some(b => b.dataset.ans.includes('/')) ? 'type numbers like 3/4 or −2 1/4, ' : 'type the number, ', kbd('Tab'), ' next box, ', kbd('Enter'), ' check, ', kbd('Esc'), ' leave the box'],
+    hint: [translate(all.some(b => b.dataset.ans.includes('/')) ? 'hintTypeFraction' : all.some(b => /[.,]/.test(b.dataset.ans)) ? 'hintTypeDecimal' : 'hintTypeNumber'),
+      kbd('Tab'), translate('hintNextBox'), kbd('Enter'), translate('hintCheck'), kbd('Esc'), translate('hintLeaveBox')],
   };
 };
 // Drag number chips into the stage number map. items: [parts, smallest ring, explanation].
@@ -1418,14 +1619,14 @@ const slot = (k, n) => {
   const r = RINGS[k];
   return [r.lx + [-72, 72, 0][n % 3], r.ly + 50 + 56 * Math.floor(n / 2)];
 };
-const plain = parts => parts.map(p => typeof p === 'string' ? p : p.ov !== undefined ? p.ov + ' repeating' : p.f ? p.f.join('/') : p.sup !== undefined ? '^' + p.sup : (p.i ? p.i : '') + '√' + (p.r.f ? p.r.f.join('/') : p.r)).join('');
+const plain = parts => parts.map(p => typeof p === 'string' ? p : p.ov !== undefined ? p.ov + ' repeating' : p.tex !== undefined ? p.tex : p.f ? p.f.join('/') : p.sup !== undefined ? '^' + p.sup : (p.i ? p.i : '') + '√' + (p.r.f ? p.r.f.join('/') : p.r)).join('');
 const sorter = (items, trayXY) => (body, api) => {
   const L = qlayer();
   const bg = mk('rect', { width: 1600, height: 900, fill: 'transparent' }, L);
   const svg = $('stage');
   const pt = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
   let sel = null, drag = null, locked = false;
-  const label = c => c.setAttribute('aria-label', `${c.say}, ${c.region ? 'placed in ' + NAME[c.region] : 'not placed'}`);
+  const label = c => c.setAttribute('aria-label', c.region ? translate('chipPlaced', { x: c.say, ring: NAME[c.region] }) : translate('chipNotPlaced', { x: c.say }));
   const outline = (c, colr, w = 2.5) => { c._rect.setAttribute('stroke', colr); c._rect.setAttribute('stroke-width', w); };
   const choose = c => {
     if (sel) outline(sel, COL.chalk);
@@ -1477,6 +1678,13 @@ const sorter = (items, trayXY) => (body, api) => {
       drag = null;
       if (moved) place(c, st(c).x, st(c).y); else select(c);
     });
+    // A cancelled drag (a system gesture, a lost capture) drops the chip where it is instead of leaving it stuck to no pointer.
+    c.addEventListener('lostpointercapture', () => {
+      if (!drag) return;
+      const moved = drag.moved;
+      drag = null;
+      if (moved) place(c, st(c).x, st(c).y);
+    });
     keyAct(c, () => { if (!locked) select(c); });
     return c;
   });
@@ -1487,7 +1695,7 @@ const sorter = (items, trayXY) => (body, api) => {
       const notes = h('ul');
       for (const c of chips) {
         c.querySelector('.mark')?.remove();
-        if (!c.region) { notes.append(h('li', '', `${c.say} is not placed yet.`)); continue; }
+        if (!c.region) { notes.append(h('li', '', translate('notPlacedYet', { x: c.say }))); continue; }
         const ok = c.region === c.answer;
         right += ok;
         outline(c, ok ? COL.good : COL.bad, 4);
@@ -1495,11 +1703,11 @@ const sorter = (items, trayXY) => (body, api) => {
         const w = +c._rect.getAttribute('width');
         T(c, ok ? '✓' : '✗', { x: w / 2 + 4, y: -16, size: 26, fill: ok ? COL.good : COL.bad, weight: 700 }).classList.add('mark');
         if (!ok) notes.append(h('li', '', c.region === 'real'
-          ? `${c.say}: every real number is rational or irrational, so that space has no numbers of its own.`
+          ? translate('realRingIsEmpty', { x: c.say })
           : c.why));
       }
       const all = right === chips.length;
-      api.grade(all, all ? [] : [`${right} of ${chips.length} in the right ring.`, notes], { right, total: chips.length });
+      api.grade(all, all ? [] : [translate('ringsRight', { r: right, n: chips.length }), notes], { right, total: chips.length });
     },
     reveal() {
       const count = {};
@@ -1511,10 +1719,10 @@ const sorter = (items, trayXY) => (body, api) => {
         outline(c, COL.good, 4);
         fx(c, { x, y }, i * .12, .8);
       });
-      return 'every number is now in its smallest ring.';
+      return translate('ringsShown');
     },
     lock() { locked = true; choose(null); },
-    hint: [kbd('←'), kbd('→'), ' pick a number, ', kbd('1'), '–', kbd('6'), ' choose its ring'],
+    hint: [kbd('←'), kbd('→'), translate('hintPickNumber'), kbd('1'), '–', kbd('6'), translate('hintPickRing')],
     key(e) {
       if (locked) return false;
       const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
@@ -1534,19 +1742,19 @@ const sorter = (items, trayXY) => (body, api) => {
 };
 
 /* ---------- player ---------- */
-const P = { i: 0, t: 0, end: 1, playing: false, waiting: false, done: false, started: false, audio: null, afail: false, stall: 0, cleanup: [] };
+const P = { i: 0, t: 0, end: 1, playing: false, waiting: false, done: false, started: false, audio: null, afail: false, stall: 0, cleanup: [], rate: 1, nextClip: null };
 function runBeat(i) {
   TW = [];
-  const b = BEATS[i], tm = TIMINGS[b.id];
+  const b = BEATS[i], tm = TIMINGS[b.id], pre = b.pre || 0;   // pre: seconds of picture before the narration starts
   const m = (k, off = 0) => {
     if (!(k in tm.marks)) throw new Error(`${b.id}: missing mark ${k}`);
-    return tm.marks[k] + off;
+    return pre + tm.marks[k] + off;
   };
   S.cleared = false;
-  b.run(m, tm.dur);
-  if (S.cleared && b.lead !== false) leadIn();
+  b.run(m, pre + tm.dur);
+  if (S.cleared && b.lead !== false && !pre) leadIn();
   TW.sort((a, c) => a.t0 - c.t0);
-  return Math.max(tm.dur, ...TW.map(w => w.t0 + w.dur)) + .6;
+  return Math.max(pre + tm.dur, ...TW.map(w => w.t0 + w.dur)) + .6;
 }
 // A beat that clears the picture must not leave it empty while the narration has started.
 // If nothing appears before LEAD_MAX, the opening group (every tween that starts within LEAD_GROUP s of the
@@ -1587,33 +1795,67 @@ function seek(i, play = P.playing) {
     start(i, play);
   } finally { seeking = false; }
 }
+// Jump to a point inside beat i (frac of its narration); question beats always start at their beginning.
+function seekInto(i, frac) {
+  seek(i, true);
+  const pre = BEATS[i].pre || 0, t = BEATS[i].ask ? 0 : frac * (pre + TIMINGS[BEATS[i].id].dur);
+  if (t < .3) return;
+  P.t = t;
+  evalTo(t);
+  if (P.audio) P.audio.currentTime = Math.max(0, t - pre);
+}
 function start(i, play) {
   stopAudio(); clearCards();
   Object.assign(P, { i, t: 0, waiting: false, done: false, afail: false, stall: 0 });
   P.end = runBeat(i);
   evalTo(0);
-  const a = P.audio = new Audio(`audio/${CHAPTER.language || 'en'}/${BEATS[i].id}.mp3`);
-  a.preload = 'auto';
+  const a = P.audio = beatClip(i, true);
   a.volume = +($('volume')?.value ?? 1);
+  a.playbackRate = P.rate;
   // An aborted or superseded load (fast stepping, a reload) is not a failure: only a real error for the current clip
   // shows the note, and the note goes away as soon as a clip plays.
   a.onerror = () => { if (P.audio === a && a.error && a.error.code !== MediaError.MEDIA_ERR_ABORTED) soundFailed(); };
   a.onplaying = () => {
     if (P.audio !== a) return;
     $('soundNote').hidden = true;
-    if (P.afail) { P.afail = false; a.currentTime = P.t; }   // sound came back late: rejoin the picture where it is
+    if (P.afail) { P.afail = false; a.currentTime = Math.max(0, P.t - (BEATS[P.i].pre || 0)); }   // sound came back late: rejoin the picture where it is
   };
   const b = BEATS[i];
   if (b.ask) b.ask(() => { if (P.i === i) { evalTo(Infinity); start(i + 1, true); } });
   setPlaying(play);
+  if (i + 1 < BEATS.length) beatClip(i + 1);
 }
+// The next beat's clip starts loading while this one plays, so a slow connection does not stall between beats.
+function beatClip(i, take) {
+  const src = `audio/${CHAPTER.language || 'en'}/${BEATS[i].id}.mp3`;
+  let a = P.nextClip?._src === src ? P.nextClip : null;
+  if (!a) {
+    if (P.nextClip && P.nextClip !== P.audio) { P.nextClip.removeAttribute('src'); P.nextClip.load(); }   // abandon a stale preload
+    a = Object.assign(new Audio(src), { preload: 'auto', _src: src });
+  }
+  P.nextClip = take ? null : a;
+  return a;
+}
+// Playback speed: the audio clock drives the picture, so changing the clip's rate keeps them together.
+const SPEEDS = [.75, 1, 1.25, 1.5];
+function setSpeed(r) {
+  P.rate = r;
+  $('bSpeed').textContent = r + '×';
+  if (P.audio) P.audio.playbackRate = r;
+  try { localStorage.setItem('speed', String(r)); } catch {}
+}
+const stepSpeed = d => setSpeed(SPEEDS[Math.max(0, Math.min(SPEEDS.length - 1, SPEEDS.indexOf(P.rate) + d))]);
 function soundFailed() { P.afail = true; $('soundNote').hidden = false; }
 function setPlaying(v) {
   P.playing = v;
   const a = P.audio;
   if (!a) return;
-  if (v && !P.waiting && !a.ended && !P.afail) a.play().catch(e => { if (P.audio === a && e.name === 'NotAllowedError') soundFailed(); });
-  else a.pause();
+  const lead = v && P.t < (BEATS[P.i]?.pre || 0);
+  if (v && !P.waiting && !a.ended && !P.afail && !lead) a.play().catch(e => { if (P.audio === a && e.name === 'NotAllowedError') soundFailed(); });
+  else if (lead && !a._unlocked) {   // the clip starts later, outside this click: play it silently now so the browser allows that
+    a._unlocked = true; a.muted = true;
+    a.play().then(() => { if (P.t < (BEATS[P.i].pre || 0)) { a.pause(); a.currentTime = 0; } a.muted = false; }, () => { a.muted = false; });
+  } else a.pause();
 }
 function beatDone() {
   evalTo(Infinity);
@@ -1631,10 +1873,14 @@ function frame(now) {
   if (P.playing && !P.waiting && !P.done) {
     const a = P.audio;
     // While the clip plays, its clock drives the picture; before it starts or after it ends, wall time does.
-    if (a && !P.afail && !a.ended) {
-      if (a.currentTime > 0) { P.t = Math.max(P.t, a.currentTime); P.stall = 0; }
+    const pre = BEATS[P.i].pre || 0;
+    if (a && P.t < pre) {   // the picture's lead before the narration, on wall time; then the clip starts
+      P.t += dt * P.rate;
+      if (P.t >= pre && !P.afail) { a.muted = false; a.currentTime = P.t - pre; a.play().catch(e => { if (P.audio === a && e.name === 'NotAllowedError') soundFailed(); }); }
+    } else if (a && !P.afail && !a.ended) {
+      if (a.currentTime > 0) { P.t = Math.max(P.t, pre + a.currentTime); P.stall = 0; }
       else if ((P.stall += dt) > (a.readyState < 2 ? 8 : 15)) soundFailed();   // nothing to play after 8 s, or stuck for 15
-    } else P.t += dt;
+    } else P.t += dt * P.rate;
     evalTo(P.t);
     if (P.t >= P.end) beatDone();
   }
@@ -1647,21 +1893,30 @@ function buildSegs() {
   const s = h('button', 'seg' + (b.ask ? ' ask' : ''), [h('i')]);
   s.style.flex = TIMINGS[b.id].dur + (b.ask ? 12 : 0);
   s.title = b.title;
-  s.setAttribute('aria-label', `Go to step ${i + 1}: ${b.title}`);
-  s.onclick = () => { hideCover(); seek(i, true); };
+  s.setAttribute('aria-label', translate('goToStep', { n: i + 1, title: b.title }));
+  // A click lands at that point of the step; keyboard activation (no pointer position) starts the step.
+  s.onclick = e => {
+    const r = s.getBoundingClientRect();
+    hideCover(); seekInto(i, e.detail ? (e.clientX - r.left) / r.width : 0);
+  };
   $('segs').append(s);
   return s.firstChild;
   });
 }
+// ui() runs on every frame, paused or not: it writes only what changed, so an idle lesson does no layout work.
+let stepText = '';
+const setWidth = (f, w) => { if (f._w !== w) { f._w = w; f.style.width = w + '%'; } };
 function ui() {
-  segs.forEach((f, k) => { f.style.width = (k < P.i || P.done ? 100 : k > P.i ? 0 : Math.min(100, P.t / P.end * 100)) + '%'; });
-  $('frame').classList.toggle('is-playing', P.playing && !P.done && !P.waiting);
-  $('frame').classList.toggle('paused', P.started && !P.playing && !P.waiting && !P.done && !BEATS[P.i].ask);
-  $('stepName').textContent = `${P.i + 1} / ${BEATS.length}   ${BEATS[P.i].title}`;
+  segs.forEach((f, k) => setWidth(f, k < P.i || P.done ? 100 : k > P.i ? 0 : Math.min(100, P.t / P.end * 100)));
+  const fr = $('frame');
+  fr.classList.toggle('is-playing', P.playing && !P.done && !P.waiting);
+  fr.classList.toggle('paused', P.started && !P.playing && !P.waiting && !P.done && !BEATS[P.i].ask);
+  const step = `${P.i + 1} / ${BEATS.length}   ${BEATS[P.i].title}`;
+  if (step !== stepText) { stepText = step; $('stepName').textContent = step; }
   const b = BEATS[P.i];
   let text = '';
   if (captions && P.started && !b.ask && !P.done) {
-    for (const [t, line] of TIMINGS[b.id].cues) { if (t > P.t + .05) break; text = line; }
+    for (const [t, line] of TIMINGS[b.id].cues) { if (t + (b.pre || 0) > P.t + .05) break; text = line; }
   }
   if (text !== capText) { capText = text; $('caption').textContent = text; $('caption').hidden = !text; }
 }
@@ -1690,6 +1945,8 @@ $('bPlay').onclick = togglePlay;
 $('bBack').onclick = () => { hideCover(); back1(); };
 $('bRestart').onclick = restart;
 $('bCC').onclick = () => setCaptions(!captions);
+$('bSpeed').onclick = () => setSpeed(SPEEDS[(SPEEDS.indexOf(P.rate) + 1) % SPEEDS.length]);
+try { const r = +localStorage.getItem('speed'); if (SPEEDS.includes(r)) setSpeed(r); } catch {}
 $('bFull').onclick = () => toggleFull();
 const toggleFull = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
 let helpResume = false;
@@ -1698,6 +1955,23 @@ function toggleHelp() {
   $('help').hidden = !open;
   if (open) { helpResume = P.playing; if (P.playing) setPlaying(false); }
   else if (helpResume) setPlaying(true);
+}
+// Review notes, only with ?review in the URL: N pauses and asks for a note on this moment, Shift+N copies every
+// note of the chapter (one line each, with the ?beat=N&t=S that reopens it) and offers to clear them.
+const REVIEW = new URLSearchParams(location.search).has('review');
+const REVIEW_KEY = 'papermorph:review:' + location.pathname;
+const reviewNotes = () => { try { return JSON.parse(localStorage.getItem(REVIEW_KEY) || '[]'); } catch { return []; } };
+function reviewNote() {
+  if (P.playing) setPlaying(false);
+  const at = `?beat=${P.i}&t=${P.t.toFixed(1)}`, note = prompt(`Note at ${BEATS[P.i].id} ${at}`);
+  if (!note) return;
+  try { localStorage.setItem(REVIEW_KEY, JSON.stringify([...reviewNotes(), `ch${String(CHAPTER.number).padStart(2, '0')} ${at} (${BEATS[P.i].id}): ${note}`])); } catch {}
+}
+function reviewCopy() {
+  const notes = reviewNotes(), text = notes.join('\n');
+  console.log(text);
+  navigator.clipboard?.writeText(text).catch(() => {});
+  if (confirm(`${notes.length} notes copied (also in the console). Clear them?`)) try { localStorage.removeItem(REVIEW_KEY); } catch {}
 }
 // Every action has a key. A question's own keys (P.keys) come first; Shift reaches the player during a question.
 document.addEventListener('keydown', e => {
@@ -1710,6 +1984,7 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (k === '?') { e.preventDefault(); toggleHelp(); return; }
+  if (REVIEW && isShortcut(e, 'n')) { e.preventDefault(); e.shiftKey ? reviewCopy() : reviewNote(); return; }
   if ((k === 'Enter' || k === ' ') && e.target.closest?.('button, [tabindex], a')) return;  // a Tab-focused control acts itself
   if (!P.started) { if (k === ' ' || k === 'Enter') { e.preventDefault(); togglePlay(); } return; }
   if (P.keys && !e.shiftKey && P.keys(e)) { e.preventDefault(); return; }
@@ -1719,8 +1994,10 @@ document.addEventListener('keydown', e => {
   else if (k === 'ArrowLeft' && free) back1();
   else if (k === 'ArrowRight' && free) { if (P.i < BEATS.length - 1) seek(P.i + 1); }
   else if (k === 'Home') restart();
-  else if (k === 'c' || k === 'C') setCaptions(!captions);
-  else if (k === 'f' || k === 'F') toggleFull();
+  else if (isShortcut(e, 'c')) setCaptions(!captions);
+  else if (k === '<' || k === ',' || isShortcutCode(e, 'Comma')) stepSpeed(-1);
+  else if (k === '>' || k === '.' || isShortcutCode(e, 'Period')) stepSpeed(1);
+  else if (isShortcut(e, 'f')) toggleFull();
   else used = false;
   if (used) e.preventDefault();
 });
@@ -1744,12 +2021,12 @@ function progress(f) {
   } catch {}
 }
 function boot() {
-  $('coverK').textContent = `Chapter ${CHAPTER.number}`;
+  $('coverK').textContent = translate('chapterNumber', { n: CHAPTER.label ?? CHAPTER.number });
   $('coverT').textContent = CHAPTER.title;
   $('bHome').href = `../#ch${String(CHAPTER.number).padStart(2, '0')}`;
   progress(p => { p.last = CHAPTER.number; });
-  document.getElementById('stage').setAttribute('aria-label', `Lesson animation: ${CHAPTER.title}`);
-  $('coverMeta').textContent = `About ${CHAPTER.minutes} minutes, with sound and quick checks.`;
+  document.getElementById('stage').setAttribute('aria-label', translate('stageLabelTitled', { title: CHAPTER.title }));
+  $('coverMeta').textContent = translate('aboutMinutes', { n: num(CHAPTER.minutes) });
   buildSegs();
   const qs = new URLSearchParams(location.search);
   if (qs.has('beat')) {
@@ -1757,6 +2034,7 @@ function boot() {
     seek(+qs.get('beat'), false);
     P.t = +(qs.get('t') || 0);
     evalTo(P.t);
+    if (P.audio) P.audio.currentTime = Math.max(0, P.t - (BEATS[P.i].pre || 0));
   } else seek(0, false);
   requestAnimationFrame(frame);
 }
