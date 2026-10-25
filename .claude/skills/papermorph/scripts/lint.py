@@ -8,12 +8,13 @@
 Errors (exit status 1):
   global    a top-level name in the chapter or a lib file it loads is also declared by the engine or another of
             its scripts; a second const/let/class stops the page script, a second function silently replaces one
+  math      the chapter uses a maths helper from lib/math.js but does not load it after engine.js
   beat      a beat id has no entry in audio/<lang>/timings.js or no MP3
   mark      m('name') is not a mark of any beat
   stale     the narration's text or [[marks]] differ from timings.js: run tts.py again
   style     style.json is not valid JSON or lacks schema, tier, book, words, look or voice
 Warnings: a beat's m('name') not among that beat's own marks (beats built by shared helpers can mislead this);
-  no beats recognised in a chapter.
+  no beats recognised in a chapter; no narration file to check against.
 --content defaults to content/<book> (content/ for the first book's legacy layout), --brief to books/<book>.
 """
 import argparse, json, re, sys, unicodedata
@@ -26,6 +27,13 @@ BEAT = re.compile(r"\[\s*'(\w+)'\s*,\s*(['\"`])(?:\\.|(?!\2).)*\2\s*,\s*(?:\(\s*
 MCALL = re.compile(r"(?<![\w$.])m\(\s*'(\w+)'\s*[,)]")
 MARK = re.compile(r'\[\[(\w+)\]\]')
 SAY = re.compile(r'\{\{([^|{}]+)\|([^{}]+)\}\}')   # {{shown|spoken}}, as in tts.py: captions carry "shown"
+ENGINE_FILES = {'engine.js', 'math.js', 'volume.js', 'contents.js', 'units.js'}
+LOCAL = re.compile(r'[,(]\s*([A-Za-z_$][\w$]*)\s*=(?![=>])')   # a, name = … or (p, name = 1): declared in a list
+PARAMS = re.compile(r'function\s*[\w$]*\s*\(([^)]*)\)|\(([^()]*)\)\s*=>|([A-Za-z_$][\w$]*)\s*=>')   # parameters
+METHOD = re.compile(r'^\s*([A-Za-z_$][\w$]*)\s*\([^()]*\)\s*\{', re.M)   # name(a, b) { … } in an object
+DESTRUCT = re.compile(r'(?:const|let|var)\s*([\[{][^;]*?[\]}])\s*(?:=|of\b|in\b)')   # const {a, b: c, d = 1} = …, for (const [x, y] of …)
+DKEY = re.compile(r'[A-Za-z_$][\w$]*\s*:|=[^,\]}]*')   # in a pattern, a key (b: c declares c) and a default (= 1) declare nothing
+USE = re.compile(r'(?<![\w$.])([A-Za-z_$][\w$]*)(?![\w$])(?!\s*:)')   # a name, not a property or an object key
 
 
 def depth0(text):
@@ -94,7 +102,12 @@ def decls(text):
 
 def timings(path):
     t = path.read_text(encoding='utf-8')
-    return json.loads(t[t.index('{'):t.rindex('}') + 1])
+    T = json.loads(t[t.index('{'):t.rindex('}') + 1])
+    shots = path.with_name('shots.js')   # join.py's joined scenes: TIMINGS.scene = {...};
+    if shots.exists():
+        for m in re.finditer(r'^TIMINGS\.(\w+) = (\{.*\});$', shots.read_text(encoding='utf-8'), re.M):
+            T[m.group(1)] = json.loads(m.group(2))
+    return T
 
 
 def words(s):
@@ -105,10 +118,10 @@ def words(s):
 def lint_chapter(ch, content, out):
     err = lambda kind, msg: out.append(('E', kind, f'{ch.name}: {msg}'))
     warn = lambda kind, msg: out.append(('W', kind, f'{ch.name}: {msg}'))
-    html = (ch / 'index.html').read_text(encoding='utf-8')
+    html = re.sub(r'<!--.*?-->', '', (ch / 'index.html').read_text(encoding='utf-8'), flags=re.S)   # a commented-out <script> loads nothing
     inline = '\n'.join(INLINE.findall(html))
     # globals: every script the page loads, in order
-    seen = {}
+    seen, own = {}, [inline]   # own: the chapter's code and the book's scripts, not the engine's
     for src in SRC.findall(html) + ['(chapter)']:
         if src == '(chapter)':
             text, name = inline, 'chapter'
@@ -117,6 +130,8 @@ def lint_chapter(ch, content, out):
             if f.suffix != '.js' or not f.exists() or f.name in ('timings.js', 'mathjax.js'):   # MathJax declares no globals
                 continue
             text, name = f.read_text(encoding='utf-8'), f.name
+            if (f.parent.name != 'lib' or f.name not in ENGINE_FILES) and not f.name.endswith('.min.js'):   # a vendored library is not the book's code
+                own.append(text)
         for ident, kind, line in decls(text):
             if ident in seen:
                 first, k0 = seen[ident]
@@ -124,6 +139,19 @@ def lint_chapter(ch, content, out):
                 err('global', f'{name}:{line} {what} {ident} from {first}')
             else:
                 seen[ident] = (name, kind)
+    # maths helpers used without math.js (they left engine.js after the engine-v1 tag)
+    math = (ch / '../lib/math.js').resolve()
+    loaded = {Path(s).name for s in SRC.findall(html)}
+    if 'engine.js' in loaded and 'math.js' not in loaded and math.exists():
+        names = {d[0] for d in decls(math.read_text(encoding='utf-8'))} - set(seen)
+        code = [depth0(text)[0] for text in own]
+        local = {m.group(2) for c in code for m in DECL.finditer(c)} | {n for c in code for n in LOCAL.findall(c)}
+        local |= {n for c in code for n in METHOD.findall(c)}
+        local |= {n for c in code for d in DESTRUCT.findall(c) for n in re.findall(r'[A-Za-z_$][\w$]*', DKEY.sub(' ', d))}
+        local |= {n for c in code for p in PARAMS.findall(c) for n in re.findall(r'[A-Za-z_$][\w$]*', ''.join(p))}
+        used = sorted({w for c in code for w in USE.findall(c)} & names - local)
+        if used:
+            err('math', f"uses {', '.join(used)} from lib/math.js: load ../lib/math.js right after engine.js")
     # beats, audio, marks
     lang = (re.search(r"language:\s*'(\w+)'", inline) or [None, 'en'])[1]
     tpath = ch / 'audio' / lang / 'timings.js'
@@ -152,6 +180,8 @@ def lint_chapter(ch, content, out):
     if nar.exists():
         N = json.loads(nar.read_text(encoding='utf-8-sig')).get('beats', {})
         for b, text in N.items():
+            if isinstance(text, dict):   # a beat with a speaker; its caption is the subtitle when it has one
+                text = text.get('sub') or text['text']
             if b not in T:
                 err('stale', f'narration beat {b} has no timings')
                 continue
@@ -160,6 +190,8 @@ def lint_chapter(ch, content, out):
             cues = ' '.join(c[1] for c in T[b].get('cues', []))
             if cues and words(text) != words(cues):
                 err('stale', f'beat {b}: narration text differs from the generated audio')
+    else:
+        warn('stale', f'no narration at {nar}: narration not checked (pass --content)')
 
 
 def lint_style(brief, out):

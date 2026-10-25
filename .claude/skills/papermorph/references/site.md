@@ -20,7 +20,85 @@ echo '[]' > "$BOOK_WORK/refs.json"
 python "$SKILL/scripts/refs.py" build "$BOOK_WORK/refs.json" "$BOOK_SITE/refs.js"
 ```
 
-Use the pilot chapter's number in place of `ch01` when the pilot is not the first chapter. Use the agreed primary language: rename the narration source, load `audio/<lang>/timings.js`, and set `CHAPTER.language` to match (default `en`). Take `voice` and `rate` for each narration file from `style.json`, and translate the template's visible UI text as needed before the pilot.
+### A picture book
+
+Instead of the block above (not after it). The book's `index.html` is the series page; each episode comes from the picture-book kit, and the empty `baked.js` stands in until `bake_puppets.py` has run:
+
+```sh
+BOOK_ID=jokes
+BOOK_SITE="site/$BOOK_ID"
+BOOK_WORK="books/$BOOK_ID"
+PB="$SKILL/assets/templates/picture-book"
+mkdir -p "$BOOK_SITE/lib" "$BOOK_SITE/img/puppets" "$BOOK_SITE/ch01" "$BOOK_WORK/art" "content/$BOOK_ID/ch01" "tools/$BOOK_ID"
+python3 "$SKILL/scripts/engine.py" "$BOOK_SITE"
+cp "$PB/series.html" "$BOOK_SITE/index.html"
+cp "$PB"/lib/*.js "$BOOK_SITE/lib/"
+cp "$PB/chapter.html" "$BOOK_SITE/ch01/index.html"; cp "$PB/scene1.js" "$BOOK_SITE/ch01/"
+cp "$PB/sets.js" "$BOOK_WORK/art/"
+cp "$PB/narration.en.json" "content/$BOOK_ID/ch01/"
+echo 'window.BAKED = {};' > "$BOOK_SITE/img/puppets/baked.js"
+```
+
+For a painted look, also `cp "$PB/painted.json" "$BOOK_WORK/art/"` ([painting.md](painting.md)). Then the sound and the pictures, in this order ([sound.md](sound.md), [puppets.md](puppets.md)), with the preview server running on 8765:
+
+```sh
+A="$BOOK_SITE/ch01/audio/en"; N="content/$BOOK_ID/ch01/narration.en.json"
+uv run --with edge-tts python "$SKILL/scripts/tts.py" "$N" "$A"
+python3 "$SKILL/scripts/level.py" "$A"/*.mp3
+python3 "$SKILL/scripts/mouths.py" "$N" "$A"
+python3 "$SKILL/scripts/join.py" "$A" scene1=s01,s02,s02b,s03 --words "$N"
+uv run --with numpy python "$SKILL/scripts/sfx.py" "$BOOK_SITE/ch01/audio/sfx" knock
+```
+
+Keep these commands in a script beside the book's notes (`tools/$BOOK_ID/audio.sh`) and rerun it after any change to the narration. As copied, they voice the kit's own sample episode, a check that the folder works; the episode's script then replaces the narration file, and its scenes replace the `join.py` list.
+
+The sets are baked before the scenes are written, the puppets after, since `bake_puppets.py` bakes the poses the chapters ask for; rerun either after a set or a puppet part changes. A painted look paints its sets between `bake_sets.py --ref` and the scenes ([painting.md](painting.md)).
+
+```sh
+uv run --with playwright --with pillow python "$SKILL/scripts/bake_sets.py" "$BOOK_WORK/art/sets.js" "$BOOK_SITE"
+uv run --with playwright --with pillow python "$SKILL/scripts/bake_puppets.py" "$BOOK_SITE" --url "http://localhost:8765/$BOOK_ID/"
+```
+
+### A documentary
+
+Instead of the first block, like a picture book's. `engine.py` runs first, on the new folder: it refuses a `lib/` that already holds files but no engine. The kit's `lib/` then goes over it, its `book.css` replacing the default one. The book's `index.html` is the picture-book series page, given the film's colours and fonts and a credits section listing every picture and recording from `SOURCES.tsv` (as *Madness and Civilization* does); a single film is a series of one.
+
+```sh
+BOOK_ID=film
+BOOK_SITE="site/$BOOK_ID"
+BOOK_WORK="books/$BOOK_ID"
+DK="$SKILL/assets/templates/documentary"
+mkdir -p "$BOOK_SITE/lib" "$BOOK_SITE/img" "$BOOK_SITE/ch01" "$BOOK_WORK/art/found" "content/$BOOK_ID/ch01" "tools/$BOOK_ID"
+python3 "$SKILL/scripts/engine.py" "$BOOK_SITE"
+cp -R "$DK"/lib/. "$BOOK_SITE/lib/"
+cp "$DK/chapter.html" "$BOOK_SITE/ch01/index.html"
+cp "$SKILL/assets/templates/picture-book/series.html" "$BOOK_SITE/index.html"
+cp "$DK/narration.en.json" "content/$BOOK_ID/ch01/"
+echo 'window.ART = {};' > "$BOOK_SITE/img/art.js"
+```
+
+### A short
+
+Like a documentary: `engine.py` first, then the shorts kit's `lib/` over it, with the documentary kit's fonts. Each episode is a chapter; its sound effects come from `sfx.py`. The commands for an empty book (a series page and shelf registration come later, as for any book):
+
+```sh
+BOOK_ID=short
+BOOK_SITE="site/$BOOK_ID"
+SK="$SKILL/assets/templates/shorts"
+DK="$SKILL/assets/templates/documentary"
+mkdir -p "$BOOK_SITE/lib" "$BOOK_SITE/img" "$BOOK_SITE/ch01/audio/sfx" "content/$BOOK_ID/ch01" "books/$BOOK_ID/art"
+python3 "$SKILL/scripts/engine.py" "$BOOK_SITE"
+cp -R "$SK"/lib/. "$BOOK_SITE/lib/"
+cp -R "$DK/lib/fonts.css" "$DK/lib/fonts" "$BOOK_SITE/lib/"
+cp "$SK/chapter.html" "$BOOK_SITE/ch01/index.html"
+uv run --with numpy python "$SKILL/scripts/sfx.py" "$BOOK_SITE/ch01/audio/sfx" whoosh bang tick thud
+```
+
+The chapter loads `../img/art.js`, which `prep.py` fills as pictures are treated; until then the kit's sample beat needs one picture named `first-picture`. Voice the sample with `uv run --with edge-tts python "$SKILL/scripts/tts.py" "content/$BOOK_ID/ch01/narration.en.json" "$BOOK_SITE/ch01/audio/en"` to check the folder works, then replace the narration with the film's script ([documentary.md](documentary.md#the-order-of-work)).
+
+### Every book
+
+Use the pilot chapter's number in place of `ch01` when the pilot is not the first chapter. Use the agreed primary language: rename the narration source, load `audio/<lang>/timings.js` (a picture-book chapter also loads `mouths.js` and `shots.js` from that folder), and set `CHAPTER.language` to match (default `en`, it picks the audio folder). A chapter's minutes appear on its title screen (`CHAPTER.minutes`), its contents card and a series card; write the same number in each: the length of its audio (the `dur`s in `timings.js`) plus about 15 s for each question, rounded to whole minutes and never below 1. Set `<html lang>` in `index.html` and every chapter to the same language: the player and the contents page take their interface text from it (English, Russian, Chinese and Japanese are built into the engine; other languages fall back to English until a block is added to the engine's `TRANSLATIONS`). Take `voice` and `rate` for each narration file from `style.json`, and translate the template's own visible text (titles, lede, prompts) before the pilot.
 
 If the book's formulas need LaTeX ([engine.md](engine.md#latex)), add MathJax (with its license) to `lib/`, and load `../lib/mathjax.js` right after `engine.js` in every chapter:
 
@@ -28,20 +106,27 @@ If the book's formulas need LaTeX ([engine.md](engine.md#latex)), add MathJax (w
 python3 "$SKILL/scripts/engine.py" "$BOOK_SITE" --latex   # lib/mathjax.js; later syncs keep it in step
 ```
 
-Each book has its own engine copy (kept in step with `engine.py`, see [engine.md](engine.md)), source materials, narration and optional tests. The engine and cover derive the same progress key from the book's URL folder. Keep existing books on their current paths; their legacy progress remains intact.
+Each book has its own engine copy (kept in step with `engine.py`, see [engine.md](engine.md)), source materials, narration and optional tests. The engine and cover derive the same progress key from the book's URL folder (or `--progress-key` in `lib/book.css`), so moving a book to another folder resets its readers' progress unless the key is set.
 
-A chapter returns to its book's index. Preserve cover → contents → chapter navigation and the return from contents to cover. The book opens directly at `/<book>/`; it needs no parent index page. Keep existing books' navigation when editing them.
+A chapter returns to its book's index. Preserve cover → contents → chapter navigation and the return from contents to cover. The book opens directly at `/<book>/`; it needs no parent index page.
 
 ## Cover and contents (`index.html`)
+
+A textbook's cover and contents; a picture book or a documentary uses the series page instead ([stories.md](stories.md#delivering), [above](#a-documentary)).
 
 One page: no hash or `#book` shows the cover, `#references` the reference list, `#acknowledgements` the acknowledgements, `#contents` or `#chNN` the contents; a lesson's home button returns to `#chNN`, and the card grows into the lesson frame through a view transition.
 
 - Edit the title, kicker, lede, the faint chalk phrases on the cover (a few formulas or lines from the book), and the `<title>`.
-- The page's script calls `Contents.book({ start, units, hues, ack })` (from the engine's `lib/contents.js`; the shared styles are `lib/contents.css`). `units`: `[unit title, [[chapter title, minutes], …]]`; chapters are numbered in order from `start` (`{ unit: 1, chapter: 1 }`; a book whose scope starts mid-way, e.g. at unit 3, chapter 9, keeps the original numbers). Add a chapter when its lesson is ready; also set the previous chapter's `CHAPTER.next = '../chNN/'`. An optional third entry `{ unit, chapter, sample: true }` renumbers a unit and marks it as a sample, left out of the chapter count. To show different numbers than the folders, add `label` to `start` (`{ unit: 1, chapter: 9, label: 1 }` shows ch09 as 1) and set the same `CHAPTER.label` in each lesson, which its title screen and completion card show. A chapter's own third entry `{ chapter }` changes only the number on its card; `{ href, chapter }` links a card to another book's chapter, outside this book's count and progress (`href` on a unit's entry does it for the whole unit).
+- The page's script calls `Contents.book({ start, units, hues, ack })` (from the engine's `lib/contents.js`; the shared styles are `lib/contents.css`):
+  - `units`: `[unit title, [[chapter title, minutes], …]]`; chapters are numbered in order from `start` (`{ unit: 1, chapter: 1 }`; a book whose scope starts mid-way, e.g. at unit 3, chapter 9, keeps the original numbers).
+  - Add a chapter when its lesson is ready, and set the previous chapter's `CHAPTER.next = '../chNN/'`.
+  - A unit's optional third entry `{ unit, chapter, sample: true }` renumbers it and marks it as a sample, left out of the chapter count.
+  - To show different numbers than the folders, add `label` to `start` (`{ unit: 1, chapter: 9, label: 1 }` shows ch09 as 1) and set the same `CHAPTER.label` in each lesson, which its title screen and completion card show.
+  - A chapter's own third entry `{ chapter }` changes only the number on its card; `{ href, chapter }` links a card to another book's chapter, outside this book's count and progress (`href` on a unit's entry does it for the whole unit).
 - `hues`: one colour per unit, cycling; keep the template's U of T accents ([palette.md](palette.md)).
 - A book with its own look overrides the tokens of `lib/contents.css` (`--board`, `--chalk`, `--top-bg`, …) in a `<style>` after it, as the template's comment shows; don't copy the stylesheet into the page.
 - Acknowledgements: fill `ack` in the `Contents.book` call for every book. `sources` lists the `refs.json` keys of the works the book retells (shown in full, linked); `note` says in one or two sentences how the book uses them (what it follows, what is the book's own, any change of setting); `made` (rows `[label, text, link?]`, where `link` is a URL or a list of URLs) credits Papermorph (DozenTwelve, MIT, linked to its GitHub repository) and the editor's fork it was made with, the editor (name, affiliation, ORCID link), Claude as the drafting tool with the editor's review, the actual narration engine, voice and model, the question approach (books with mcq-item-writer banks link https://github.com/titulartarantula/mcq-item-writer), citation checking and the palette. The contents shows an Acknowledgements link under References; an empty `ack` hides it. Update `made` if the voice or model changes.
-- References: the page loads `refs.js` before the call, and `lib/contents.js` builds the views. The contents ends with one link to the separate `#references` view, which lists every entry in APA style, linked to its DOI or catalogue record. Keep the full list off the contents page. Rebuild `refs.js` whenever `refs.json` changes (see authoring.md, *Citations*). The views' markup (`#refpage`, `#ackpage`) is in the template; keep it when editing the page.
+- References: the page loads `refs.js` before the call, and `lib/contents.js` builds the views. The contents ends with one link to the separate `#references` view, which lists every entry in APA style, linked to its DOI or catalogue record. Keep the full list off the contents page. Rebuild `refs.js` whenever `refs.json` changes ([courses.md](courses.md#citations)). The views' markup (`#refpage`, `#ackpage`) is in the template; keep it when editing the page.
 
 ## Unit sketches (`unit-art.js`)
 
@@ -49,7 +134,7 @@ Give each unit a small sketch of its own ideas, drawn in the unit colour, with o
 
 ## Guide character
 
-Keep the existing infinity guide by default. For an agreed custom guide, adapt `mascotEl` and the cover drawing together, retaining blink, happy hop and wrong-answer tilt states.
+The infinity guide comes with the engine (`mascotEl` in `engine.js`, the cover's in `contents.js`), so a book's copy is replaced at every sync. A custom guide needs a hook in the engine itself; agree it with the user and change the engine at its source.
 
 ## Local preview and delivery
 
@@ -67,4 +152,4 @@ Narration and on-screen text are written in one language first. A second languag
 
 ## Video export (optional)
 
-`uv run --with playwright SKILL/scripts/export.py chNN --url http://localhost:8765/<book>/ --out OUT --link <lesson URL>` renders the lesson beats to `OUT/chNN.mp4` (1080p, 30 fps) plus `OUT/chNN.srt` for upload with it. Frames come from seeking the beat clock, so the video matches the page exactly; question beats are left out and the video ends on a card pointing to the interactive lesson. It takes about 1.6× the video's length.
+`uv run --with playwright --with numpy SKILL/scripts/export.py chNN --url http://localhost:8765/<book>/ --out OUT --link <lesson URL>` renders the beats to `OUT/chNN.mp4` (1080p, 30 fps) plus `OUT/chNN.srt` for upload with it. Frames come from seeking the beat clock and the sound is mixed by the page's own rules (each beat's `pre`, and in a picture book its effects and music), so the video matches the page; question beats are left out and a lesson's video ends on a card pointing to the interactive lesson (in a film with `CHAPTER.film`, they stay in: each holds its picture for `hold` s, then the next beat plays as if the reader had acted). It takes about 1.6× the video's length. Video files are large (an episode at 1080p is tens of megabytes, more than a static host such as Cloudflare Pages takes per file): upload them to the video site, not into `site/`.

@@ -28,7 +28,7 @@ Before writing code, write the chapter's objectives (three to five things the re
 `content/<book>/chNN/narration.<lang>.json` (English example):
 
 ```json
-{ "voice": "en-US-AndrewMultilingualNeural", "rate": "-4%",
+{ "voice": "en-US-AndrewNeural", "rate": "-4%",
   "beats": { "intro": "Chapter five. [[sub]]Subtraction undoes addition.", "...": "..." } }
 ```
 
@@ -36,11 +36,11 @@ Before writing code, write the chapter's objectives (three to five things the re
 - Write for the ear: short sentences, one idea each. Say symbols and units in words ("negative seven halves", "meters per second squared"); the picture shows the symbols.
 - Match the audience: plain, warm, never childish. Explain why, not only how.
 - Question beats get one short line ("Quick check. Find the mean."); the card holds the question.
-- `tts.py` writes `<beat>.mp3` and `timings.js` (duration, marks, captions) and caches each finished beat beside the narration JSON: moving `[[marks]]` reuses the cache, and after a failure the same command resumes rather than starting over.
-- Engine: `"engine": "edge"` (default, online), `"kokoro"` (local, Apache 2.0; English word timings; voices such as `am_michael`, `af_heart`, `bm_george`) or `"elevenlabs"` (below), set at the top of the narration file with `voice` and `rate`. Keep one engine and voice per book, recorded in `style.json` `voice`.
+- `tts.py` writes `<beat>.mp3` and `timings.js` (duration, marks, captions) and caches each finished beat beside the narration JSON: moving `[[marks]]` reuses the cache, and after a failure the same command resumes rather than starting over. It takes a few seconds a beat, so a long chapter can outlast a tool's foreground time limit: run it in the background and wait for it before `lint.py`.
+- Engine: `"engine": "edge"` (default, online), `"kokoro"` (local, Apache 2.0; English word timings; voices such as `am_michael`, `af_heart`, `bm_george`) or `"elevenlabs"` (below), set at the top of the narration file with `voice` and `rate`. Keep one engine and voice per book, recorded in `style.json` `voice`. Edge's `...MultilingualNeural` voices guess the language sentence by sentence and read a short line such as "No zero, no fractions, no negatives." with a Spanish or Portuguese accent; a book in one language uses a one-language voice of that language.
 - Respell for the voice with `{{shown|spoken}}` (e.g. `{{honne|honneh}}`): the voice reads `spoken`, captions show `shown`. The spoken text keys the audio cache, so wrapping an already-synthesized respelling costs nothing.
 
-ElevenLabs, when the user names an ElevenLabs voice for the book (`style.json` `voice`; every chapter of a book uses the same voice):
+ElevenLabs, when the user names an ElevenLabs voice for the book (`style.json` `voice`; every chapter of a book uses the same voice). `tts.py` calls the ElevenLabs API directly with the user's key; `eleven.py` (documentaries) goes through OpenRouter instead:
 
 ```json
 { "engine": "elevenlabs", "voice": "<voice id>", "model": "eleven_v4",
@@ -96,17 +96,17 @@ Pick the type that lets the student act on the picture itself whenever possible 
 
 | Type | Use for |
 | --- | --- |
-| `choice` / `mcq` | One best answer from a few options, each wrong option with its own explanation; new questions come from the bank via `mcq(id)` |
+| `choice` / `mcq` | One best answer from a few options, each wrong option with its own explanation; new questions come from the reviewed item bank via `mcq(id)` ([courses.md](courses.md)) |
 | `blanks` | Typed numbers inside an expression; fractions and mixed numbers accepted; `test` judges a whole row (answers in any order) |
 | `grid` | Several items, each classified (yes/no, which category, true/false) |
 | `tap` / `tapEls` / `pickEls` | Click a point on the number line / a token in an expression / any drawn object |
-| `pickPoint` | Choose a grid point on a coordinate plane |
-| `sorter` | Drag items into regions (the number-set diagram) |
+| `pickPoint` | Choose a grid point on a coordinate plane (math.js) |
+| `sorter` | Drag items into regions (the number-set diagram; math.js) |
 
 New types are welcome when the content calls for one; each needs keyboard play (see engine.md).
 
 - Ids: `c-…` for quick checks, `p-…` for practice; the score card adds them up.
-- The prompt is HTML text; put math in it with `$m(...)`.
+- The prompt is rich text ([engine.md](engine.md#traps)).
 - Vary the right option's position across a chapter's `choice` questions; a fixed position (always the first) becomes guessable.
 - Feedback: right → `why` (and an animation via `fx`/`onRight`); wrong → a hint aimed at that mistake; after a wrong try, Show answer.
 - Grade meaning: equal values match (6/8 = 3/4) unless the lowest form is asked for; sets and pairs in any order; no denominators of zero; never judge irrationality from finitely many digits.
@@ -118,17 +118,9 @@ New types are welcome when the content calls for one; each needs keyboard play (
 
 - Follow the agreed chapter scope and order. Verify facts, calculations and answers actually used in the finished lesson; correct or replace source errors and note them in `books/<book>/chapters/chNN.md` for the user.
 - Check worked examples as the subject, not only as arithmetic (a push on someone standing on the ground is not the net force).
-- Use the notation and rounding in `style.json` (`look.notation`). Record new shared decisions there.
+- Use the notation and rounding in `style.json` (`look.notation`). Record new shared decisions there. Group thousands with a no-break space (U+00A0) or the book's comma: a thin space all but vanishes in bold system fonts (150 000 000 read as 150000000).
 - Colours follow [palette.md](palette.md): `COL` names, text ≥ 4.5:1, `COL.board` text on accent fills, never colour alone.
 
 ## Citations
 
-Every work named on screen (an author–year, a quoted study, a book title) is a live link to that work. Links come from a verified list, never from memory.
-
-1. **List.** Add each cited work to `books/<book>/refs.json`, taking authors, year and full title from the source book's own reference list (`pages/*/text.md`). The key is `surname-surname-year` (`scheper-hughes-lock-1987`); `cite` is the on-screen label.
-2. **Find.** `python SKILL/scripts/refs.py lookup books/<book>/refs.json --write`. This accepts a Crossref DOI only when the year, first author and title all match. For books without a DOI it takes the ISBN of the English edition from the cited year (Open Library), which links to its WorldCat record. Decide each `NO CONFIDENT MATCH` by hand: pick the right candidate or a trusted academic page (`url`, e.g. PubMed, JSTOR, ERIC, a university repository). If none exists, keep the citation as plain text and note it in the chapter file.
-3. **Verify.** `python SKILL/scripts/refs.py verify books/<book>/refs.json --write` resolves every DOI or ISBN, checks it against the entry, fills in the missing metadata and stamps `verified`. Fix every `FAIL`.
-4. **Build.** `python SKILL/scripts/refs.py build books/<book>/refs.json site/<book>/refs.js`. Chapters and the contents page load it. The book's separate References view (linked from the end of the contents) lists every work, and each chapter's finish card lists the sources that chapter cites.
-5. **Draw.** `cite(p, key, { x, y, size, fill, anchor, weight, o: 0 })` draws the label as an underlined link and returns it, ready for `show()`/`tw()` like `T`. `str` overrides the label (e.g. `'(1987)'` after a name drawn separately). Clicking a citation opens the source in a new tab and pauses the lesson. Faded-out links take no clicks or Tab focus. A work discussed but not drawn goes in `CHAPTER.refs` so the finish card still lists it.
-
-Never put a citation inside a long `T` sentence. Draw it with `cite()` next to the text it supports, so the link is a separate target of at least 24 px text height.
+Every work named on screen (an author–year, a quoted study, a book title) is a live link to that work, from a verified list, never from memory: follow [courses.md](courses.md#citations) (list, find, verify, build, draw) for every book of this fork.

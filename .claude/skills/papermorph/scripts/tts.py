@@ -1,7 +1,7 @@
 """Generate narration audio and word-mark timings with Edge TTS, Kokoro or ElevenLabs.
 
 Usage (from the project root; SKILL is this skill's folder):
-    uv run --with edge-tts $SKILL/scripts/tts.py content/ch01/narration.en.json site/ch01/audio/en
+    uv run --with edge-tts $SKILL/scripts/tts.py content/<book>/ch01/narration.en.json site/<book>/ch01/audio/en
     uv run --python 3.12 --with kokoro $SKILL/scripts/tts.py ...      # narration with "engine": "kokoro"
 
 The narration file names the engine ("edge", the default, or "kokoro"), the voice and the rate. Edge needs network
@@ -19,6 +19,9 @@ API's character alignment.
 
 Respell a word for the voice with {{shown|spoken}} (any engine): the voice says "spoken", captions show "shown".
 The spoken text alone keys the audio cache, so adding a respelling around already-spoken text is free.
+
+A book with several speakers lists them under "voices" ({name: {"voice", "rate", "pitch"}}) and writes a
+beat as {"speaker": name, "text": ...}; plain string beats use the file's own voice. Pitch is Edge only ("+20Hz").
 
 Narration text may contain [[mark]] tags placed before a word. The output
 timings.js records each clip's duration and the time (seconds) at which the
@@ -59,10 +62,10 @@ FIRST_RETRY_DELAY = 2     # seconds before the second request; doubles after eac
 PROBE_TEXT = "1, 2, 3."   # checks the voice after a beat fails; any voice reads digits in its own language
 
 
-async def synth(text, voice, rate, mp3_path):
+async def synth(text, voice, rate, mp3_path, pitch="+0Hz"):
     import edge_tts
     words = []  # (seconds, word)
-    comm = edge_tts.Communicate(text, voice, rate=rate, boundary="WordBoundary")
+    comm = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, boundary="WordBoundary")
     with open(mp3_path, "wb") as f:
         async for chunk in comm.stream():
             if chunk["type"] == "audio":
@@ -72,12 +75,12 @@ async def synth(text, voice, rate, mp3_path):
     return words
 
 
-async def synth_with_retries(beat, text, voice, rate, mp3_path):
+async def synth_with_retries(beat, text, voice, rate, mp3_path, pitch):
     """synth(), requested again after NoAudioReceived; each attempt rewrites mp3_path from the start."""
     from edge_tts.exceptions import NoAudioReceived
     for attempt in range(1, MAX_ATTEMPTS + 1):
         try:
-            return await synth(text, voice, rate, mp3_path)
+            return await synth(text, voice, rate, mp3_path, pitch)
         except NoAudioReceived:
             if attempt == MAX_ATTEMPTS:
                 raise
@@ -93,7 +96,7 @@ async def explain_no_audio(beat, voice, rate, out_dir):
     with tempfile.NamedTemporaryFile(dir=out_dir, prefix=".probe-", suffix=".mp3", delete=False) as f:
         probe_path = Path(f.name)
     try:
-        await synth(PROBE_TEXT, voice, rate, probe_path)
+        await synth(PROBE_TEXT, voice, rate, probe_path)  # default pitch
         voice_works = True
     except NoAudioReceived:
         voice_works = False
@@ -107,10 +110,10 @@ async def explain_no_audio(beat, voice, rate, out_dir):
             "Rerun later, or choose another voice for the whole book (uv run --with edge-tts edge-tts --list-voices).")
 
 
-async def edge_beat(beat, text, voice, rate, mp3_path, out_dir):
+async def edge_beat(beat, text, voice, rate, mp3_path, out_dir, pitch):
     from edge_tts.exceptions import NoAudioReceived
     try:
-        return await synth_with_retries(beat, text, voice, rate, mp3_path)
+        return await synth_with_retries(beat, text, voice, rate, mp3_path, pitch)
     except NoAudioReceived:
         raise SystemExit(await explain_no_audio(beat, voice, rate, out_dir)) from None
 
@@ -205,8 +208,10 @@ def split_marks(raw):
     return "".join(clean), marks, shown
 
 
-def time_at(clean, words):
-    """Return f(pos): start time of the first spoken word at or after char pos."""
+def time_at(clean, words, estimate=False):
+    """Return f(pos): start time of the first spoken word at or after char pos. The voice's word list can stop
+    short of the text; with estimate, a position past its last word is timed at the speaking rate so far (seconds
+    per character within sentences) plus the voice's mean pause at each sentence end on the way."""
     cursor, located = 0, []
     for t, w in words:
         i = clean.find(w, cursor)
@@ -214,7 +219,19 @@ def time_at(clean, words):
             continue
         located.append((i, t))
         cursor = i + len(w)
-    return lambda pos: next((round(t, 3) for i, t in located if i >= pos), None)
+    ends = lambda a, b: len(SENTENCE_END.findall(clean, a, b))
+    pairs = list(zip(located, located[1:]))
+    inner = [(i1 - i0, t1 - t0) for (i0, t0), (i1, t1) in pairs if not ends(i0, i1)]
+    rate = sum(d for _, d in inner) / max(sum(c for c, _ in inner), 1) if inner else located[-1][1] / max(located[-1][0], 1) if located else 0
+    gaps = [t1 - t0 - (i1 - i0) * rate for (i0, t0), (i1, t1) in pairs if ends(i0, i1)]
+    pause = max(0, sum(gaps) / len(gaps)) if gaps else .4   # ponytail: a guess when the clip shows no sentence end
+    def at(pos):
+        t = next((t for i, t in located if i >= pos), None)
+        if t is None and estimate and located:
+            i, t = located[-1]
+            t += (pos - i) * rate + ends(i, pos) * pause
+        return None if t is None else round(t, 3)
+    return at
 
 
 def mark_times(clean, marks, words):
@@ -234,10 +251,16 @@ def respell(cues, shown):
     return cues
 
 
+SENTENCE_END = re.compile(r"[.?!]\s+|[。！？]\s*")
+ABBREV = re.compile(r"(?<![\w.])(?:Mr|Mrs|Ms|Dr|Prof|St|vs|approx|e\.g|i\.e|cf)\.$")
+
+
 def caption_cues(clean, words):
     """One cue per sentence: [start seconds, sentence]."""
-    at, cues, start = time_at(clean, words), [], 0
-    for m in list(re.finditer(r"[.?!]\s+", clean)) + [None]:
+    at, cues, start = time_at(clean, words, estimate=True), [], 0
+    for m in list(SENTENCE_END.finditer(clean)) + [None]:
+        if m and ABBREV.search(clean, 0, m.start() + 1):   # "Mr. Lee", "e.g. a lot" go on
+            continue
         end = m.end() if m else len(clean)
         text = clean[start:end].strip()
         if text:
@@ -271,24 +294,29 @@ async def main(src, out_dir):
     cache_path = Path(src).with_suffix(".timings.json")  # build cache, kept out of the site
     cache = json.loads(cache_path.read_text(encoding="utf-8-sig")) if cache_path.exists() else {}
     engine = spec.get("engine", spec.get("provider", "edge"))   # "provider": older ElevenLabs narration files
-    voice = spec["voice"]
-    if engine in ("edge", "kokoro"):
-        rate = spec["rate"]
-        tag = f"{voice}|{rate}" if engine == "edge" else f"{engine}|{voice}|{rate}"   # Edge keys stay as they were, so its audio is kept
-    elif engine == "elevenlabs":
-        rate, model, settings = None, spec.get("model", "eleven_v4"), spec.get("settings", {})
-        tag = f"elevenlabs|{voice}|{model}|{json.dumps(settings, sort_keys=True)}"
-    else:
+    voices = spec.get("voices", {})
+    if engine not in ("edge", "kokoro", "elevenlabs"):
         raise SystemExit(f"unknown engine {engine!r}: use edge, kokoro or elevenlabs")
     result = {}
-    public = lambda v: {k: v[k] for k in ("dur", "marks", "cues")}
+    public = lambda v: {k: v[k] for k in ("dur", "marks", "cues", "forced") if k in v}
     live = {b: public(v) for b, v in cache.items()
             if {"dur", "marks", "cues"} <= v.keys() and (out_dir / f"{b}.mp3").exists()}
     timings_path = out_dir / "timings.js"
     for beat, raw in spec["beats"].items():
+        who = voices[raw["speaker"]] if isinstance(raw, dict) else spec
+        sub = raw.get("sub") if isinstance(raw, dict) else None   # the line's subtitle, one cue for the whole clip
+        raw = raw["text"] if isinstance(raw, dict) else raw
+        voice, rate, pitch = who["voice"], who.get("rate", "+0%"), who.get("pitch", "+0Hz")
+        if pitch != "+0Hz" and engine != "edge":
+            raise SystemExit(f"{beat}: pitch is Edge only")
         mp3 = out_dir / f"{beat}.mp3"
         old = cache.get(beat)
         clean, marks, shown = split_marks(raw)
+        if engine == "elevenlabs":
+            model, settings = who.get("model", spec.get("model", "eleven_v4")), who.get("settings", spec.get("settings", {}))
+            tag = f"elevenlabs|{voice}|{model}|{json.dumps(settings, sort_keys=True)}"
+        else:   # Edge keys stay as they were, so its audio is kept
+            tag = ("" if engine == "edge" else f"{engine}|") + f"{voice}|{rate}" + ("" if pitch == "+0Hz" else f"|{pitch}")
         key = hashlib.sha1(f"{tag}|{clean}".encode()).hexdigest()
         # Existing caches included [[marks]] in the key; reuse an unchanged old beat once,
         # then save its spoken-text key so future mark edits do not regenerate audio.
@@ -306,12 +334,21 @@ async def main(src, out_dir):
             if not reusable:
                 words = (kokoro_beat(clean, voice, rate, clip) if engine == "kokoro"
                          else elevenlabs_beat(clean, voice, model, settings, clip) if engine == "elevenlabs"
-                         else await edge_beat(beat, clean, voice, rate, clip, out_dir))
+                         else await edge_beat(beat, clean, voice, rate, clip, out_dir, pitch))
             entry = {"key": key, "dur": duration(clip), "words": words,
-                     "marks": mark_times(clean, marks, words), "cues": respell(caption_cues(clean, words), shown)}
+                     "marks": mark_times(clean, marks, words), "cues": [[0, sub]] if sub else respell(caption_cues(clean, words), shown)}
+            # a line in another language than the book's (its voice's locale differs): the page shows its subtitle even
+            # with captions off, as films do with foreign dialogue
+            if sub and "-" in voice and voice.split("-")[0].lower() != Path(src).stem.split(".")[-1].lower():
+                entry["forced"] = True
             if tmp:
                 tmp.replace(mp3)
                 print(f"{beat}: synthesized")
+            # Edge has returned clips that stop a sentence early: the last spoken word should end the text
+            ends = re.findall(r"[A-Za-z][\w'-]*", clean[-40:])
+            if words and ends and clean.isascii() and words[-1][1].strip(".,;:!?\"'") != ends[-1]:
+                print(f"{beat}: WARNING the voice's last word is {words[-1][1]!r} but the text ends {ends[-1]!r}: the clip "
+                      "may be cut short; listen to it, and synthesize it again (change its cached key) if so")
             result[beat] = entry
             cache[beat] = entry
             # A later failed beat must not discard the successful beats' cache.

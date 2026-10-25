@@ -1,13 +1,22 @@
 @import url(volume.css);
 @import url(book.css);   /* this book's own settings and overrides (not shared), before the rules below */
-:root {
-  /* University of Toronto palette on a U of T Blue board (see the skill's references/palette.md).
-     Text colours reach WCAG AA (4.5:1) on --board and --panel; --faint (3.2:1) is for lines and shapes only. */
+/* The palette: University of Toronto colours on a U of T Blue board (see the skill's references/palette.md). Text
+   colours reach WCAG AA (4.5:1) on --board and --panel; --faint (3.2:1) is for lines and shapes only. lib/book.css may
+   redefine any of it in its own ':root' (this one has no specificity): the stage, COL in engine.js, the cards and the
+   player bar all follow. Colours are #rrggbb. The last lines are shades between those colours, written out so the board
+   stays exact: a palette of its own sets them too. */
+:where(:root) {
   --page: #14254A; --board: #1E3765; --panel: #172B50; --edge: #536583;
   --chalk: #FFFFFF; --dim: #D0D1C9; --faint: #7B8799;
   --task: #F1C500; --quiz: #6FC7EA; --good: #8DBF2E; --bad: #EA9287;
   --ui: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --vignette: rgba(0, 0, 0, .35);   /* the stage's darkened edges; a light board wants a faint, warm one */
   color-scheme: dark;
+  --rule: #536583;                            /* lines between answer rows */
+  --track: #6A7A99; --track-ask: #6A7A99;     /* the player bar's steps (question steps carry a --quiz cap instead) */
+  --bar-edge: #536583; --hover: #24406F;      /* the bar's top line, the volume control under the pointer */
+  --veil: #0C1832;                            /* behind the help panel and the captions */
+  --on-fill: #1E3765;                         /* text on a coloured fill: the board */
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; overflow: hidden; background: var(--page); }
@@ -17,18 +26,18 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--task);
 button[hidden] { display: none; }
 
 /* One fixed 1600×960 frame (900 stage + 60 controls), scaled to fit the window. */
-#frame { position: absolute; left: 50%; top: 50%; width: 1600px; height: 960px; transform: translate(-50%, -50%) scale(var(--k, .5));
+#frame { position: absolute; left: 50%; top: 50%; width: var(--sw, 1600px); height: calc(var(--sh, 900px) + 60px); transform: translate(-50%, -50%) scale(var(--k, .5));
   border-radius: 20px; overflow: hidden; background: var(--board); box-shadow: 0 0 0 1px var(--edge), 0 30px 80px rgba(0, 0, 0, .45); }
-#stage { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; display: block;
-  background: radial-gradient(75% 75% at 50% 45%, rgba(0,0,0,0) 60%, rgba(0,0,0,.35)), var(--grain, none), var(--board); }
-#ui { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; pointer-events: none; }
+#stage { position: absolute; left: 0; top: 0; width: var(--sw, 1600px); height: var(--sh, 900px); display: block;
+  background: radial-gradient(75% 75% at 50% 45%, rgba(0,0,0,0) 60%, var(--vignette)), var(--grain, none), var(--board); }
+#ui { position: absolute; left: 0; top: 0; width: var(--sw, 1600px); height: var(--sh, 900px); pointer-events: none; }
 #ui > * { pointer-events: auto; }
 
-.cover { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; display: grid; place-items: center; background: rgba(20, 37, 74, .5); border: 0; }
+.cover { position: absolute; left: 0; top: 0; width: var(--sw, 1600px); height: var(--sh, 900px); display: grid; place-items: center; background: color-mix(in srgb, var(--page) 50%, transparent); border: 0; }
 .cover[hidden] { display: none; }
 .cover > div { display: flex; flex-direction: column; align-items: center; }
 .cover-k { margin: 0 0 10px; text-align: center; font-size: 22px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--quiz); }
-.cover-t { margin: 0 0 44px; max-width: 1200px; text-align: center; font: 500 64px/1.15 "Iowan Old Style", Palatino, Georgia, serif; color: var(--chalk); text-wrap: balance; }
+.cover-t { margin: 0 0 44px; max-width: min(1200px, calc(var(--sw, 1600px) - 100px)); text-align: center; font: 500 64px/1.15 "Iowan Old Style", Palatino, Georgia, serif; color: var(--chalk); text-wrap: balance; }
 .cover > div > * { animation: rise .7s cubic-bezier(.2, .8, .2, 1) backwards; }
 .cover-t { animation-delay: .08s; }
 .cover .go { animation-delay: .18s; }
@@ -36,12 +45,12 @@ button[hidden] { display: none; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
 .cover .go { display: inline-flex; align-items: center; gap: 16px; padding: 20px 40px; border-radius: 999px; background: var(--chalk); color: var(--board); font-weight: 600; font-size: 32px; }
 .cover small { display: block; margin-top: 22px; font-size: 22px; text-align: center; color: var(--dim); }
-.paused-mark { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; display: none; place-items: center; pointer-events: none; }
+.paused-mark { position: absolute; left: 0; top: 0; width: var(--sw, 1600px); height: var(--sh, 900px); display: none; place-items: center; pointer-events: none; }
 .paused .paused-mark { display: grid; }
-.paused-mark div { padding: 14px 30px; border-radius: 999px; background: rgba(20, 37, 74, .9); color: var(--dim); font-size: 22px; }
+.paused-mark div { padding: 14px 30px; border-radius: 999px; background: color-mix(in srgb, var(--page) 85%, transparent); color: var(--dim); font-size: 22px; }
 
 /* Question cards inside the picture. */
-.card { position: absolute; padding: 20px 26px; border-radius: 20px; background: rgba(23, 43, 80, .97); border: 1.5px solid var(--edge); border-left: 7px solid var(--quiz); box-shadow: 0 14px 44px rgba(0, 0, 0, .35); }
+.card { position: absolute; padding: 20px 26px; border-radius: 20px; background: color-mix(in srgb, var(--panel) 97%, transparent); border: 1.5px solid var(--edge); border-left: 7px solid var(--quiz); box-shadow: 0 14px 44px rgba(0, 0, 0, .35); }
 .card.band { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "pic head body acts" "pic fb body acts"; column-gap: 28px; align-items: center; align-content: center; min-height: 150px; }
 .band .mascot { grid-area: pic; }
 .band .head { grid-area: head; align-self: end; }
@@ -62,8 +71,8 @@ button[hidden] { display: none; }
 .opts { display: flex; gap: 12px; flex-wrap: wrap; }
 .opt { padding: 8px 24px; border-radius: 999px; border: 2px solid var(--faint); background: transparent; color: var(--chalk); font-size: 24px; min-height: 58px; display: inline-flex; align-items: center; }
 .opt:hover:not(:disabled) { border-color: var(--dim); }
-.opt[aria-pressed="true"] { background: var(--c, var(--chalk)); border-color: var(--c, var(--chalk)); color: var(--board); font-weight: 600; }
-.opt.good { border-color: var(--good); box-shadow: 0 0 0 3px rgba(141, 191, 46, .35); }
+.opt[aria-pressed="true"] { background: var(--c, var(--chalk)); border-color: var(--c, var(--chalk)); color: var(--on-fill, #1b2320); font-weight: 600; }
+.opt.good { border-color: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 35%, transparent); }
 .opt.bad { border-color: var(--bad); color: var(--bad); }
 .opt:disabled { cursor: default; }
 .fb { margin-top: 8px; font-size: 22px; line-height: 1.4; color: var(--chalk); }
@@ -79,10 +88,10 @@ button[hidden] { display: none; }
 .card.side { padding: 18px 22px; }
 .btn { padding: 10px 28px; border-radius: 999px; border: 0; background: var(--chalk); color: var(--board); font-weight: 600; font-size: 22px; white-space: nowrap; }
 .btn.quiet { background: transparent; color: var(--dim); border: 1.5px solid var(--faint); }
-.btn.go { background: var(--quiz); color: var(--board); }
+.btn.go { background: var(--quiz); color: var(--on-fill, var(--board)); }   /* --on-fill: text on a coloured fill */
 .btn:disabled { background: var(--edge); color: var(--chalk); cursor: default; }
 
-.grid .row { display: grid; grid-template-columns: 170px minmax(0, 1fr) 34px; gap: 16px; align-items: center; padding: 5px 0 5px 12px; border-bottom: 1px solid var(--edge); }
+.grid .row { display: grid; grid-template-columns: 170px minmax(0, 1fr) 34px; gap: 16px; align-items: center; padding: 5px 0 5px 12px; border-bottom: 1px solid var(--rule); }
 .grid .num { display: flex; justify-content: flex-end; align-items: center; font-size: 26px; }
 .grid.text .row { grid-template-columns: minmax(0, 1fr) auto 34px; }
 .grid.text .num { justify-content: flex-start; }
@@ -103,7 +112,7 @@ button[hidden] { display: none; }
 .tok { cursor: grab; touch-action: none; }   /* a finger drags the chip instead of scrolling the page */
 
 /* Controls strip, part of the frame. */
-#bar { position: absolute; left: 0; top: 900px; width: 1600px; height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: var(--page); border-top: 1px solid var(--edge); }
+#bar { position: absolute; left: 0; top: var(--sh, 900px); width: var(--sw, 1600px); height: 60px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: var(--page); border-top: 1px solid var(--bar-edge); }
 .icon { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--faint); background: var(--panel); display: grid; place-items: center; flex: none; padding: 0; }
 .icon svg { width: 18px; height: 18px; fill: var(--chalk); }
 .icon .i-pause { display: none; }
@@ -114,7 +123,7 @@ button[hidden] { display: none; }
    Question steps carry a cool-blue cap above the track: a shape cue as well as a colour one. */
 .seg { position: relative; display: block; min-width: 0; height: 30px; border: 0; padding: 0; background: transparent; }
 .seg::before, .seg i { position: absolute; left: 0; top: 11px; height: 8px; border-radius: 4px; }
-.seg::before { content: ""; right: 0; background: #6A7A99; }
+.seg::before { content: ""; right: 0; background: var(--track); }
 .seg i { width: 0; background: var(--chalk); }
 .seg:hover::before, .seg:hover i { top: 9px; height: 12px; }
 .seg.ask::after { content: ""; position: absolute; left: 2px; right: 2px; top: 4px; height: 3px; border-radius: 2px; background: var(--quiz); }
@@ -123,7 +132,7 @@ button[hidden] { display: none; }
 /* Keep the control strip usable without scaling down its touch targets. */
 @media (max-width: 700px) {
   #frame { top: calc(50% - 50px); overflow: visible; }
-  #bar { width: calc(1600px * var(--k)); height: auto; flex-wrap: wrap; gap: 6px; padding: 8px;
+  #bar { width: calc(var(--sw, 1600px) * var(--k)); height: auto; flex-wrap: wrap; gap: 6px; padding: 8px;
     transform: scale(calc(1 / var(--k))); transform-origin: left top; border-radius: 0 0 12px 12px; }
   #bar .icon { width: 36px; height: 40px; }
   .step { display: none; }
@@ -132,9 +141,9 @@ button[hidden] { display: none; }
   .segs { order: 1; }
   .segs { min-width: 80px; margin: 0; }
 }
-.sound-note { position: absolute; left: 24px; top: 20px; margin: 0; padding: 8px 18px; border-radius: 12px; background: rgba(20, 37, 74, .92); color: var(--dim); font-size: 19px; }
+.sound-note { position: absolute; left: 24px; top: 20px; margin: 0; padding: 8px 18px; border-radius: 12px; background: color-mix(in srgb, var(--page) 85%, transparent); color: var(--dim); font-size: 19px; }
 .sound-note[hidden] { display: none; }
-.blanks .brow { padding: 8px 0; border-bottom: 1px solid var(--edge); }
+.blanks .brow { padding: 8px 0; border-bottom: 1px solid var(--rule); }
 .blanks .brow:last-child { border-bottom: 0; }
 .blanks .bline { line-height: 64px; white-space: nowrap; }
 .blanks .mark { display: inline-block; margin-left: 14px; font-weight: 700; }
@@ -142,8 +151,8 @@ button[hidden] { display: none; }
 .blanks .mark.bad { color: var(--bad); }
 .blanks .why { font-size: 19px; color: var(--dim); line-height: 1.35; }
 .blanks .why:empty { display: none; }
-.box { height: 52px; margin: 0 6px; padding: 0 6px; border: 0; border-bottom: 3px solid var(--quiz); border-radius: 8px 8px 0 0; background: rgba(255, 255, 255, .07); color: var(--chalk); font: 32px var(--math-font, "STIX Two Text", "Cambria Math", "Iowan Old Style", Palatino, Georgia, serif); text-align: center; vertical-align: -6px; }
-.box:focus { outline: none; background: rgba(111, 199, 234, .16); }
+.box { height: 52px; margin: 0 6px; padding: 0 6px; border: 0; border-bottom: 3px solid var(--quiz); border-radius: 8px 8px 0 0; background: color-mix(in srgb, var(--chalk) 7%, transparent); color: var(--chalk); font: 32px var(--math-font, "STIX Two Text", "Cambria Math", "Iowan Old Style", Palatino, Georgia, serif); text-align: center; vertical-align: -6px; }
+.box:focus { outline: none; background: color-mix(in srgb, var(--quiz) 16%, transparent); }
 .box.good { border-color: var(--good); }
 .box.bad { border-color: var(--bad); }
 .box:disabled { opacity: 1; }
@@ -151,13 +160,14 @@ kbd { display: inline-block; min-width: 1.5em; padding: 0 .4em; margin-left: .5e
 .opt kbd { margin: 0 .6em 0 0; }
 .keys { margin: 6px 0 0; font-size: 18px; color: var(--dim); }
 .keys kbd { margin: 0 .15em; }
-.grid .row.cur { background: rgba(255, 255, 255, .05); box-shadow: inset 4px 0 var(--quiz); }
-.help { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; display: grid; place-items: center; background: rgba(12, 24, 50, .78); }
+.grid .row.cur { background: color-mix(in srgb, var(--chalk) 5%, transparent); box-shadow: inset 4px 0 var(--quiz); }
+.help { position: absolute; left: 0; top: 0; width: var(--sw, 1600px); height: var(--sh, 900px); display: grid; place-items: center; background: color-mix(in srgb, var(--veil) 72%, transparent); }
 .help[hidden] { display: none; }
-.help-box { width: 1120px; padding: 40px 50px; border-radius: 22px; background: var(--panel); border: 1.5px solid var(--edge); }
+.help-box { width: min(1120px, calc(var(--sw, 1600px) - 80px)); padding: 40px 50px; border-radius: 22px; background: var(--panel); border: 1.5px solid var(--edge); }
 .help h2 { margin: 0 0 22px; font-size: 32px; font-weight: 600; }
 .help h3 { margin: 0 0 12px; font-size: 20px; font-weight: 600; color: var(--quiz); }
 .help-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; }
+.help-cols:has(> [hidden]) { grid-template-columns: 1fr; }
 .help dl { margin: 0; display: grid; grid-template-columns: 150px 1fr; row-gap: 10px; font-size: 22px; }
 .help dt { text-align: right; padding-right: 18px; white-space: nowrap; }
 .help dt kbd { margin: 0 0 0 .3em; opacity: .9; }
@@ -165,7 +175,7 @@ kbd { display: inline-block; min-width: 1.5em; padding: 0 .4em; margin-left: .5e
 .help-close { margin: 26px 0 0; font-size: 18px; color: var(--dim); }
 .icon.txt { font-size: 20px; font-weight: 700; color: var(--dim); }
 /* Optional captions of the narration, one sentence at a time. Off by default: teaching text lives in the picture. */
-.caption { position: absolute; left: 50%; bottom: 78px; transform: translateX(-50%); width: max-content; max-width: 1180px; padding: 10px 24px; border-radius: 14px; background: rgba(12, 24, 50, .88); color: var(--chalk); font-size: 28px; line-height: 1.35; text-align: center; pointer-events: none; }
+.caption { position: absolute; left: 50%; bottom: 78px; transform: translateX(-50%); width: max-content; max-width: min(1180px, calc(var(--sw, 1600px) - 80px)); padding: 10px 24px; border-radius: 14px; background: color-mix(in srgb, var(--veil) 82%, transparent); color: var(--chalk); font-size: 28px; line-height: 1.35; text-align: center; pointer-events: none; }
 .caption[hidden] { display: none; }
 .icon.cc { font-size: 15px; font-weight: 700; color: var(--dim); }
 .icon.cc[aria-pressed="true"] { background: var(--chalk); border-color: var(--chalk); color: var(--board); }
@@ -187,7 +197,7 @@ svg.m { display: inline-block; overflow: visible; }
 .screen .body { margin-top: 30px; }
 .card.screen { display: flex; flex-direction: column; }
 .screen .head { order: 1; } .screen .body { order: 2; }
-.screen .fb { order: 3; max-width: 1080px; margin: 26px 0 0; font-size: 24px; }   /* feedback right under the answers */
+.screen .fb { order: 3; max-width: min(1080px, calc(var(--sw, 1600px) - 140px)); margin: 26px 0 0; font-size: 24px; }   /* feedback right under the answers */
 /* Practice screens: the bottom 130 px hold the buttons. Long answers scroll inside the body, so the feedback under
    them stays in view after a wrong answer adds a 'why' line to each row. */
 .card.screen:not(.sort):not(.fin) { padding-bottom: 130px; }
@@ -241,7 +251,7 @@ a.cite:focus-visible text, a.cite:focus-visible tspan { fill: var(--task); }
 a.cite:focus-visible { outline: 3px solid var(--task); outline-offset: 6px; border-radius: 4px; }
 #ui a.cite { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 #ui a.cite:hover { color: var(--quiz); }
-.fin .srcs { margin: 26px 0 0; max-width: 1100px; font-size: 19px; line-height: 1.45; color: var(--dim); text-align: left; }
+.fin .srcs { margin: 26px 0 0; max-width: min(1100px, calc(var(--sw, 1600px) - 100px)); font-size: 19px; line-height: 1.45; color: var(--dim); text-align: left; }
 .fin .srcs h2 { margin: 0 0 6px; font-size: 18px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--quiz); }
 .fin .srcs ol { margin: 0; padding-left: 0; list-style: none; max-height: 190px; overflow: auto; }
 .fin .srcs li { padding-left: 2em; text-indent: -2em; margin: 0 0 6px; }
@@ -260,3 +270,5 @@ a.btn { text-decoration: none; display: inline-block; }
 .fin .kicker { font-size: 20px; letter-spacing: .14em; text-transform: uppercase; }
 .fin .prompt { margin: 6px 0 14px; font: 500 56px/1.15 "Iowan Old Style", Palatino, Georgia, serif; }
 .icon.speed { width: auto; min-width: 44px; padding: 0 10px; border-radius: 22px; font-size: 16px; }
+/* An upright stage is seen at about half the scale of a wide one on the same screen: bigger caption text. */
+:root[data-stage="portrait"] .caption { font-size: 38px; bottom: 60px; }

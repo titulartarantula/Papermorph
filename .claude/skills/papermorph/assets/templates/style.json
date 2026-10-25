@@ -12,11 +12,12 @@
     "fonts": { "text": "system UI", "math": "serif (engine default)" },
     "notation": "SI units with a space (6 N); round to one decimal; say 'newtons' in narration"
   },
-  "voice": { "engine": "edge", "voice": "en-US-AndrewMultilingualNeural", "rate": "-4%" },
+  "voice": { "engine": "edge", "voice": "en-US-AndrewNeural", "rate": "-4%" },
   "citations": { "refs": "books/physics/refs.json", "style": "APA; every on-screen author-year is a cite() link to a verified DOI or catalogue record" },
   "questions": { "choice": "mcq-item-writer banks in books/physics/items/", "purpose": "learning", "options_per_item": 3 },
   "pacing": { "minutes": [6, 10], "checks": "one or two quick checks inside the lesson, practice at the end" },
   "engine": { "source": "titulartarantula/Papermorph", "ref": "main" },
+  "models": { "extract": "claude-haiku-5-5", "narration": "claude-sonnet-5-5", "picture": "claude-opus-5-5", "checks": "claude-haiku-5-5", "review": "claude-sonnet-5-5", "rework": "claude-opus-5-5", "register": "claude-haiku-5-5" },
   "scenes": {
     "art": "pixel scenes on a dark board, characters about a third of the stage tall",
     "cast": [{ "name": "Mia", "look": "short hair, red jacket", "file": "site/physics/img/mia.png" }],

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chapter 2: Force and Newton's Laws of Motion — Science</title>
+<title>Chapter 2: Force and Newton's Laws of Motion — Elementary Physics</title>
 <link rel="stylesheet" href="../lib/engine.css">
 <link rel="expect" href="#bar" blocking="render">
 </head>
@@ -438,6 +438,8 @@ const BEATS = [
   T(big, 'acceleration', { x: 560, y: 470, size: 64, weight: 700, fill: ACC, anchor: 'end' }); T(big, '=', { x: 640, y: 470, size: 64, weight: 700, anchor: 'middle' });
   T(big, 'net force', { x: 900, y: 420, size: 60, weight: 700, fill: FORCE, anchor: 'middle' }); mk('rect', { x: 720, y: 446, width: 360, height: 6, fill: COL.chalk }, big);
   T(big, 'mass', { x: 900, y: 520, size: 60, weight: 700, anchor: 'middle' });
+  const name = T(p, "Newton's second law", { x: 800, y: 300, size: 44, weight: 700, fill: COL.dim, anchor: 'middle', o: 0 });   // on screen while the narration names the law
+  show(name, .1); hide(name, tm - .8, .4);
   show(big, tl); hide(big, tm - .8, .4);
   show(runs(p, [['acceleration', ACC], [' = ', COL.chalk], ['net force', FORCE], [' ÷ mass', COL.chalk]], { x: 800, y: 110, size: 44, weight: 700 }), tm - .5);
   show(runs(p, [['net force', FORCE], [' = mass × ', COL.chalk], ['acceleration', ACC]], { x: 800, y: 170, size: 40, weight: 700 }), m('rearr'));
@@ -706,7 +708,7 @@ const BEATS = [
       [null, 'Close: it is meters per second squared, an acceleration.', 'Force is measured in newtons; the kilogram measures mass.']) },
   { id: 'p-net3', prompt: ['Forces on a box: 6 newtons right, 4 newtons right, and 3 newtons left. What is the net force?'],
     build: blanks([{ parts: ['net force = 6 + 4 − 3 = ', { box: '7' }, ' newtons, to the right'], why: 'Same direction adds (6 + 4 = 10); the opposite force subtracts (10 − 3 = 7).', hint: 'Add the forces to the right, then subtract the one to the left.' }]) },
-]), done, 'Chapter practice, set 1 of 2 · question') }],
+]), done, 'Chapter practice, set 1 of 2') }],
 ['final2', 'Chapter practice: the second and third laws', () => { PRACTICE = panel(0); }, { ask: done => quiz(SCREEN, withPics([
   { id: 'p-second', prompt: ['What is ', h('b', '', 'Newton’s second law'), '?'],
     build: choice([['The acceleration of an object equals the net force on it divided by its mass.'], ['Objects keep their motion unless a net force acts.'], ['Forces act in pairs.']], 0,
@@ -718,7 +720,7 @@ const BEATS = [
       'Forces act in pairs: equal in size, opposite in direction.', [null, 'That is about inertia (first law).', 'That defines momentum.']) },
   { id: 'p-mom', prompt: ['A 0.5 kilogram ball moves at 8 meters per second. What is its momentum?'],
     build: blanks([{ parts: ['momentum = 0.5 × 8 = ', { box: '4' }, ' kilogram meters per second'], why: 'mass × velocity = 0.5 × 8 = 4.', hint: 'momentum = mass × velocity.' }]) },
-]), done, 'Chapter practice, set 2 of 2 · question') }],
+]), done, 'Chapter practice, set 2 of 2') }],
 ['finish', 'Finished', () => {
   // under the card, the chapter in four small pictures with their names
   const p = panel(0);

@@ -18,12 +18,13 @@ const TRANSLATIONS = {
     helpShowAnswer: 'Show the answer', helpLeaveBox: 'Leave an answer box', helpClose: 'Press {key} to close.',
     paused: 'Paused. Press space or click to continue.',
     soundFailed: 'Sound could not play. The lesson continues with the on-screen text.',
-    startLesson: 'Start lesson', coverKeys: 'Press {space} to start, {help} for shortcuts.', spaceKey: 'Space',
+    startLesson: 'Start lesson', startFilm: 'Play', aboutMinutesFilm: 'About {n} minutes, with sound.', coverKeys: 'Press {space} to start, {help} for shortcuts.', spaceKey: 'Space',
     chapterNumber: 'Chapter {n}', aboutMinutes: 'About {n} minutes, with sound and quick checks.',
     allChapters: 'All chapters', playLabel: 'Play or pause (space)', backLabel: 'Previous step (left arrow)', nextLabel: 'Next step (right arrow)', restartLabel: 'Restart lesson',
+    checksInLesson: 'Quick checks and practice are in the interactive lesson.',
     volumeLabel: 'Adjust volume', volumeTitle: 'Volume (0 = muted)', volumeSlider: 'Volume',
     helpLabel: 'Keyboard shortcuts (?)', speedLabel: 'Playback speed (< and >)', captionsLabel: 'Captions (C)', fullScreenLabel: 'Full screen', goToStep: 'Go to step {n}: {title}',
-    quickCheck: 'Quick check', countOf: '{k} of {n}', check: 'Check', showAnswer: 'Show answer', nextQuestion: 'Next question', continue: 'Continue',
+    quickCheck: 'Quick check', countOf: 'question {k} of {n}', check: 'Check', showAnswer: 'Show answer', nextQuestion: 'Next question', continue: 'Continue',
     correct: 'Correct. ', notQuite: 'Not quite. ', answerPrefix: 'Answer: ', keysPrefix: 'Keys: ',
     hintMove: ' move, ', hintChoose: ' choose', hintChooseOrClickGrid: ' choose, or click the grid', hintMoveAlongLine: ' move along the line, ',
     hintChooseOrClick: ' choose, or click', hintRow: ' row, ', hintTypeFraction: 'type numbers like 3/4 or −2 1/4, ', hintTypeNumber: 'type the number, ',
@@ -52,14 +53,15 @@ const TRANSLATIONS = {
     helpShowAnswer: 'Показать ответ', helpLeaveBox: 'Выйти из поля ответа', helpClose: 'Нажмите {key}, чтобы закрыть.',
     paused: 'Пауза. Нажмите пробел или щёлкните, чтобы продолжить.',
     soundFailed: 'Звук не воспроизводится. Урок продолжится с текстом на экране.',
-    startLesson: 'Начать урок', coverKeys: '{space} — начать, {help} — горячие клавиши.', spaceKey: 'Пробел',
+    startLesson: 'Начать урок', startFilm: 'Смотреть', aboutMinutesFilm: { one: 'Около {n} минуты, со звуком.', few: 'Около {n} минут, со звуком.', many: 'Около {n} минут, со звуком.', other: 'Около {n} минуты, со звуком.' }, coverKeys: '{space} — начать, {help} — горячие клавиши.', spaceKey: 'Пробел',
     chapterNumber: 'Глава {n}',
     aboutMinutes: { one: 'Около {n} минуты, со звуком и проверками.', few: 'Около {n} минут, со звуком и проверками.',
       many: 'Около {n} минут, со звуком и проверками.', other: 'Около {n} минуты, со звуком и проверками.' },
     allChapters: 'Все главы', playLabel: 'Пуск или пауза (пробел)', backLabel: 'Предыдущий шаг (стрелка влево)', nextLabel: 'Следующий шаг (стрелка вправо)', restartLabel: 'Начать урок заново',
+    checksInLesson: 'Проверочные вопросы и практика — в интерактивном уроке.',
     volumeLabel: 'Настроить громкость', volumeTitle: 'Громкость (0 — без звука)', volumeSlider: 'Громкость',
     helpLabel: 'Горячие клавиши (?)', speedLabel: 'Скорость воспроизведения (< и >)', captionsLabel: 'Субтитры (C)', fullScreenLabel: 'Полный экран', goToStep: 'Перейти к шагу {n}: {title}',
-    quickCheck: 'Проверь себя', countOf: '{k} из {n}', check: 'Проверить', showAnswer: 'Показать ответ', nextQuestion: 'Следующий вопрос', continue: 'Продолжить',
+    quickCheck: 'Проверь себя', countOf: 'вопрос {k} из {n}', check: 'Проверить', showAnswer: 'Показать ответ', nextQuestion: 'Следующий вопрос', continue: 'Продолжить',
     correct: 'Верно. ', notQuite: 'Не совсем. ', answerPrefix: 'Ответ: ', keysPrefix: 'Клавиши: ',
     hintMove: ' двигаться, ', hintChoose: ' выбрать', hintChooseOrClickGrid: ' выбрать или щёлкнуть по сетке', hintMoveAlongLine: ' двигаться по прямой, ',
     hintChooseOrClick: ' выбрать или щёлкнуть', hintRow: ' строка, ', hintTypeFraction: 'вводите числа вида 3/4 или −2 1/4, ', hintTypeNumber: 'введите число, ',
@@ -88,12 +90,13 @@ const TRANSLATIONS = {
     helpShowAnswer: '显示答案', helpLeaveBox: '离开答题框', helpClose: '按 {key} 关闭。',
     paused: '已暂停。按空格键或点击继续。',
     soundFailed: '声音无法播放。课程将借助屏幕上的文字继续。',
-    startLesson: '开始上课', coverKeys: '按 {space} 开始，按 {help} 查看快捷键。', spaceKey: '空格',
+    startLesson: '开始上课', startFilm: '播放', aboutMinutesFilm: '约 {n} 分钟，有配音。', coverKeys: '按 {space} 开始，按 {help} 查看快捷键。', spaceKey: '空格',
     chapterNumber: '第 {n} 章', aboutMinutes: '约 {n} 分钟，含配音和随堂小测。',
     allChapters: '全部章节', playLabel: '播放或暂停（空格）', backLabel: '上一步（左方向键）', nextLabel: '下一步（右方向键）', restartLabel: '重新开始本课',
+    checksInLesson: '小测验和练习在互动课程里。',
     volumeLabel: '调节音量', volumeTitle: '音量（0 为静音）', volumeSlider: '音量',
     helpLabel: '键盘快捷键（?）', speedLabel: '播放速度（< 和 >）', captionsLabel: '字幕（C）', fullScreenLabel: '全屏', goToStep: '跳到第 {n} 步：{title}',
-    quickCheck: '小测', countOf: '{k} / {n}', check: '检查', showAnswer: '显示答案', nextQuestion: '下一题', continue: '继续',
+    quickCheck: '小测', countOf: '第 {k}/{n} 题', check: '检查', showAnswer: '显示答案', nextQuestion: '下一题', continue: '继续',
     correct: '正确。', notQuite: '还不对。', answerPrefix: '答案：', keysPrefix: '按键：',
     hintMove: ' 移动，', hintChoose: ' 选择', hintChooseOrClickGrid: ' 选择，或点击网格', hintMoveAlongLine: ' 沿数轴移动，',
     hintChooseOrClick: ' 选择，或点击', hintRow: ' 换行，', hintTypeFraction: '可输入 3/4 或 −2 1/4 这样的数，', hintTypeNumber: '输入数字，',
@@ -122,12 +125,13 @@ const TRANSLATIONS = {
     helpShowAnswer: '答えを表示', helpLeaveBox: '解答欄から出る', helpClose: '{key} で閉じる。',
     paused: '一時停止中。スペースキーかクリックで再開します。',
     soundFailed: '音声を再生できません。画面の文字で授業を続けます。',
-    startLesson: '授業を始める', coverKeys: '{space} で開始、{help} でショートカット一覧。', spaceKey: 'スペース',
+    startLesson: '授業を始める', startFilm: '再生', aboutMinutesFilm: '約{n}分、音声つき。', coverKeys: '{space} で開始、{help} でショートカット一覧。', spaceKey: 'スペース',
     chapterNumber: '第{n}章', aboutMinutes: '約{n}分、音声と確認問題つき。',
     allChapters: 'すべての章', playLabel: '再生／一時停止（スペース）', backLabel: '前のステップ（左矢印）', nextLabel: '次のステップ（右矢印）', restartLabel: '授業を最初から',
+    checksInLesson: '確認問題と練習はインタラクティブな授業の中にあります。',
     volumeLabel: '音量を調整', volumeTitle: '音量（0 でミュート）', volumeSlider: '音量',
     helpLabel: 'キーボードショートカット（?）', speedLabel: '再生速度（< と >）', captionsLabel: '字幕（C）', fullScreenLabel: '全画面', goToStep: 'ステップ {n}：{title} へ移動',
-    quickCheck: '確認問題', countOf: '{k} / {n}', check: '答え合わせ', showAnswer: '答えを見る', nextQuestion: '次の問題', continue: '続ける',
+    quickCheck: '確認問題', countOf: '問 {k}/{n}', check: '答え合わせ', showAnswer: '答えを見る', nextQuestion: '次の問題', continue: '続ける',
     correct: '正解。', notQuite: 'おしい。', answerPrefix: '答え：', keysPrefix: 'キー：',
     hintMove: ' 移動、', hintChoose: ' 選ぶ', hintChooseOrClickGrid: ' 選ぶ、またはマス目をクリック', hintMoveAlongLine: ' 数直線上を移動、',
     hintChooseOrClick: ' 選ぶ、またはクリック', hintRow: ' 行、', hintTypeFraction: '3/4 や −2 1/4 のように入力、', hintTypeNumber: '数を入力、',
@@ -147,9 +151,15 @@ const TRANSLATIONS = {
     watchAgain: 'もう一度見る', nextChapter: '次の章へ',
   },
 };
+// <html data-stage="portrait"> turns the stage upright: 900 wide, 1600 tall. Landscape (1600×900) otherwise.
+const PORTRAIT = document.documentElement.dataset.stage === 'portrait';
+const SW = PORTRAIT ? 900 : 1600, SH = PORTRAIT ? 1600 : 900;
+document.documentElement.style.setProperty('--sw', SW + 'px');
+document.documentElement.style.setProperty('--sh', SH + 'px');
 const LANGUAGE = (document.documentElement.lang || 'en').toLowerCase().split('-')[0];
 const pluralRules = {};
 // Interface text in LANGUAGE: translate('chapterNumber', { n: 3 }) → 'Chapter 3'. Chapters may use it too, e.g. for practice labels.
+// contents.js has its own copy for the contents page: keep the two in step.
 function translate(key, vars = {}) {
   const language = TRANSLATIONS[LANGUAGE]?.[key] !== undefined ? LANGUAGE : 'en';
   let text = TRANSLATIONS[language][key] ?? key;
@@ -168,7 +178,7 @@ const isShortcut = (event, letter) => event.key.toLowerCase() === letter.toLower
 const isShortcutCode = (event, code) => /^\p{L}$/u.test(event.key) && !isLatinLetter(event.key) && event.code === code;
 
 document.body.insertAdjacentHTML('afterbegin', `<div id="frame">
-  <svg id="stage" viewBox="0 0 1600 900" role="group" aria-label="${translate('stageLabel')}"><!-- a group, not img: it holds citation links -->
+  <svg id="stage" viewBox="0 0 ${SW} ${SH}" role="img" aria-label="${translate('stageLabel')}">
     <g id="scene"></g>
   </svg>
   <div id="ui"></div>
@@ -205,7 +215,7 @@ document.body.insertAdjacentHTML('afterbegin', `<div id="frame">
   <button class="cover" id="cover"><div>
     <p class="cover-k" id="coverK"></p>
     <h1 class="cover-t" id="coverT"></h1>
-    <span class="go"><svg width="24" height="24" viewBox="0 0 18 18"><path d="M3 1.5v15l13-7.5z" fill="currentColor"/></svg>${translate('startLesson')}</span>
+    <span class="go"><svg width="24" height="24" viewBox="0 0 18 18"><path d="M3 1.5v15l13-7.5z" fill="currentColor"/></svg><span id="coverGo">${translate('startLesson')}</span></span>
     <small><span id="coverMeta"></span> ${translate('coverKeys', { space: `<kbd>${translate('spaceKey')}</kbd>`, help: '<kbd>?</kbd>' })}</small>
   </div></button>
   <div id="bar">
@@ -249,24 +259,31 @@ document.body.insertAdjacentHTML('afterbegin', `<div id="frame">
 
 /* ---------- drawing helpers ---------- */
 const NS = 'http://www.w3.org/2000/svg';
-// University of Toronto palette on a U of T Blue board (references/palette.md). Every colour except faint and board
-// reaches WCAG AA (≥ 5:1) as text on the board; faint (3.2:1) is for lines and shapes only. Text drawn on a filled
-// accent shape uses COL.board. Category colours: Warm Red, Cool Blue, Teal, Fuchsia, Light Green, Purple (tints where needed).
-const COL = { nat: '#EA9287', whole: '#6FC7EA', int: '#47BBAA', rat: '#D995BB', irr: '#8DBF2E', real: '#BF9FC4',
-  chalk: '#FFFFFF', dim: '#D0D1C9', faint: '#7B8799', task: '#F1C500', good: '#8DBF2E', bad: '#EA9287', board: '#1E3765' };
 const UI = '"Avenir Next","Segoe UI","Helvetica Neue",Arial,sans-serif';
 // Book settings (lib/book.css, next to engine.css and imported by it): --math-font for numbers and formulas,
 // --progress-key for the localStorage key the cover and chapters share.
 const BOOK = getComputedStyle(document.documentElement);
 const bookSetting = name => BOOK.getPropertyValue(name).trim().replace(/^(["'])([^"']*)\1$/, '$2');   // unquote a lone string only
+// The board and ink colours come from the palette in engine.css, which lib/book.css may redefine (a light board):
+// the picture, the cards and the player bar then agree. The six hues are the chapters' meanings, set in JS.
+// University of Toronto palette on a U of T Blue board (references/palette.md). Every colour except faint and board
+// reaches WCAG AA (≥ 5:1) as text on the board; faint (3.2:1) is for lines and shapes only. Text drawn on a filled
+// accent shape uses COL.board. Category colours: Warm Red, Cool Blue, Teal, Fuchsia, Light Green, Purple (tints where needed).
+const COL = { nat: '#EA9287', whole: '#6FC7EA', int: '#47BBAA', rat: '#D995BB', irr: '#8DBF2E', real: '#BF9FC4',
+  chalk: '#FFFFFF', dim: '#D0D1C9', faint: '#7B8799', task: '#F1C500', good: '#8DBF2E', bad: '#EA9287', board: '#1E3765' };
+{ // a canvas reads any CSS colour back as #rrggbb, the form colour tweens mix; a missing or bad one keeps the default
+  const c = document.createElement('canvas').getContext('2d');
+  for (const k of ['chalk', 'dim', 'faint', 'task', 'good', 'bad', 'board']) { c.fillStyle = COL[k]; c.fillStyle = bookSetting('--' + k) || COL[k]; COL[k] = c.fillStyle; }
+}
 const MATH = bookSetting('--math-font') || '"STIX Two Text","Cambria Math","Iowan Old Style",Palatino,Georgia,serif';
 const NAME = { nat: translate('natural'), whole: translate('whole'), int: translate('integers'), rat: translate('rational'), irr: translate('irrational'), real: translate('real') };
-// Card positions inside the 1600×900 picture.
-const BAND = { x: 96, y: 686, w: 1408, cls: 'band' };      // bottom band (moves up when taller than the space left)
+// Card positions inside the picture. BAND and the screens follow the stage; RIGHT and TOPR are placed for the wide
+// stage's number line and map and have no upright layout yet.
+const BAND = { x: 96 * SW / 1600, y: SH - 214, w: SW - 192 * SW / 1600, cls: 'band' };   // bottom band (moves up when taller than the space left)
 const RIGHT = { x: 1258, y: 546, w: 330, cls: 'side', maxH: 346 };    // right of the number map
 const TOPR = { x: 960, y: 70, w: 624, cls: 'side', maxH: 470 };   // top right, above the number line
-const SCREEN = { x: 0, y: 0, w: 1600, cls: 'screen' };
-const SORT_SCREEN = { x: 0, y: 0, w: 1600, cls: 'screen sort' };
+const SCREEN = { x: 0, y: 0, w: SW, cls: 'screen' };
+const SORT_SCREEN = { x: 0, y: 0, w: SW, cls: 'screen sort' };
 const $m = (...parts) => ({ m: parts });
 
 function mk(tag, attrs = {}, parent) {
@@ -282,7 +299,8 @@ function put(e, o) { Object.assign(st(e), o); render(e); return e; }
 // Unchanged transform/opacity are not rewritten: per-frame updates of still elements cost repaints (notably in Firefox).
 function render(e) {
   const s = e._st, tf = s.x || s.y || s.s !== 1 || s.r ? `translate(${s.x},${s.y}) rotate(${s.r}) scale(${s.s})` : null;
-  if (tf !== e._tf) { if (tf) e.setAttribute('transform', tf); else e.removeAttribute('transform'); e._tf = tf; }
+  // _tf starts unset: an element never moved keeps a transform attribute it was made with
+  if (tf !== (e._tf ?? null)) { if (tf) e.setAttribute('transform', tf); else e.removeAttribute('transform'); e._tf = tf; }
   if (s.o !== e._o) { e.setAttribute('opacity', s.o); e._o = s.o; }
   if (s.d !== undefined) {
     e.setAttribute('stroke-dashoffset', 1 - s.d);
@@ -313,6 +331,7 @@ function cite(parent, key, { str, ...opts } = {}) {
   if (!r) throw new Error(`cite: no reference "${key}" in refs.js`);
   CITED.add(key);
   if (!r.url) return T(parent, str || r.cite, opts);
+  linkStage();
   const a = mk('a', { class: 'cite', href: r.url, target: '_blank', rel: 'noopener', 'aria-label': translate('opensSource', { label: r.cite }) }, parent);
   const { o = 1, x = 0, y = 0, ...rest } = opts;
   T(a, str || r.cite, { ...rest, fill: rest.fill || COL.chalk });
@@ -359,10 +378,13 @@ function autoCite(root) {
       made++;
     }
     if (!made) continue;   // replacing the node unchanged would re-trigger the observer
+    if (svg) linkStage();
     frag.append(n.data.slice(i));
     n.replaceWith(frag);
   }
 }
+// The stage is announced as one image; once it holds a link it becomes a group, so the link stays reachable.
+function linkStage() { document.getElementById('stage').setAttribute('role', 'group'); }
 // Links that have faded out (or sit in a faded group) must not take clicks or Tab focus.
 function syncLinks() {
   for (const a of scene.querySelectorAll('a.cite')) {
@@ -547,521 +569,7 @@ function collapse(row, i, j, parts, t0, { color = COL.task, fill = COL.chalk, li
   const next = [...row.slice(0, i), res, ...row.slice(j + 1)];
   return layRow(next, row, e => run(e, { x: e._px }, t0 + 1.3, .5));
 }
-// Vertical number line at x; Yf maps a value to its y. Labels sit on the left.
-function vAxis(p, { x, Yf, lo, hi, step = 1, t0 = .1, unit = '' }) {
-  draw(path(p, `M${x} ${Yf(lo - .5)}V${Yf(hi + .5)}`, { stroke: COL.chalk, 'stroke-width': 3 }, { d: 0 }), t0, .8);
-  for (let v = lo; v <= hi; v += step) {
-    const g = G(p, { o: 0 });
-    path(g, `M${x - 9} ${Yf(v)}H${x + 9}`, { stroke: COL.dim, 'stroke-width': 2.5 });
-    T(g, num(v) + unit, { x: x - 46, y: Yf(v) + 9, size: 24, fill: v === 0 ? COL.chalk : COL.dim, font: MATH, anchor: 'end' });
-    show(g, t0 + .2 + Math.abs(v - lo) * .02);
-  }
-}
-// Thermometer from lo (bottom) to hi (top). set(v, t0, run) moves the column; run = tw (lesson) or fx (answer).
-function thermometer(p, { x = 800, bottom = 600, top = 200, lo = -10, hi = 15, step = 5, value = 0, color = COL.nat } = {}) {
-  const Yt = v => bottom - (v - lo) / (hi - lo) * (bottom - top), bulb = bottom + 32, g = G(p);
-  mk('rect', { x: x - 18, y: top - 24, width: 36, height: bulb - top + 24, rx: 18, fill: COL.board, stroke: COL.dim, 'stroke-width': 2.5 }, g);
-  mk('circle', { cx: x, cy: bulb, r: 26, fill: color }, g);
-  const merc = put(mk('rect', { x: x - 9, width: 18, rx: 9, fill: color }, g), { a_y: Yt(value), a_height: bulb - Yt(value) });
-  for (let v = lo; v <= hi; v += step) {
-    path(g, `M${x - 30} ${Yt(v)}H${x - 18}`, { stroke: COL.dim, 'stroke-width': 2 });
-    T(g, `${num(v)}°`, { x: x - 40, y: Yt(v) + 9, size: 24, fill: v === 0 ? COL.chalk : COL.dim, font: MATH, anchor: 'end' });
-  }
-  return { g, merc, Yt, set: (v, t0, run = tw, dur = 1.2) => run(merc, { a_y: Yt(v), a_height: bulb - Yt(v) }, t0, dur) };
-}
-/* ---------- fractions: rows with strikable parts, bars and brackets ---------- */
-// A row of fractions and symbols whose numerators and denominators can be struck out one by one.
-// items: { f: [n, d], fill } | 'symbol text'. The fraction bars sit on y.
-function fracRow(p, items, { x = 800, y = 300, size = 60, anchor = 'middle', o = 0 } = {}) {
-  const fs = size * .8, g = G(p, { o });
-  const els = items.map(it => {
-    if (typeof it === 'string') {
-      const w = textW(it, size);
-      return { w, draw(cx) { this.cx = cx; T(g, it, { x: cx, y: y + size * .33, size, font: MATH, fill: COL.chalk, anchor: 'middle' }); } };
-    }
-    const [n, d] = it.f.map(String), w = Math.max(textW(n, fs), textW(d, fs)) + size * .35, fill = it.fill || COL.chalk;
-    return { w, n, d, draw(cx) {
-      this.cx = cx;
-      path(g, `M${cx - w / 2 + 4} ${y}H${cx + w / 2 - 4}`, { stroke: fill, 'stroke-width': size * .055 });
-      this.num = T(g, n, { x: cx, y: y - size * .18, size: fs, font: MATH, fill, anchor: 'middle' });
-      this.den = T(g, d, { x: cx, y: y + size * .78, size: fs, font: MATH, fill, anchor: 'middle' });
-    } };
-  });
-  const total = els.reduce((a, e) => a + e.w, 0);
-  let cx = anchor === 'middle' ? x - total / 2 : x;
-  for (const e of els) { e.draw(cx + e.w / 2); cx += e.w; }
-  return Object.assign(els, { g, y, size, x0: anchor === 'middle' ? x - total / 2 : x, w: total });
-}
-// Strike the numerator ('num') or denominator ('den') of fraction k and write its reduced value beside it.
-function reduce(row, k, part, value, color, t0, run = tw) {
-  const e = row[k], { y, size } = row, top = part === 'num';
-  const cy = top ? y - size * .42 : y + size * .52, g = row.g;
-  const slash = path(g, `M${e.cx - size * .28} ${cy + size * .3}L${e.cx + size * .28} ${cy - size * .3}`, { stroke: color, 'stroke-width': 3.5 }, { d: 0 });
-  const nv = T(g, String(value), { x: e.cx + size * .02, y: top ? y - size * .92 : y + size * 1.36, size: size * .5, font: MATH, fill: color, anchor: 'middle', o: 0 });
-  run(slash, { d: 1 }, t0, .4); run(nv, { o: 1 }, t0 + .3, .4);
-  run(e[part], { o: .45 }, t0 + .3, .4);
-}
-function rect(p, x, y, w, h, fill, o = 0, stroke = 'none') {
-  return put(mk('rect', { x, y, width: w, height: h, fill, stroke, 'stroke-width': 2.5 }, p), { o });
-}
-function bracketH(p, x1, x2, y, label, color, t0) {
-  draw(path(p, `M${x1} ${y - 10}V${y}H${x2}V${y - 10}`, { stroke: color, 'stroke-width': 3 }, { d: 0 }), t0, .5);
-  show(T(p, label, { x: (x1 + x2) / 2, y: y + 32, size: 26, fill: color, font: MATH, anchor: 'middle', o: 0 }), t0 + .3);
-}
-
-/* ---------- decimal point that hops between digits (ch10, ch20) ---------- */
-// Digits in evenly spaced slots with a decimal point that can hop between them.
-// places = digits after the point (0 = point at the far right, hidden).
-function pointRow(p, digits, x, y, places, { size = 72, fill = COL.chalk, sign = '' } = {}) {
-  const g = G(p, { o: 0 }), w = size * .7, n = digits.length, x0 = x - n * w / 2;
-  if (sign) T(g, sign, { x: x0 - w * .6, y, size, fill, font: MATH, anchor: 'middle' });
-  const ds = [...digits].map((c, i) => T(g, c, { x: x0 + i * w + w / 2, y, size, fill, font: MATH, anchor: 'middle' }));
-  const px = k => x0 + (n - k) * w;
-  const dot = mk('circle', { r: size * .065, fill: COL.task }, g);
-  put(dot, { x: px(places), y: y - size * .02, o: places ? 1 : 0 });
-  const trail = path(g, '', { stroke: COL.task, 'stroke-width': 2.5, 'stroke-dasharray': '5 6' });
-  return { g, ds, dot, px, w,
-    hop(from, to, t0, run = tw, dur = .55) {
-      const steps = Math.abs(to - from);
-      run(dot, { o: 1 }, t0, .2);
-      let d = '';
-      for (let k = 0; k < steps; k++) {
-        const a = px(from + Math.sign(to - from) * k), b = px(from + Math.sign(to - from) * (k + 1));
-        d += `M${a} ${y - 10}Q${(a + b) / 2} ${y - size * .9} ${b} ${y - 10}`;
-      }
-      trail.setAttribute('d', d);
-      put(trail, { o: 0 }); run(trail, { o: .9 }, t0 + steps * dur, .3);
-      (run === tw ? prog : fxp)(q => {
-        const s = q * steps, k = Math.min(steps - 1, Math.floor(s)), f = s - k;
-        const a = px(from + Math.sign(to - from) * k), b = px(from + Math.sign(to - from) * (k + 1));
-        put(dot, { x: a + (b - a) * f, y: y - size * .02 - Math.sin(Math.PI * f) * size * .7 });
-      }, t0, steps * dur, lin);
-    } };
-}
-
-/* ---------- balance scale for equations (ch24, ch25) ---------- */
-// A balance scale. Its pans hang from the beam ends; tilt(deg, t0) rocks it (positive: left side down).
-function balance(p, { x = 800, y = 330, L = 300 } = {}) {
-  const g = G(p, { o: 0 });
-  path(g, `M${x} ${y}L${x - 50} ${y + 330}H${x + 50}Z`, { stroke: COL.dim, 'stroke-width': 3, fill: mix(COL.board, COL.dim, .15) });
-  const beam = G(g, { x, y });
-  path(beam, `M${-L} 0H${L}`, { stroke: COL.chalk, 'stroke-width': 6 });
-  mk('circle', { r: 10, fill: COL.chalk }, beam);
-  const pan = side => {
-    const pg = G(g, { x: x + side * L, y });
-    path(pg, 'M0 0L-90 110M0 0L90 110', { stroke: COL.dim, 'stroke-width': 2 });
-    path(pg, 'M-110 110Q0 150 110 110Z', { stroke: side < 0 ? COL.whole : COL.nat, 'stroke-width': 3, fill: mix(COL.board, side < 0 ? COL.whole : COL.nat, .2) });
-    return pg;
-  };
-  const Lp = pan(-1), Rp = pan(1);
-  let angle = 0;
-  const place = a => {
-    const r = a * Math.PI / 180, dx = L * Math.cos(r), dy = L * Math.sin(r);
-    put(beam, { r: -a }); put(Lp, { x: x - dx, y: y + dy }); put(Rp, { x: x + dx, y: y - dy });
-  };
-  return {
-    g, L: Lp, R: Rp,
-    // Content sits on a pan: text or math at (0, 90) in pan coordinates.
-    load(side, parts, color, t0, size = 44) { const e = M(side < 0 ? Lp : Rp, parts, { y: 96, size, fill: color, o: 0 }); show(e, t0); return e; },
-    tilt(a, t0, run = prog) { const from = angle; angle = a; run(q => place(from + (a - from) * back(q)), t0, .9); },
-  };
-}
-/* ---------- algebra tiles (ch23, ch25) ---------- */
-const XL = 120, UN = 30;            // length of x, size of 1
-const TS = { x2: [XL, XL, COL.real], x: [UN, XL, COL.whole], y: [UN, 90, COL.nat], one: [UN, UN, COL.int] };
-function atile(p, kind, x, y, neg = false, o = 0) {
-  const [w, h, c] = TS[kind], g = G(p, { x, y, o, s: o ? 1 : .6 });
-  mk('rect', { x: -w / 2, y: -h / 2, width: w, height: h, rx: 5, fill: neg ? COL.board : mix(COL.board, c, .55), stroke: neg ? COL.bad : c, 'stroke-width': neg ? 3.5 : 2.5, 'stroke-dasharray': neg ? '7 5' : '' }, g);
-  g.kind = kind; g.neg = neg;
-  return g;
-}
-const popIn = (els, t0, step = .08) => els.forEach((e, i) => tw(e, { o: 1, s: 1 }, t0 + i * step, .35, back));
-// n tiles of a kind in a row starting at x.
-const tileRow = (p, kind, n, x, y, neg = false, gap = 12) => Array.from({ length: n }, (_, i) => atile(p, kind, x + i * (TS[kind][0] + gap), y, neg));
-// Pair each negative tile with a positive one: they move together and vanish.
-function cancel(pos, negs, t0) {
-  negs.forEach((n, i) => {
-    const a = pos[i];
-    tw(n, { x: st(a).x, y: st(a).y }, t0 + i * .3, .6);
-    tw(n, { o: 0, s: .5 }, t0 + i * .3 + .7, .3); tw(a, { o: 0, s: .5 }, t0 + i * .3 + .7, .3);
-  });
-}
-/* ---------- inequality graphs (ch26, ch27) ---------- */
-// Solution ray on the number line: endpoint v, closed or open circle, dir +1 (right) or −1 (left).
-function ray(p, v, closed, dir, t0, color = COL.task, run = tw) {
-  const end = X(dir > 0 ? 5.7 : -5.7), g = G(p, { o: 1 });
-  const line = path(g, `M${X(v)} ${Y0}H${end}`, { stroke: color, 'stroke-width': 7 }, { d: 0 });
-  const head = path(g, `M${end - 18 * dir} ${Y0 - 13}L${end} ${Y0}L${end - 18 * dir} ${Y0 + 13}`, { stroke: color, 'stroke-width': 6 }, { o: 0 });
-  const dot = G(g, { x: X(v), y: Y0, s: 0, o: 0 });
-  mk('circle', { r: 13, fill: closed ? color : COL.board, stroke: color, 'stroke-width': 4 }, dot);
-  run(dot, { s: 1, o: 1 }, t0, .4, back);
-  run(line, { d: 1 }, t0 + .3, .8); run(head, { o: 1 }, t0 + 1, .2);
-  return g;
-}
-// Segment between a and b on the number line, each end open or closed.
-function segment(p, a, b, ca, cb, t0, color = COL.task, run = tw) {
-  const g = G(p, { o: 1 });
-  const line = path(g, `M${X(a)} ${Y0}H${X(b)}`, { stroke: color, 'stroke-width': 7 }, { d: 0 });
-  const ends = [[a, ca], [b, cb]].map(([v, c]) => {
-    const d = G(g, { x: X(v), y: Y0, s: 0, o: 0 });
-    mk('circle', { r: 13, fill: c ? color : COL.board, stroke: color, 'stroke-width': 4 }, d);
-    run(d, { s: 1, o: 1 }, t0, .4, back);
-    return d;
-  });
-  run(line, { d: 1 }, t0 + .3, .8);
-  g.parentNode.appendChild(g); ends.forEach(e => g.appendChild(e));
-  return g;
-}
-/* ---------- equation steps (ch25 onward) ---------- */
-// One line of an equation or inequality with its sign at xEq, so a column of steps lines up. note: grey hint on the right.
-function eqLine(p, L, R, y, t0, { xEq = 760, fill = COL.chalk, size = 50, note, sym = '=', symFill, noteX = 1180 } = {}) {
-  const g = G(p, { o: 0 });
-  M(g, [].concat(L), { x: xEq - size * .6, y, size, fill, anchor: 'end' });
-  M(g, [sym], { x: xEq, y, size, fill: symFill || fill });
-  M(g, [].concat(R), { x: xEq + size * .6, y, size, fill, anchor: 'start' });
-  if (note) T(g, note, { x: noteX, y: y - 8, size: 26, fill: COL.task, weight: 600 });
-  show(g, t0);
-  return g;
-}
-/* ---------- data on a number line: dot plots (unit 7) ---------- */
-// Axis for data from lo to hi drawn between x0 and x1 at baseline y; every: label every n-th tick.
-// shape 'x' draws line-plot crosses instead of dots.
-// Returns D: D.V(value) -> x; D.dot(v, color, t0) stacks a dot above v; D.mark(v, color, t0, label) is a
-// balance triangle under the axis that can slide with D.slide(mark, v, t0).
-function dataLine(p, { lo, hi, x0 = 200, x1 = 1400, y = 600, step = 1, every = 1, t0 = .1, r = 13, size = 22, shape = 'dot' }) {
-  const V = v => x0 + (v - lo) / (hi - lo) * (x1 - x0), g = G(p, { o: 0 });
-  path(g, `M${x0 - 24} ${y}H${x1 + 24}`, { stroke: COL.dim, 'stroke-width': 3 });
-  for (let v = lo, i = 0; v <= hi + 1e-9; v += step, i++) {
-    path(g, `M${V(v)} ${y - 7}V${y + 7}`, { stroke: COL.dim, 'stroke-width': 2 });
-    if (i % every === 0) T(g, num(+v.toFixed(6)), { x: V(v), y: y + 26 + size, size, fill: COL.dim, font: MATH, anchor: 'middle' });
-  }
-  show(g, t0);
-  const D = {
-    g, V, y, r, count: {},
-    top: v => y - 6 - r - ((D.count[v] || 1) - 1) * (2 * r + 5),
-    dot(v, color, t0, { run = tw, into = p, from } = {}) {
-      D.count[v] = (D.count[v] || 0) + 1;
-      let d;
-      if (shape === 'x') { d = G(into); path(d, `M${-r * .75} ${-r * .75}L${r * .75} ${r * .75}M${r * .75} ${-r * .75}L${-r * .75} ${r * .75}`, { stroke: color, 'stroke-width': 5 }); }
-      else d = mk('circle', { r, fill: color, stroke: COL.board, 'stroke-width': 2 }, into);
-      put(d, { x: V(v), y: D.top(v), s: 0, o: 0 });
-      if (from !== undefined) { put(d, { y: from, s: 1 }); run(d, { o: 1 }, t0, .2); run(d, { y: D.top(v) }, t0, .7, back); }
-      else run(d, { s: 1, o: 1 }, t0, .45, back);
-      return d;
-    },
-    dots: (vals, color, t0, gap = .15, opts) => vals.map((v, i) => D.dot(v, color, t0 + i * gap, opts)),
-    mark(v, color, t0, label, { run = tw, into = p } = {}) {
-      const m = G(into, { x: V(v), y, o: 0 });
-      path(m, 'M0 4L-17 30H17Z', { fill: color, stroke: COL.board, 'stroke-width': 2 });
-      if (label) T(m, label, { y: 64 + size, size: 24, fill: color, weight: 600, anchor: 'middle' });
-      run(m, { o: 1 }, t0, .4);
-      return m;
-    },
-    slide: (m, v, t0, run = tw, dur = 1.2) => run(m, { x: V(v) }, t0, dur),
-    // Bracket above the data from a to b at height yb, with a label.
-    span(a, b, yb, label, color, t0, { run = tw, into = p } = {}) {
-      const g = G(into), l = path(g, `M${V(a)} ${yb + 12}V${yb}H${V(b)}V${yb + 12}`, { stroke: color, 'stroke-width': 3 }, { d: 0 });
-      run(l, { d: 1 }, t0, .6);
-      const t = M(g, [label], { x: (V(a) + V(b)) / 2, y: yb - 14, size: 28, fill: color, o: 0 });
-      run(t, { o: 1 }, t0 + .4, .4);
-      return g;
-    },
-  };
-  return D;
-}
-/* ---------- chance: number cubes, coins, spinners (unit 7) ---------- */
-// A number cube face showing n pips, centred on (x, y).
-const PIPS = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]],
-  5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]], 6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] };
-function die(p, n, x, y, s = 96, o = 0) {
-  const g = G(p, { x, y, o, s: o ? 1 : .6 });
-  g._box = mk('rect', { x: -s / 2, y: -s / 2, width: s, height: s, rx: s * .18, fill: mix(COL.board, COL.chalk, .1), stroke: COL.chalk, 'stroke-width': 3 }, g);
-  PIPS[n].forEach(([a, b]) => mk('circle', { cx: a * s * .26, cy: b * s * .26, r: s * .085, fill: COL.chalk }, g));
-  return g;
-}
-// Spinner with equal sections; pointer starts straight up. land(k) is the rotation that points at section k.
-const SPIN = [COL.whole, COL.nat, COL.int, COL.whole, COL.irr, COL.nat, COL.whole, COL.int];
-function spinner(p, cx, cy, r, t0, cols = SPIN) {
-  const g = G(p, { x: cx, y: cy, o: 0 }), n = cols.length, secs = [];
-  cols.forEach((c, i) => {
-    const a1 = (-90 + i * 360 / n) * Math.PI / 180, a2 = (-90 + (i + 1) * 360 / n) * Math.PI / 180;
-    secs.push(path(g, `M0 0L${r * Math.cos(a1)} ${r * Math.sin(a1)}A${r} ${r} 0 0 1 ${r * Math.cos(a2)} ${r * Math.sin(a2)}Z`,
-      { fill: mix(COL.board, c, .7), stroke: COL.board, 'stroke-width': 3 }));
-  });
-  mk('circle', { r, fill: 'none', stroke: COL.chalk, 'stroke-width': 3 }, g);
-  const ptr = G(g);
-  path(ptr, `M0 ${r * .12}V${-r * .78}M-14 ${-r * .66}L0 ${-r * .8}L14 ${-r * .66}`, { stroke: COL.chalk, 'stroke-width': 7 });
-  mk('circle', { r: 12, fill: COL.chalk }, g);
-  show(g, t0);
-  return { g, secs, ptr, land: k => (k + .5) * 360 / n };
-}
-// Outline some spinner sections: a bright border that fades in.
-function outline(p, sp, ks, color, t0, run = tw) {
-  return ks.map(k => { const e = sp.secs[k].cloneNode(); e.setAttribute('fill', 'none'); e.setAttribute('stroke', color); e.setAttribute('stroke-width', 7); sp.g.insertBefore(e, sp.ptr); put(e, { o: 0 }); run(e, { o: 1 }, t0, .4); return e; });
-}
-// A coin face.
-function coin(p, side, x, y, t0, r = 34, run = tw) {
-  const g = G(p, { x, y, s: .5, o: 0 });
-  mk('circle', { r, fill: mix(COL.board, side === 'H' ? COL.int : COL.rat, .5), stroke: side === 'H' ? COL.int : COL.rat, 'stroke-width': 3 }, g);
-  T(g, side, { y: r * .36, size: r, fill: COL.chalk, weight: 700, anchor: 'middle' });
-  run(g, { s: 1, o: 1 }, t0, .45, back);
-  return g;
-}
-/* ---------- scaled axes for data and real-world graphs (ch41 onward) ---------- */
-// Axes with a scale on each; returns value -> pixel maps. ybreak draws a zigzag when y does not start at 0.
-function axes(p, { x0, y0, w, h, xs: [xlo, xhi, xst], ys: [ylo, yhi, yst], xl, yl, t0, ybreak }) {
-  const PX = v => x0 + (v - xlo) / (xhi - xlo) * w, PY = v => y0 - (v - ylo) / (yhi - ylo) * h, g = G(p, { o: 0 });
-  let d = '';
-  for (let v = xlo + xst; v <= xhi + 1e-9; v += xst) d += `M${PX(v)} ${y0}V${y0 - h}`;
-  for (let v = ylo + yst; v <= yhi + 1e-9; v += yst) d += `M${x0} ${PY(v)}H${x0 + w}`;
-  mk('path', { d, stroke: COL.chalk, 'stroke-opacity': .1, 'stroke-width': 1.5, fill: 'none' }, g);
-  path(g, `M${x0} ${y0 - h - 20}V${y0}H${x0 + w + 20}`, { stroke: COL.chalk, 'stroke-width': 3 });
-  if (ybreak) path(g, `M${x0 - 10} ${y0 - 22}L${x0 + 10} ${y0 - 30}M${x0 - 10} ${y0 - 34}L${x0 + 10} ${y0 - 42}`, { stroke: COL.chalk, 'stroke-width': 3 });
-  for (let v = xlo; v <= xhi + 1e-9; v += xst) T(g, String(v), { x: PX(v), y: y0 + 30, size: 20, fill: COL.dim, font: MATH, anchor: 'middle' });
-  for (let v = ylo; v <= yhi + 1e-9; v += yst) T(g, String(v), { x: x0 - 14, y: PY(v) + 7, size: 20, fill: COL.dim, font: MATH, anchor: 'end' });
-  T(g, xl, { x: x0 + w / 2, y: y0 + 66, size: 24, fill: COL.dim, anchor: 'middle' });
-  T(g, yl, { x: x0, y: y0 - h - 36, size: 24, fill: COL.dim, anchor: 'middle' });
-  show(g, t0);
-  return { PX, PY };
-}
-/* ---------- area grids for multiplying and factoring polynomials (ch51 onward) ---------- */
-// Area grid from (x0, y0): column widths ws, row heights hs, factor terms along the top and the left side.
-function areaGrid(p, x0, y0, ws, hs, colLab, rowLab, t0, { size = 40 } = {}) {
-  const xs = [x0], ys = [y0];
-  ws.forEach(w => xs.push(xs.at(-1) + w)); hs.forEach(h => ys.push(ys.at(-1) + h));
-  let d = '';
-  xs.forEach(x => { d += `M${x} ${y0}V${ys.at(-1)}`; }); ys.forEach(y => { d += `M${x0} ${y}H${xs.at(-1)}`; });
-  draw(path(p, d, { stroke: COL.chalk, 'stroke-width': 3 }, { d: 0 }), t0, .9);
-  colLab.forEach((l, j) => show(M(p, [].concat(l), { x: (xs[j] + xs[j + 1]) / 2, y: y0 - 22, size, fill: COL.whole, o: 0 }), t0 + .3 + j * .15));
-  rowLab.forEach((l, i) => show(M(p, [].concat(l), { x: x0 - 24, y: (ys[i] + ys[i + 1]) / 2 + size * .35, size, fill: COL.nat, anchor: 'end', o: 0 }), t0 + .3 + i * .15));
-  const box = (i, j, pad) => ({ x: xs[j] + pad, y: ys[i] + pad, width: xs[j + 1] - xs[j] - 2 * pad, height: ys[i + 1] - ys[i] - 2 * pad });
-  return {
-    xs, ys,
-    cell(i, j, parts, t0, { fill = COL.chalk, tint, run = tw, into = p } = {}) {
-      if (tint) { const r = put(mk('rect', { ...box(i, j, 3), fill: tint }, into), { o: 0 }); into.insertBefore(r, into.firstChild); run(r, { o: .3 }, t0, .4); }
-      const e = M(into, [].concat(parts), { x: (xs[j] + xs[j + 1]) / 2, y: (ys[i] + ys[i + 1]) / 2 + size * .35, size, fill, o: 0, s: .6 });
-      run(e, { o: 1, s: 1 }, t0, .4, back);
-      return e;
-    },
-    ring(i, j, color, t0, run = tw, into = p) { const r = put(mk('rect', { ...box(i, j, 8), rx: 12, fill: 'none', stroke: color, 'stroke-width': 4.5 }, into), { o: 0 }); run(r, { o: 1 }, t0, .3); return r; },
-  };
-}
-// A curved arrow from (x1, y1) to (x2, y2) bending up (h < 0) or down (h > 0).
-function arc(p, x1, y1, x2, y2, h, color, t0, run = tw) {
-  const mx = (x1 + x2) / 2, l = path(p, `M${x1} ${y1}Q${mx} ${y1 + h} ${x2} ${y2}`, { stroke: color, 'stroke-width': 3.5 }, { d: 0 });
-  run(l, { d: 1 }, t0, .5);
-  return l;
-}
-
-/* ---------- built-up fractions with math above and below the bar (ch60 onward) ---------- */
-// Width of math parts at a size, without leaving anything on the stage.
-function mathW(parts, size) { const e = M(scene, [].concat(parts), { size, o: 0 }), w = e._w; e.remove(); return w; }
-// A built-up fraction whose top and bottom are math parts (they may hold radicals); bar on y. Returns { g, w, t, b, x0 }.
-function frac(p, top, bot, x, y, t0, { size = 56, fill = COL.chalk, anchor = 'start', topFill, botFill } = {}) {
-  const g = G(p, { o: 0 });
-  const w = Math.max(mathW(top, size), mathW(bot, size)) + size * .3;
-  const x0 = anchor === 'middle' ? x - w / 2 : x;
-  const t = M(g, [].concat(top), { x: x0 + w / 2, y: y - size * .25, size, fill: topFill || fill });
-  const b = M(g, [].concat(bot), { x: x0 + w / 2, y: y + size * 1.05, size, fill: botFill || fill });
-  path(g, `M${x0} ${y}H${x0 + w}`, { stroke: fill, 'stroke-width': size * .05 });
-  if (t0 !== undefined) show(g, t0);
-  return { g, w, t, b, x0 };
-}
-
-/* ---------- coordinate plane (unit 6 onward) ---------- */
-// Grid centred on the origin at (cx, cy); u pixels per unit; x from x0 to x1, y from y0 to y1.
-// Returns { g, PX, PY, u, ... } with helpers to plot points, walk to a point, and draw lines.
-// The grid stays in p; marks go into P.layer (set it to the current panel so marks clear with the step) or opts.into.
-function plane(p, { cx = 800, cy = 450, u = 50, x0 = -6, x1 = 6, y0 = -6, y1 = 6, t0 = .1, labels = true, step = 1 } = {}) {
-  const PX = x => cx + x * u, PY = y => cy - y * u, g = G(p, { o: 0 });
-  let d = '';
-  for (let x = x0; x <= x1; x++) if (x) d += `M${PX(x)} ${PY(y0)}V${PY(y1)}`;
-  for (let y = y0; y <= y1; y++) if (y) d += `M${PX(x0)} ${PY(y)}H${PX(x1)}`;
-  mk('path', { d, stroke: COL.chalk, 'stroke-opacity': .1, 'stroke-width': 1.5, fill: 'none' }, g);
-  const ax = { stroke: COL.chalk, 'stroke-width': 3 };
-  path(g, `M${PX(x0 - .5)} ${cy}H${PX(x1 + .5)}M${PX(x1 + .5) - 14} ${cy - 9}L${PX(x1 + .5)} ${cy}L${PX(x1 + .5) - 14} ${cy + 9}`, ax);
-  path(g, `M${cx} ${PY(y0 - .5)}V${PY(y1 + .5)}M${cx - 9} ${PY(y1 + .5) + 14}L${cx} ${PY(y1 + .5)}L${cx + 9} ${PY(y1 + .5) + 14}`, ax);
-  T(g, 'x', { x: PX(x1 + .5) + 10, y: cy + 30, size: 28, fill: COL.dim, font: MATH, anchor: 'middle' }).setAttribute('font-style', 'italic');
-  T(g, 'y', { x: cx - 26, y: PY(y1 + .5) + 10, size: 28, fill: COL.dim, font: MATH, anchor: 'middle' }).setAttribute('font-style', 'italic');
-  if (labels) {
-    for (let x = x0; x <= x1; x += step) if (x) T(g, num(x), { x: PX(x), y: cy + 26, size: 18, fill: COL.dim, font: MATH, anchor: 'middle' });
-    for (let y = y0; y <= y1; y += step) if (y) T(g, num(y), { x: cx - 12, y: PY(y) + 6, size: 18, fill: COL.dim, font: MATH, anchor: 'end' });
-  }
-  show(g, t0, .5);
-  const P = {
-    g, PX, PY, u, cx, cy, x0, x1, y0, y1, layer: null,
-    dot(x, y, color, t0, { r = 10, label, run = tw, dx = 14, dy = -14, anchor = 'start', into = P.layer || p, open = false } = {}) {
-      const d = G(into, { x: PX(x), y: PY(y), s: 0, o: 0 });
-      mk('circle', open ? { r, fill: COL.board, stroke: color, 'stroke-width': 3.5 } : { r, fill: color, stroke: COL.board, 'stroke-width': 2 }, d);
-      run(d, { s: 1, o: 1 }, t0, .4, back);
-      if (label) { const l = M(into, [label], { x: PX(x) + dx, y: PY(y) + dy, size: 26, fill: color, anchor, o: 0 }); run(l, { o: 1 }, t0 + .2, .3); }
-      return d;
-    },
-    // Walk from the origin: along x, then along y, drawing arrows; then a dot.
-    walk(x, y, t0, { cx: colX = COL.whole, cy: colY = COL.nat, run = tw, color = COL.task, label, into = P.layer || p } = {}) {
-      const a = path(into, `M${PX(0)} ${PY(0)}H${PX(x)}`, { stroke: colX, 'stroke-width': 5 }, { d: 0 });
-      const b = path(into, `M${PX(x)} ${PY(0)}V${PY(y)}`, { stroke: colY, 'stroke-width': 5 }, { d: 0 });
-      run(a, { d: 1 }, t0, .3 + Math.abs(x) * .12, lin);
-      run(b, { d: 1 }, t0 + .4 + Math.abs(x) * .12, .3 + Math.abs(y) * .12, lin);
-      return P.dot(x, y, color, t0 + .8 + (Math.abs(x) + Math.abs(y)) * .12, { run, label, into });
-    },
-    // Arrow from (xa, ya) to (xb, yb) with an optional label beside its middle.
-    arrow(xa, ya, xb, yb, color, t0, { label, run = tw, into = P.layer || p } = {}) {
-      const a = [PX(xa), PY(ya)], b = [PX(xb), PY(yb)], L = Math.hypot(b[0] - a[0], b[1] - a[1]), ux = (b[0] - a[0]) / L, uy = (b[1] - a[1]) / L;
-      const l = path(into, `M${a[0]} ${a[1]}L${b[0]} ${b[1]}M${b[0] - 12 * ux - 8 * uy} ${b[1] - 12 * uy + 8 * ux}L${b[0]} ${b[1]}L${b[0] - 12 * ux + 8 * uy} ${b[1] - 12 * uy - 8 * ux}`, { stroke: color, 'stroke-width': 4 }, { d: 0 });
-      run(l, { d: 1 }, t0, .5);
-      if (label !== undefined) {
-        const vert = Math.abs(uy) > Math.abs(ux);
-        const t = M(into, [label], { x: (a[0] + b[0]) / 2 + (vert ? -24 : 0), y: (a[1] + b[1]) / 2 + (vert ? 9 : -12), size: 26, fill: color, anchor: vert ? 'end' : 'middle', o: 0 });
-        run(t, { o: 1 }, t0 + .3, .3);
-      }
-      return l;
-    },
-    // One slope step from (x, y): rise first (irr green), then run (real violet).
-    stair(x, y, rise, runX, t0, { run = tw, into = P.layer || p, labels = true } = {}) {
-      P.arrow(x, y, x, y + rise, COL.irr, t0, { label: labels ? num(rise) : undefined, run, into });
-      P.arrow(x, y + rise, x + runX, y + rise, COL.real, t0 + .6, { label: labels ? num(runX) : undefined, run, into });
-    },
-    // Shade the region where every a·x + b·y ≥ c in the list holds, clipped to the grid.
-    region(list, color, t0, { run = tw, into = P.layer || p, o = .22 } = {}) {
-      let pts = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
-      for (const [a, b, c] of list) {
-        const f = ([x, y]) => a * x + b * y - c, next = [];
-        pts.forEach((v, i) => {
-          const w = pts[(i + 1) % pts.length], fv = f(v), fw = f(w);
-          if (fv >= 0) next.push(v);
-          if (fv * fw < 0) { const t = fv / (fv - fw); next.push([v[0] + t * (w[0] - v[0]), v[1] + t * (w[1] - v[1])]); }
-        });
-        pts = next;
-      }
-      const e = path(into, pts.length ? 'M' + pts.map(([x, y]) => `${PX(x)} ${PY(y)}`).join('L') + 'Z' : '', { fill: color, stroke: 'none' }, { o: 0 });
-      into.insertBefore(e, into.firstChild);
-      run(e, { o }, t0, .6);
-      return e;
-    },
-    half: (a, b, c, color, t0, opts) => P.region([[a, b, c]], color, t0, opts),
-    // Graph of y = f(x) for x from xa to xb, drawn on; the part outside the grid's y range is cut off.
-    fn(f, xa, xb, color, t0, { run = tw, w = 4, into = P.layer || p, n = 160, dur = 1.2 } = {}) {
-      let d = '', pen = false;
-      for (let i = 0; i <= n; i++) {
-        const x = xa + (xb - xa) * i / n, y = f(x), inside = y >= y0 - .5 && y <= y1 + .5;
-        if (inside) { d += `${pen ? 'L' : 'M'}${PX(x).toFixed(1)} ${PY(y).toFixed(1)}`; pen = true; } else pen = false;
-      }
-      const l = path(into, d, { stroke: color, 'stroke-width': w }, { d: 0 });
-      run(l, { d: 1 }, t0, dur);
-      return l;
-    },
-    // Line through two points, extended to the edge of the grid.
-    line(xa, ya, xb, yb, color, t0, { run = tw, w = 4, dash, into = P.layer || p } = {}) {
-      const dx = xb - xa, dy = yb - ya, ts = [];
-      const clip = (t, v, lo, hi) => { if (v >= lo - 1e-9 && v <= hi + 1e-9) ts.push(t); };
-      if (dx) { for (const X of [x0, x1]) { const t = (X - xa) / dx; clip(t, ya + t * dy, y0, y1); } }
-      if (dy) { for (const Y of [y0, y1]) { const t = (Y - ya) / dy; clip(t, xa + t * dx, x0, x1); } }
-      const t1 = Math.min(...ts), t2 = Math.max(...ts);
-      // A dashed line fades in: drawing it on would need the dash array for the reveal.
-      const l = path(into, `M${PX(xa + t1 * dx)} ${PY(ya + t1 * dy)}L${PX(xa + t2 * dx)} ${PY(ya + t2 * dy)}`, { stroke: color, 'stroke-width': w, ...(dash ? { 'stroke-dasharray': dash } : {}) }, dash ? { o: 0 } : { d: 0 });
-      run(l, dash ? { o: 1 } : { d: 1 }, t0, dash ? .6 : 1);
-      return l;
-    },
-  };
-  return P;
-}
-// Question: pick a grid point. ans = [x, y]; no(x, y) explains a wrong pick. Arrows move a cursor, Enter picks.
-// test(x, y), when given, accepts any point it approves; ans is then the point Show answer uses.
-const pickPoint = (P, ans, yes, no, onRight, test) => (body, api) => {
-  const L = qlayer();
-  let cur = [0, 0], locked = false;
-  const cursor = G(L, { x: P.PX(0), y: P.PY(0) });
-  mk('circle', { r: 16, fill: 'none', stroke: COL.task, 'stroke-width': 3 }, cursor);
-  let tag = null;
-  const moveTo = (x, y) => {
-    cur = [Math.max(P.x0, Math.min(P.x1, x)), Math.max(P.y0, Math.min(P.y1, y))];
-    put(cursor, { x: P.PX(cur[0]), y: P.PY(cur[1]) });
-    tag?.remove();
-    tag = M(L, [`(${num(cur[0])}, ${num(cur[1])})`], { x: P.PX(cur[0]) + 22, y: P.PY(cur[1]) - 18, size: 24, fill: COL.task, anchor: 'start' });
-  };
-  moveTo(0, 0);
-  const pick = () => {
-    if (locked) return;
-    const [x, y] = cur;
-    if (test ? test(x, y) : x === ans[0] && y === ans[1]) { P.dot(x, y, COL.good, 0, { run: fx, into: L }); onRight?.(); api.grade(true, typeof yes === 'function' ? yes(x, y) : yes); }
-    else { const d = P.dot(x, y, COL.bad, 0, { run: fx, r: 8, into: L }); fx(d, { o: 0 }, 1.2, .4); shakeFx(cursor); api.grade(false, no(x, y)); }
-  };
-  const hit = mk('rect', { x: P.PX(P.x0 - .5), y: P.PY(P.y1 + .5), width: (P.x1 - P.x0 + 1) * P.u, height: (P.y1 - P.y0 + 1) * P.u, fill: 'transparent' }, L);
-  L.insertBefore(hit, L.firstChild);
-  hit.style.cursor = 'crosshair';
-  hit.addEventListener('click', e => {
-    if (locked) return;
-    const s = $('stage'), pt = s.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
-    const q = pt.matrixTransform(s.getScreenCTM().inverse());
-    moveTo(Math.round((q.x - P.cx) / P.u), Math.round((P.cy - q.y) / P.u));
-    pick();
-  });
-  return {
-    reveal() { moveTo(...ans); P.dot(ans[0], ans[1], COL.good, 0, { run: fx, into: L }); onRight?.(); return typeof yes === 'function' ? yes(...ans) : yes; },
-    lock() { locked = true; },
-    hint: [kbd('←'), kbd('↑'), kbd('↓'), kbd('→'), translate('hintMove'), kbd('Enter'), translate('hintChooseOrClickGrid')],
-    key(e) {
-      if (locked) return false;
-      const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
-      if (d) { moveTo(cur[0] + d[0], cur[1] + d[1]); return true; }
-      if (e.key === 'Enter') { pick(); return true; }
-      return false;
-    },
-  };
-};
-/* ---------- signed numbers: number-line moves and plus/minus tiles ---------- */
-const POS = COL.whole, NEG = COL.nat;           // positive: blue, negative: coral
-// Integer number line from lo to hi with arrows at both ends, drawn into S.line.
-function numberLine(t0 = .1, lo = -8, hi = 8) {
-  const L = S.line;
-  draw(path(L, `M${X(lo - .7)} ${Y0}H${X(hi + .7)}`, { stroke: COL.chalk, 'stroke-width': 3 }, { d: 0 }), t0, .8);
-  for (const [x, d] of [[X(hi + .7), 1], [X(lo - .7), -1]]) {
-    show(path(L, `M${x - 15 * d} ${Y0 - 10}L${x} ${Y0}L${x - 15 * d} ${Y0 + 10}`, { stroke: COL.chalk, 'stroke-width': 3 }, { o: 0 }), t0 + .7, .3);
-  }
-  for (let v = lo; v <= hi; v++) show(tick(v), t0 + .2 + Math.abs(v) * .04, .4);
-}
-// A move along the number line from a to b, drawn as an arrow at height y. run = tw (lesson) or fx (answer).
-function move(p, a, b, y, t0, run = tw) {
-  const x1 = X(a), x2 = X(b), d = Math.sign(b - a), color = d > 0 ? POS : NEG;
-  const dur = .35 + Math.abs(b - a) * .09;
-  const line = path(p, `M${x1} ${y}H${x2}`, { stroke: color, 'stroke-width': 5 }, { d: 0 });
-  const head = path(p, `M${x2 - 15 * d} ${y - 11}L${x2} ${y}L${x2 - 15 * d} ${y + 11}`, { stroke: color, 'stroke-width': 5 }, { o: 0 });
-  const lab = T(p, (d > 0 ? '+' : '−') + Math.abs(b - a), { x: (x1 + x2) / 2, y: y - 16, size: 28, fill: color, font: MATH, anchor: 'middle', o: 0 });
-  const drop = path(p, `M${x2} ${y + 12}V${Y0 - 14}`, { stroke: color, 'stroke-width': 2, 'stroke-dasharray': '5 6' }, { o: 0 });
-  run(line, { d: 1 }, t0, dur, lin); run(head, { o: 1 }, t0 + dur - .1, .15);
-  run(lab, { o: 1 }, t0 + .2, .3); run(drop, { o: .8 }, t0 + dur, .3);
-}
-function landDot(p, v, t0, color = COL.chalk, run = tw) {
-  const g = G(p, { x: X(v), y: Y0, s: 0, o: 0 });
-  mk('circle', { r: 12, fill: color, stroke: COL.board, 'stroke-width': 2 }, g);
-  run(g, { s: 1, o: 1 }, t0, .45, back);
-  return g;
-}
-function tile(p, sign, x, y, o = 0) {
-  const c = sign > 0 ? POS : NEG, g = G(p, { x, y, o, s: o ? 1 : .6 });
-  mk('rect', { x: -27, y: -27, width: 54, height: 54, rx: 10, fill: mix(COL.board, c, .45), stroke: c, 'stroke-width': 2.5 }, g);
-  M(g, [sign > 0 ? '+' : '−'], { y: 13, size: 40 });
-  return g;
-}
-const tiles = (p, n, sign, x0, y, gap = 70) => Array.from({ length: n }, (_, i) => tile(p, sign, x0 + i * gap, y));
-const popAll = (els, t0, step = .08) => els.forEach((e, i) => tw(e, { o: 1, s: 1 }, t0 + i * step, .35, back));
-// Circle each plus/minus pair, then let the pairs vanish: they make zero.
-function cancelPairs(p, tops, bottoms, t0) {
-  tops.forEach((a, i) => {
-    const b = bottoms[i], x = st(a).x, y1 = st(a).y, y2 = st(b).y;
-    const ring = put(mk('rect', { rx: 18, fill: 'none', stroke: COL.dim, 'stroke-width': 2.5, 'stroke-dasharray': '8 6' }, p),
-      { o: 0, a_x: x - 38, a_y: y1 - 38, a_width: 76, a_height: y2 - y1 + 76 });
-    tw(ring, { o: 1 }, t0 + i * .2, .3);
-    for (const e of [a, b, ring]) tw(e, { o: 0, ...(e === ring ? {} : { s: .5 }) }, t0 + 1.4 + i * .1, .4);
-  });
-}
-function brace(p, a, b, y, label, color, t0) {
-  const x1 = X(a), x2 = X(b);
-  draw(path(p, `M${x1} ${y - 10}V${y}H${x2}V${y - 10}`, { stroke: color, 'stroke-width': 3 }, { d: 0 }), t0, .6);
-  show(T(p, label, { x: (x1 + x2) / 2, y: y + 34, size: 26, fill: color, anchor: 'middle', o: 0 }), t0 + .4);
-}
-
+// The maths helpers (number lines, tiles, fractions, planes, the number map, sorter) are in math.js.
 // Inline math for HTML text.
 function mathEl(parts, size = 22) {
   const svg = mk('svg', { class: 'm', 'font-weight': 400 });   // widths are measured at normal weight, so a bold prompt must not thicken the math
@@ -1079,33 +587,6 @@ function mathEl(parts, size = 22) {
   return svg;
 }
 
-/* ---------- number map geometry ---------- */
-const RINGS = {
-  real: { cx: 640, cy: 470, rx: 610, ry: 390, lx: 640, ly: 128 },
-  rat: { cx: 500, cy: 480, rx: 400, ry: 320, lx: 500, ly: 202 },
-  int: { cx: 500, cy: 510, rx: 300, ry: 250, lx: 500, ly: 302 },
-  whole: { cx: 500, cy: 540, rx: 210, ry: 180, lx: 500, ly: 400 },
-  nat: { cx: 500, cy: 570, rx: 125, ry: 110, lx: 500, ly: 500 },
-  irr: { cx: 1060, cy: 480, rx: 140, ry: 170, lx: 1060, ly: 360 },
-};
-const CHAIN = { nat: ['nat', 'whole', 'int', 'rat', 'real'], whole: ['whole', 'int', 'rat', 'real'], int: ['int', 'rat', 'real'], rat: ['rat', 'real'], irr: ['irr', 'real'], real: ['real'] };
-const ell = r => `M${r.cx} ${r.cy - r.ry}A${r.rx} ${r.ry} 0 1 1 ${r.cx} ${r.cy + r.ry}A${r.rx} ${r.ry} 0 1 1 ${r.cx} ${r.cy - r.ry}`;
-const inRing = (k, x, y) => { const r = RINGS[k]; return ((x - r.cx) / r.rx) ** 2 + ((y - r.cy) / r.ry) ** 2 <= 1; };
-function regionAt(x, y) {
-  for (const k of ['nat', 'whole', 'int', 'rat', 'irr', 'real']) if (inRing(k, x, y)) return k;
-  return null;
-}
-function buildVenn(parent, hidden) {
-  const out = {};
-  for (const k of ['real', 'rat', 'int', 'whole', 'nat', 'irr']) {
-    const r = RINGS[k], g = G(parent);
-    const fill = path(g, ell(r), { fill: mix(COL.board, COL[k], k === 'real' ? .1 : .16), stroke: 'none' }, { o: hidden ? 0 : 1 });
-    const stroke = path(g, ell(r), { stroke: COL[k], 'stroke-width': 3 }, hidden ? { d: 0, 'a_stroke-width': 3 } : { 'a_stroke-width': 3 });
-    const lab = T(g, NAME[k], { x: r.lx, y: r.ly, size: 26, fill: COL[k], weight: 600, anchor: 'middle', o: hidden ? 0 : 1 });
-    out[k] = { g, fill, stroke, lab };
-  }
-  return out;
-}
 
 /* ---------- timeline ---------- */
 let TW = [];
@@ -1115,16 +596,11 @@ const back = p => 1 + 2.2 * (p - 1) ** 3 + 1.2 * (p - 1) ** 2;
 const lin = p => p;
 function tw(e, to, t0, dur = .6, ease = io) { TW.push({ e, to, t0, dur, ease }); }
 function prog(pf, t0, dur, ease = io) { TW.push({ pf, t0, dur, ease }); }
-const show = (e, t0, dur = .5) => tw(e, { o: 1 }, t0, dur);
-const hide = (e, t0, dur = .5) => tw(e, { o: 0 }, t0, dur);
-const draw = (e, t0, dur = .9) => tw(e, { d: 1 }, t0, dur);
+const show = (e, t0, dur = .5, ease) => tw(e, { o: 1 }, t0, dur, ease);
+const hide = (e, t0, dur = .5, ease) => tw(e, { o: 0 }, t0, dur, ease);
+const draw = (e, t0, dur = .9, ease) => tw(e, { d: 1 }, t0, dur, ease);
 const pop = (e, t0) => tw(e, { s: 1, o: 1 }, t0, .45, back);
 function pulse(e, t0, k = 1.7) { tw(e, { s: k }, t0, .22, out); tw(e, { s: 1 }, t0 + .22, .4); }
-function glow(key, t0) {
-  const s = S.ring[key].stroke;
-  tw(s, { 'a_stroke-width': 9 }, t0, .22, out); tw(s, { 'a_stroke-width': 3 }, t0 + .25, .5);
-}
-function glowRun(key, t0) { CHAIN[key].forEach((k, i) => glow(k, t0 + i * .3)); }
 function stream(t, str, t0, dur) { prog(q => { t.textContent = str.slice(0, Math.round(q * str.length)); }, t0, dur, lin); }
 function mix(a, b, q) {
   const h = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
@@ -1150,15 +626,18 @@ function evalTo(t, list = TW) {
 /* ---------- world clock and camera ---------- */
 const soft = p => (1 - Math.cos(Math.PI * p)) / 2;   // gentle in-out, for camera moves
 // Continuous motion: f(t) runs on every frame of the beat with t in seconds from its start (0..D).
-// Keep f a pure function of t, so pause, seek and ?beat=N&t=S show the same frame.
-const clockRun = (f, D) => { f(0); prog(q => f(q * D), 0, D, lin); };
+// Keep f a pure function of t, so pause, seek and ?beat=N&t=S show the same frame. A beat holds its picture for HOLD s
+// after its narration and last tween; with { tail: true } f keeps running through that hold (t up to the beat's end)
+// instead of freezing at D, for motion that never stops, as in a film. A camera runs through the hold too when anything
+// in its beat does (its tail is 'follow'), so a follow shot keeps up with a tailed subject.
+const clockRun = (f, D, { tail = false } = {}) => { f(0); const w = { t0: 0, dur: D, ease: lin, tail }; w.pf = q => f(q * w.dur); TW.push(w); };
 // A camera looks at a world group through the stage (or a box, for split screen and picture-in-picture).
 // The view {x, y, z, r} is the world point at the centre, the zoom (screen px per world px) and the roll in degrees.
 // Moves are keyed on the beat clock: to(view, t0, dur, ease) blends each given key from its value at t0; a key may be a
 // function of t (follow). Unspecified keys keep following the earlier moves. dur 0 is a hard cut.
 let camN = 0;
-function camera(p, D, { box, x = 800, y = 450, z, r = 0, bg = COL.board } = {}) {
-  const [bx, by, bw, bh] = box || [0, 0, 1600, 900];
+function camera(p, D, { box, x = SW / 2, y = SH / 2, z, r = 0, bg = COL.board } = {}) {
+  const [bx, by, bw, bh] = box || [0, 0, SW, SH];
   const el = G(p, { x: bx + bw / 2, y: by + bh / 2 });
   let hold = el;
   if (box) {
@@ -1169,7 +648,7 @@ function camera(p, D, { box, x = 800, y = 450, z, r = 0, bg = COL.board } = {}) 
   }
   const view = mk('g', {}, hold), world = G(view);
   if (box) mk('rect', { x: -bw / 2, y: -bh / 2, width: bw, height: bh, rx: 18, fill: 'none', stroke: COL.faint, 'stroke-width': 2 }, el);
-  const v0 = { x, y, z: z ?? (box ? Math.min(bw / 1600, bh / 900) : 1), r };
+  const v0 = { x, y, z: z ?? (box ? Math.min(bw / SW, bh / SH) : 1), r };
   const ops = [], shakes = [], layers = [];
   const val = (v, t) => typeof v === 'function' ? v(t) : v;
   // The view at time t after the first n moves; each move remembers the view it starts from.
@@ -1220,14 +699,14 @@ function camera(p, D, { box, x = 800, y = 450, z, r = 0, bg = COL.board } = {}) 
       put(el, { x: Math.min(bx + bw - m - h, Math.max(bx + m + h, sx)), y: sy, o: Math.max(0, 1 - away / 80) });
     },
   };
-  clockRun(apply, D);
+  clockRun(apply, D, { tail: 'follow' });
   return cam;
 }
 
 /* ---------- scene ---------- */
 const scene = document.getElementById('scene');
 const S = {};
-const AXIS = { o: 800, u: 120 };             // number line: x of 0, pixels per unit; a chapter may change it
+const AXIS = { o: SW / 2, u: 120 };             // number line: x of 0, pixels per unit; a chapter may change it
 const X = v => AXIS.o + AXIS.u * v, Y0 = 610;
 const num = v => (v < 0 ? '−' : '') + String(Math.abs(v)).replace('.', DECIMAL_SIGN);
 function reset() {
@@ -1280,32 +759,12 @@ function fxp(pf, delay, dur, ease = io) { FX.push({ pf, t0: clock + delay, dur, 
 function finishFx() { FX.sort((a, b) => a.t0 - b.t0); evalTo(Infinity, FX); FX = []; }
 const pulseFx = (e, k = 1.8) => { if (!e) return; fx(e, { s: k }, 0, .22, out); fx(e, { s: 1 }, .22, .45); };
 const shakeFx = e => { if (!e) return; const x0 = st(e).x; fxp(q => put(e, { x: x0 + Math.sin(q * Math.PI * 6) * (1 - q) * 12 }), 0, .55, lin); };
-const glowFx = (key, delay = 0) => CHAIN[key].forEach((k, i) => {
-  const s = S.ring[k].stroke;
-  fx(s, { 'a_stroke-width': 9 }, delay + i * .28, .22, out); fx(s, { 'a_stroke-width': 3 }, delay + i * .28 + .25, .5);
-});
-function popDotFx(key, v, label) {
-  const L = S.q || qlayer();
-  const g = G(L, { x: X(v), y: Y0, s: 0, o: 0 });
-  mk('circle', { r: 7, fill: COL[key], stroke: COL.board, 'stroke-width': 2 }, g);
-  fx(g, { s: 1, o: 1 }, 0, .45, back);
-  if (label) fx(M(L, label, { x: X(v) + 10, y: Y0 + 56, size: 28, fill: COL[key], o: 0 }), { o: 1 }, .3, .4);
-}
 function floatText(str, x, y, colr) {
   const t = T(S.q || qlayer(), str, { x, y: y + 14, size: 24, fill: colr, anchor: 'middle', weight: 600, o: 0 });
   fx(t, { o: 1, y }, 0, .5, out);
 }
-function hopsFx(n) {
-  for (let k = 1; k <= -n; k++) {
-    const a = X(1 - k), b = X(-k);
-    fx(path(S.q, `M${a} ${Y0 - 12}Q${(a + b) / 2} ${Y0 - 84} ${b} ${Y0 - 12}`, { stroke: COL.int, 'stroke-width': 3 }, { d: 0 }), { d: 1 }, (k - 1) * .35, .35, lin);
-  }
-  floatText(translate('stepsLeftOfZero', { n: -n }), X(n / 2), Y0 - 100, COL.int);
-}
 
 /* ---------- shared answer columns ---------- */
-const FAMILIES = ['nat', 'whole', 'int', 'rat', 'irr', 'real'];
-const FAM_COLS = FAMILIES.map(k => [k, k === 'int' ? translate('integerColumn') : NAME[k], COL[k]]);
 const TF = [['t', translate('trueLabel'), null, 'T'], ['f', translate('falseLabel'), null, 'F']];
 function finishCard() {
   const c = card(SCREEN, 'fin');
@@ -1345,7 +804,6 @@ function sources() {
   return h('section', 'srcs', [h('h2', '', translate('sources')), h('ol', '', items)]);
 }
 const uiW = (str, size) => { ctx2d.font = `600 ${size}px ${UI}`; return ctx2d.measureText(str).width; };
-const RING_KEYS = ['nat', 'whole', 'int', 'rat', 'irr', 'real'];   // number keys 1–6 in sorting questions
 const SCORE = {};                                          // question id -> first-attempt {right, total}
 
 function h(tag, cls, kids = []) {
@@ -1368,7 +826,7 @@ function card(pos, cls) {
   if (pos.maxH) c.style.maxHeight = pos.maxH + 'px';
   $('ui').append(c);
   if (pos.cls === 'band') {
-    const fit = () => { c.style.top = Math.max(16, Math.min(pos.y, 900 - 16 - c.offsetHeight)) + 'px'; };
+    const fit = () => { c.style.top = Math.max(16, Math.min(pos.y, SH - 16 - c.offsetHeight)) + 'px'; };
     const ro = new ResizeObserver(fit);
     ro.observe(c); fit();
     P.cleanup.push(() => ro.disconnect());
@@ -1411,6 +869,7 @@ function quiz(pos, qs, done, label = translate('quickCheck')) {
     const q = qs[k];
     let first = true, resolved = false;
     const fb = h('div', 'fb'), body = h('div', 'body'), acts = h('div', 'acts');
+    fb.setAttribute('role', 'status');   // screen readers announce right or wrong
     const bCheck = h('button', 'btn', [translate('check'), kbd('Enter')]), bShow = h('button', 'btn quiet', [translate('showAnswer'), kbd('S')]);
     const bNext = h('button', 'btn go', [k < qs.length - 1 ? translate('nextQuestion') : translate('continue'), kbd('Enter')]);
     bShow.hidden = bNext.hidden = true;
@@ -1447,7 +906,7 @@ function quiz(pos, qs, done, label = translate('quickCheck')) {
       if (isShortcut(e, 's') && !bShow.hidden) { bShow.click(); return true; }
       return false;
     };
-    const kick = label + (qs.length > 1 ? '   ' + translate('countOf', { k: k + 1, n: qs.length }) : '');
+    const kick = label + (qs.length > 1 ? '  ·  ' + translate('countOf', { k: k + 1, n: qs.length }) : '');
     const head = h('div', 'head', [h('p', 'kicker', kick), h('p', 'prompt', [rich(q.prompt, pos.cls.startsWith('screen') ? 38 : 28)])]);   // match the prompt's type size
     if (ctl.hint) head.append(h('p', 'keys', [translate('keysPrefix'), ...ctl.hint]));
     c.replaceChildren(...(guide ? [guide] : []), head, fb, body, acts);
@@ -1627,9 +1086,12 @@ const grid = (items, cols, { multi = true, text = false } = {}) => (body, api) =
   };
 };
 // Exact value of a typed answer: integer, decimal, fraction a/b or mixed number "w a/b"; returns [num, den] or null.
-// Accepts −, – or - as the sign, and a decimal comma when DECIMAL_SIGN is ','. Never evaluates the text as code.
+// Accepts −, – or - as the sign, a currency sign before or after ($5, -$5, 5 €), thousands grouped by spaces (any kind)
+// or, where the decimal sign is a point, by commas, and a decimal comma when DECIMAL_SIGN is ','. Never evaluates the text as code.
 function rat(str) {
-  let t = String(str).trim().replace(/^[−–]/, '-').replace(/\s+/g, ' ');
+  let t = String(str).trim().replace(/^[−–]/, '-').replace(/\s+/g, ' ').replace(/^(-?) ?\p{Sc} ?|(?<=\d) ?\p{Sc}$/gu, '$1');
+  const group = DECIMAL_SIGN === ',' ? ' ' : '[, ]';   // one kind of separator throughout: 1,000 000 is not a number
+  t = t.replace(new RegExp(`^(-?\\d{1,3})(${group})(\\d{3}(?:\\2\\d{3})*)(?=$|[.,])`), (_, head, sep, rest) => head + rest.split(sep).join(''));
   if (DECIMAL_SIGN === ',') t = t.replace(/^(-?\d+),(\d+)$/, '$1.$2');   // 0,75 where the decimal sign is a comma
   let m = t.match(/^(-?)(\d+)(?:\.(\d+))?$/);
   if (m) { const d = 10 ** (m[3] || '').length, n = (m[1] ? -1 : 1) * (Number(m[2]) * d + Number(m[3] || 0)); return Number.isSafeInteger(n) && Number.isSafeInteger(d) ? [n, d] : null; }
@@ -1690,7 +1152,8 @@ const blanks = rowsIn => (body, api) => {
     if (ok && !r.played) { r.played = true; r.it.fx?.(); }
     return ok;
   };
-  requestAnimationFrame(() => all[0]?.focus({ preventScroll: true }));
+  // not on the frame ?beat=N opens before the lesson has started: there Space starts it rather than typing a space
+  requestAnimationFrame(() => { if (P.started) all[0]?.focus({ preventScroll: true }); });
   return {
     check() {
       const right = rows.filter(judge).length, done = right === rows.length;
@@ -1711,133 +1174,131 @@ const blanks = rowsIn => (body, api) => {
       kbd('Tab'), translate('hintNextBox'), kbd('Enter'), translate('hintCheck'), kbd('Esc'), translate('hintLeaveBox')],
   };
 };
-// Drag number chips into the stage number map. items: [parts, smallest ring, explanation].
-const slot = (k, n) => {
-  if (k === 'real') return [[940, 210], [1000, 760], [820, 800]][n % 3];   // inside Real, outside every other ring
-  const r = RINGS[k];
-  return [r.lx + [-72, 72, 0][n % 3], r.ly + 50 + 56 * Math.floor(n / 2)];
-};
-const plain = parts => parts.map(p => typeof p === 'string' ? p : p.ov !== undefined ? p.ov + ' repeating' : p.tex !== undefined ? p.tex : p.f ? p.f.join('/') : p.sup !== undefined ? '^' + p.sup : (p.i ? p.i : '') + '√' + (p.r.f ? p.r.f.join('/') : p.r)).join('');
-const sorter = (items, trayXY) => (body, api) => {
-  const L = qlayer();
-  const bg = mk('rect', { width: 1600, height: 900, fill: 'transparent' }, L);
-  const svg = $('stage');
-  const pt = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
-  let sel = null, drag = null, locked = false;
-  const label = c => c.setAttribute('aria-label', c.region ? translate('chipPlaced', { x: c.say, ring: NAME[c.region] }) : translate('chipNotPlaced', { x: c.say }));
-  const outline = (c, colr, w = 2.5) => { c._rect.setAttribute('stroke', colr); c._rect.setAttribute('stroke-width', w); };
-  const choose = c => {
-    if (sel) outline(sel, COL.chalk);
-    sel = c;
-    if (sel) { outline(sel, COL.task, 4); L.append(sel); }
-  };
-  const select = c => choose(sel === c ? null : c);
-  // Number badges next to the ring names, for keys 1–6.
-  RING_KEYS.forEach((k, i) => {
-    const r = RINGS[k], g = G(L, { x: r.lx - uiW(NAME[k], 26) / 2 - 24, y: r.ly - 9 });
-    g.style.pointerEvents = 'none';
-    mk('circle', { r: 14, fill: COL.board, stroke: COL[k], 'stroke-width': 1.5 }, g);
-    T(g, String(i + 1), { y: 6.5, size: 18, fill: COL[k], anchor: 'middle', weight: 600 });
-  });
-  const place = (c, x, y) => {
-    c.region = regionAt(x, y);
-    if (!c.region) [x, y] = c.home;
-    put(c, { x, y });
-    outline(c, COL.chalk);
-    c.querySelector('.mark')?.remove();
-    if (sel === c) sel = null;
-    label(c);
-  };
-  const chips = items.map(([parts, answer, why], i) => {
-    const [x, y] = trayXY(i);
-    const c = chip(L, parts, COL.chalk, { x, y, size: 32 });
-    Object.assign(c, { answer, why, home: [x, y], region: null, say: plain(parts) });
-    c.classList.add('tok');
-    c.setAttribute('tabindex', 0);
-    c.setAttribute('role', 'button');
-    label(c);
-    c.addEventListener('pointerdown', e => {
-      if (locked) return;
-      e.preventDefault();
-      const p = pt(e);
-      drag = { dx: p.x - st(c).x, dy: p.y - st(c).y, sx: p.x, sy: p.y, moved: false };
-      L.append(c);  // re-parent before capturing: moving a node drops its capture
-      c.setPointerCapture(e.pointerId);
-    });
-    c.addEventListener('pointermove', e => {
-      if (!drag) return;
-      const p = pt(e);
-      if (Math.hypot(p.x - drag.sx, p.y - drag.sy) > 6) drag.moved = true;
-      if (drag.moved) put(c, { x: p.x - drag.dx, y: p.y - drag.dy });
-    });
-    c.addEventListener('pointerup', () => {
-      if (!drag) return;
-      const moved = drag.moved;
-      drag = null;
-      if (moved) place(c, st(c).x, st(c).y); else select(c);
-    });
-    // A cancelled drag (a system gesture, a lost capture) drops the chip where it is instead of leaving it stuck to no pointer.
-    c.addEventListener('lostpointercapture', () => {
-      if (!drag) return;
-      const moved = drag.moved;
-      drag = null;
-      if (moved) place(c, st(c).x, st(c).y);
-    });
-    keyAct(c, () => { if (!locked) select(c); });
-    return c;
-  });
-  bg.addEventListener('pointerup', e => { if (sel && !locked) { const p = pt(e); place(sel, p.x, p.y); } });
-  return {
-    check() {
-      let right = 0;
-      const notes = h('ul');
-      for (const c of chips) {
-        c.querySelector('.mark')?.remove();
-        if (!c.region) { notes.append(h('li', '', translate('notPlacedYet', { x: c.say }))); continue; }
-        const ok = c.region === c.answer;
-        right += ok;
-        outline(c, ok ? COL.good : COL.bad, 4);
-        if (ok) { pulseFx(c, 1.25); glowFx(c.answer, right * .15); } else shakeFx(c);
-        const w = +c._rect.getAttribute('width');
-        T(c, ok ? '✓' : '✗', { x: w / 2 + 4, y: -16, size: 26, fill: ok ? COL.good : COL.bad, weight: 700 }).classList.add('mark');
-        if (!ok) notes.append(h('li', '', c.region === 'real'
-          ? translate('realRingIsEmpty', { x: c.say })
-          : c.why));
-      }
-      const all = right === chips.length;
-      api.grade(all, all ? [] : [translate('ringsRight', { r: right, n: chips.length }), notes], { right, total: chips.length });
-    },
-    reveal() {
-      const count = {};
-      chips.forEach((c, i) => {
-        const n = count[c.answer] = (count[c.answer] ?? -1) + 1;
-        const [x, y] = slot(c.answer, n);
-        c.region = c.answer;
-        c.querySelector('.mark')?.remove();
-        outline(c, COL.good, 4);
-        fx(c, { x, y }, i * .12, .8);
-      });
-      return translate('ringsShown');
-    },
-    lock() { locked = true; choose(null); },
-    hint: [kbd('←'), kbd('→'), translate('hintPickNumber'), kbd('1'), '–', kbd('6'), translate('hintPickRing')],
-    key(e) {
-      if (locked) return false;
-      const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
-      if (d) {
-        const i = sel ? chips.indexOf(sel) : d > 0 ? -1 : 0;
-        choose(chips[(i + d + chips.length) % chips.length]);
-        return true;
-      }
-      const ring = RING_KEYS[+e.key - 1];
-      if (!ring || !sel) return false;
-      const c = sel;
-      place(c, ...slot(ring, chips.filter(x => x.region === ring && x !== c).length));
-      choose(chips.find(x => !x.region) || null);
-      return true;
-    },
-  };
-};
+
+/* ---------- sound effects and music ----------
+   sfx(beat, at, name, vol, bed): play audio/sfx/<name>.mp3 when the clock of beat `beat` passes `at` in normal playback
+   (a seek past it fires nothing), at half volume (vol 2 is full). A long ambience is listed in SFX_BED with its length
+   (SFX_BED.birds = 10): a seek into it joins it part-way. A beat function runs again at every seek; an effect is listed once.
+   An effect still loading when it is due plays late, joined part-way, for up to a second (or its bed).
+   music(file, beats, gain, fade): a looping track under the listed beats (all of them by default). Its place is the
+   length of its earlier beats plus the clock. It ducks to 30 % under the whole beat, or 70 % in the music-only lead-in
+   (`pre`) of the beats in window.MUSIC_UP_IN_PRE (true: every beat). It crossfades over `fade` s (0: a cut), and
+   window.MUSIC_OFF = { beat: t => true } fades it out for a moment.
+   export.py reads SFX, BGM and these settings, and mixes the film by the same rules.
+   Films only (a chapter without questions): effects and music go through one Web Audio graph, so ducks, fades and the
+   volume slider reach them on phones too (iOS ignores an element's .volume). A pause holds them; a seek stops the effects.
+   When a clip loading or buffering holds the film's clock, the music runs on and then eases back (5 % slower or faster),
+   or jumps back once if it is more than a second out. */
+const SND = { sfx: [], bed: {}, bgm: [], len: [], on: [], wait: [], buf: {}, ctx: null, out: null, last: { i: -1, t: 0 }, duck: .3 };
+// window properties, not declarations: a book with its own older sfx() or BGM declares them over these
+Object.assign(window, { SFX: SND.sfx, SFX_BED: SND.bed, BGM: SND.bgm,
+  sfx(beat, at, name, vol = 1, bed = SND.bed[name] || 0) {
+    const e = SND.sfx.find(x => x.beat === beat && x.at === at && x.name === name);
+    if (e) Object.assign(e, { vol, bed }); else SND.sfx.push({ beat, at, name, vol, bed });
+    sfxLoad(name);
+  },
+  music(file, beats = BEATS.map(b => b.id), gain = 1, fade = .8) {
+    const m = { n: file, beats, gain, fade, v: 0, a: Object.assign(new Audio(file), { preload: 'auto', loop: true, volume: 0 }) };
+    SND.bgm.push(m);
+    if (SND.ctx) bgmWire(m);
+  },
+});
+function sfxLoad(name) {
+  const s = SND.buf[name] ??= { data: fetch(`audio/sfx/${name}.mp3`).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null) };
+  if (SND.ctx && !s.decoded) s.decoded = s.data.then(d => d && SND.ctx.decodeAudioData(d)).then(b => { s.b = b; }, () => {});
+}
+function sfxPlay(e, late) {
+  const ctx = SND.ctx, src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = SND.buf[e.name].b; src._sfx = e.name; g.gain.value = src._vol = .5 * e.vol;
+  src.playbackRate.value = P.rate;
+  src.connect(g).connect(SND.out);
+  src.start(0, late && !e.bed ? 0 : Math.max(0, P.t - e.at));   // a late one-shot starts from its attack
+  SND.on.push(src);
+  src.onended = () => { const k = SND.on.indexOf(src); if (k >= 0) SND.on.splice(k, 1); };
+}
+function bgmWire(m) {
+  m.g = SND.ctx.createGain();
+  SND.ctx.createMediaElementSource(m.a).connect(m.g).connect(SND.out);
+  m.a.volume = 1;
+}
+// A browser starts sound only after a click or a key: the first one builds the graph (films only) and readies the music.
+function soundUnlock() {
+  if (!SND.ctx && window.AudioContext && (!BEATS.some(b => b.ask) || CHAPTER.film)) {   // a film with a question (CHAPTER.film) keeps its sound
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';   // iOS: the silent switch must not mute the film
+    SND.ctx = new AudioContext();
+    SND.out = SND.ctx.createGain();
+    SND.out.connect(SND.ctx.destination);
+    for (const n in SND.buf) sfxLoad(n);
+    for (const m of SND.bgm) bgmWire(m);
+  }
+  if (SND.ctx && SND.ctx.state !== 'running' && SND.ctx.state !== 'closed') SND.ctx.resume().catch(() => {});   // also iOS 'interrupted'
+  for (const m of SND.bgm) if (!m.blessed) {   // iOS lets an element play later only if it once played inside a click
+    m.blessed = true; m.a.muted = true;
+    m.a.play().then(() => { if (!m.cur) m.a.pause(); m.a.muted = false; }, () => { m.a.muted = false; m.blessed = false; });
+  }
+}
+// a touch activates the page on touchend or click, not on pointerdown
+for (const type of ['pointerdown', 'touchend', 'click', 'keydown']) addEventListener(type, soundUnlock, true);
+function soundTick(dt) {
+  const id = BEATS[P.i]?.id, pre = BEATS[P.i]?.pre || 0, on = P.started && P.playing && !P.waiting && !P.done, L = SND.last;
+  // a film waiting for the reader (CHAPTER.film, a question beat after its narration): the music plays on, louder
+  const wait = P.started && P.playing && P.waiting && !P.done && !!CHAPTER.film;
+  const held = P.started && !P.playing && !P.done, ctx = SND.ctx;
+  if (ctx?.state === 'running' && held) ctx.suspend();
+  else if (ctx && ctx.state !== 'running' && ctx.state !== 'closed' && !held) ctx.resume().catch(() => {});
+  // the clock ran on (or stood still, paused) in the same beat; anything else is a seek, a replay or the next beat
+  const same = L.i === P.i && P.t >= L.t && P.t - Math.max(0, L.t) < .5;
+  if (!same) { while (SND.on.length) SND.on.pop().stop(); SND.wait = []; }
+  // a beat that has just begun fires its effects from 0 on; a seek fires nothing it skipped, but joins a bed
+  const from = same ? L.t : P.t < .25 ? -1 : P.t, seeked = !same || L.pend;
+  if (on && ctx) {
+    for (const e of SND.sfx) {
+      if (e.beat !== id || !(e.at > from && e.at <= P.t || seeked && e.bed && e.at < P.t && P.t < e.at + e.bed)) continue;
+      if (SND.buf[e.name]?.b) sfxPlay(e); else SND.wait.push(e);
+    }
+    SND.wait = SND.wait.filter(e => P.t - e.at < (e.bed || 1) && !(SND.buf[e.name]?.b && (sfxPlay(e, true), true)));
+    for (const s of SND.on) if (s.playbackRate.value !== P.rate) s.playbackRate.value = P.rate;
+  }
+  SND.last = { i: P.i, t: on ? P.t : from, pend: !on && (!same || !!L.pend) };
+  const vol = +($('volume')?.value ?? 1), up = window.MUSIC_UP_IN_PRE;
+  if (SND.out) SND.out.gain.value = vol;
+  if (!SND.bgm.length) return;
+  // the film's clock moved this frame (a clip loading or buffering holds it), or jumped (a seek, a replay)
+  const runs = on && same && P.t > L.t, jump = !same && !(L.i === P.i - 1 && P.t < .5);
+  if (!held) SND.duck += Math.max(-dt, Math.min(dt, (wait || P.t < pre && (up === true || up?.includes?.(id)) ? .7 : .3) - SND.duck));
+  for (const m of SND.bgm) {
+    const k = m.beats.indexOf(id), current = (on || wait) && k >= 0 && !window.MUSIC_OFF?.[id]?.(P.t);
+    if (jump) m.off = 0;   // a seek or a replay puts every track back where the film's own timing says
+    if (wait && current) m.off = (m.off || 0) + dt * P.rate;   // the time it ran on while the reader decided
+    m.cur = current;
+    if (!held) m.v = m.fade > 0 ? Math.max(0, Math.min(1, m.v + (current ? 1 : -1) * dt / m.fade)) : +current;
+    const g = m.v * m.gain * SND.duck;
+    if (m.g) m.g.gain.value = g; else m.a.volume = Math.min(1, g * vol);
+    if (current) {
+      // where the film is: the beats before this one in the track as they really ran (P.end), plus now
+      const dur = m.a.duration || Infinity;
+      const want = (m.beats.slice(0, k).reduce((s, b) => s + (SND.len[BEATS.findIndex(x => x.id === b)] || 0), 0) + P.t + (m.off || 0)) % dur;
+      let d = m.a.currentTime - want;
+      if (d > dur / 2) d -= dur; else if (d < -dur / 2) d += dur;
+      // a start, a jump, or more than a second out once the clock runs again: seek. Less: ease back while the clock runs,
+      // from .25 s out until .05 s
+      const ok = runs && !m.a.seeking;
+      // (once more after a jump: the element plays on while it seeks)
+      if (m.a.paused || jump && Math.abs(d) > .05 || ok && Math.abs(d) > (m.settle ? .25 : 1)) {
+        m.a.currentTime = want; d = 0; m.settle = !ok;
+      } else if (ok) m.settle = false;
+      if (Math.abs(d) > .25) m.fix = true; else if (Math.abs(d) < .05) m.fix = false;
+      // a frame where the clock stood still keeps the rate it had
+      const rate = !m.fix ? P.rate : ok ? P.rate * (1 - Math.sign(d) * .05) : m.a.playbackRate;
+      if (Math.abs(m.a.playbackRate - rate) > .001) m.a.playbackRate = rate;
+      if (m.a.paused) m.a.play().catch(() => {});
+    } else {
+      if (m.a.playbackRate !== P.rate) m.a.playbackRate = P.rate;
+      if (m.v === 0 && !m.a.paused) m.a.pause();
+    }
+  }
+  if (!on && !wait && !P.done) for (const m of SND.bgm) m.a.pause();
+}
 
 /* ---------- player ---------- */
 const P = { i: 0, t: 0, end: 1, playing: false, waiting: false, done: false, started: false, audio: null, afail: false, stall: 0, cleanup: [], rate: 1, nextClip: null };
@@ -1850,10 +1311,14 @@ function runBeat(i) {
   };
   S.cleared = false;
   b.run(m, pre + tm.dur);
-  if (S.cleared && b.lead !== false && !pre) leadIn();
+  if (S.cleared && b.lead !== false && CHAPTER.lead !== false && !pre) leadIn();   // CHAPTER.lead false: no beat gets one (a film)
   TW.sort((a, c) => a.t0 - c.t0);
-  return Math.max(pre + tm.dur, ...TW.map(w => w.t0 + w.dur)) + .6;
+  const end = Math.max(pre + tm.dur, ...TW.map(w => w.t0 + w.dur)) + HOLD;
+  const tail = TW.some(w => w.tail === true);
+  for (const w of TW) if (w.tail === true || tail && w.tail === 'follow') w.dur = end - w.t0;
+  return SND.len[i] = end;   // the music places itself by how long each beat really runs
 }
+const HOLD = .6;
 // A beat that clears the picture must not leave it empty while the narration has started.
 // If nothing appears before LEAD_MAX, the opening group (every tween that starts within LEAD_GROUP s of the
 // first reveal) moves earlier so it begins at LEAD_AT, just after the old panel has faded. Later steps keep their word timing.
@@ -1896,7 +1361,7 @@ function seek(i, play = P.playing) {
 // Jump to a point inside beat i (frac of its narration); question beats always start at their beginning.
 function seekInto(i, frac) {
   seek(i, true);
-  const pre = BEATS[i].pre || 0, t = BEATS[i].ask ? 0 : frac * (pre + TIMINGS[BEATS[i].id].dur);
+  const pre = BEATS[i].pre || 0, t = BEATS[i].ask && !CHAPTER.film ? 0 : frac * (pre + TIMINGS[BEATS[i].id].dur);   // a film's question beats seek like any other
   if (t < .3) return;
   P.t = t;
   evalTo(t);
@@ -1904,7 +1369,7 @@ function seekInto(i, frac) {
 }
 function start(i, play) {
   stopAudio(); clearCards();
-  Object.assign(P, { i, t: 0, waiting: false, done: false, afail: false, stall: 0 });
+  Object.assign(P, { i, t: 0, waiting: false, done: false, afail: false, stall: 0, lost: 0 });
   P.end = runBeat(i);
   evalTo(0);
   const a = P.audio = beatClip(i, true);
@@ -1919,13 +1384,20 @@ function start(i, play) {
     if (P.afail) { P.afail = false; a.currentTime = Math.max(0, P.t - (BEATS[P.i].pre || 0)); }   // sound came back late: rejoin the picture where it is
   };
   const b = BEATS[i];
-  if (b.ask) b.ask(() => { if (P.i === i) { evalTo(Infinity); start(i + 1, true); } });
+  if (b.ask) b.ask(() => {
+    if (P.i !== i || P.done) return;
+    evalTo(Infinity);
+    if (i + 1 < BEATS.length) start(i + 1, true);
+    else { P.done = true; setPlaying(false); filmDone(); }
+  });
   setPlaying(play);
   if (i + 1 < BEATS.length) beatClip(i + 1);
 }
 // The next beat's clip starts loading while this one plays, so a slow connection does not stall between beats.
 function beatClip(i, take) {
-  const src = `audio/${CHAPTER.language || 'en'}/${BEATS[i].id}.mp3`;
+  // the clip's length rides on the URL: regenerated narration gets a new address, so a browser cache cannot pair new
+  // timings with an old clip
+  const src = `audio/${CHAPTER.language || 'en'}/${BEATS[i].id}.mp3?v=${TIMINGS[BEATS[i].id]?.dur ?? ''}`;
   let a = P.nextClip?._src === src ? P.nextClip : null;
   if (!a) {
     if (P.nextClip && P.nextClip !== P.audio) { P.nextClip.removeAttribute('src'); P.nextClip.load(); }   // abandon a stale preload
@@ -1960,16 +1432,38 @@ function beatDone() {
   const b = BEATS[P.i];
   if (b.ask) P.waiting = true;
   else if (P.i < BEATS.length - 1) start(P.i + 1, true);
-  else { P.done = true; setPlaying(false); }
+  else { P.done = true; setPlaying(false); filmDone(); }
+}
+// A chapter that ends on its last frame, with no closing card of questions (a picture book), is finished there: it
+// counts as done, and CHAPTER.next is offered over that frame. Seeking or replaying clears the button with the cards.
+function filmDone() {
+  progress(p => { p.done = [...new Set([...(p.done || []), CHAPTER.number])]; });
+  document.activeElement?.blur();   // a last question's Continue keeps focus, and Enter would press it again
+  // as on the finish card: Enter opens the next chapter (or replays), R and Space replay
+  const go = () => { if (CHAPTER.next) location.href = CHAPTER.next; else restart(); };
+  P.keys = e => e.key === 'Enter' ? (go(), true) : isShortcut(e, 'r') ? (restart(), true) : false;
+  if (!CHAPTER.next) return;
+  const next = h('button', 'btn go', [translate('nextChapter'), kbd('Enter')]);
+  next.onclick = go;
+  const c = card({ x: 0, y: 770, w: 0, cls: 'side' }, 'next');
+  Object.assign(c.style, { left: 'auto', right: '40px', width: 'auto' });
+  c.append(h('div', 'acts', [next]));
 }
 let last = performance.now();
 function frame(now) {
-  const dt = Math.min(.1, (now - last) / 1000);
+  frameStep(now, .1);
+  requestAnimationFrame(frame);
+}
+// A hidden tab gets no animation frames: a timer keeps the film going, so a beat that ends there still starts the next
+// one (a tab playing sound keeps its timers). Its ticks come late, so they may move the clock further at once.
+setInterval(() => { if (document.hidden) frameStep(performance.now(), 1.5); }, 250);
+function frameStep(now, most) {
+  const dt = Math.min(most, Math.max(0, now - last) / 1000);
   last = now;
   clock += dt;
   if (FX.length) { evalTo(clock, FX); FX = FX.filter(w => !w.done); }
   if (P.playing && !P.waiting && !P.done) {
-    const a = P.audio;
+    const a = P.audio, t0 = P.t;
     // While the clip plays, its clock drives the picture; before it starts or after it ends, wall time does.
     const pre = BEATS[P.i].pre || 0;
     if (a && P.t < pre) {   // the picture's lead before the narration, on wall time; then the clip starts
@@ -1980,11 +1474,16 @@ function frame(now) {
       else if ((P.stall += dt) > (a.readyState < 2 ? 8 : 15)) soundFailed();   // nothing to play after 8 s, or stuck for 15
     } else P.t += dt * P.rate;
     evalTo(P.t);
-    if (P.t >= P.end) beatDone();
+    // P.lost: how long the clock stood still while the film played (a clip getting going, buffering). Music runs on
+    // through it, so a beat under music gives that time back from its closing hold: each beat then lasts as long in
+    // real time as on the music's timeline, and the music stays with the picture instead of drifting ahead beat by beat.
+    P.lost += dt * P.rate - (P.t - t0);
+    const back = SND.bgm.some(m => m.beats.includes(BEATS[P.i].id)) ? Math.max(0, Math.min(HOLD, P.lost)) : 0;
+    if (P.t >= P.end - back) beatDone();
   }
+  soundTick(dt);
   syncLinks();
   ui();
-  requestAnimationFrame(frame);
 }
 let segs = [];
 function buildSegs() {
@@ -2016,23 +1515,49 @@ function ui() {
   if (step !== stepText) { stepText = step; $('stepName').textContent = step; }
   const b = BEATS[P.i];
   let text = '';
-  if (captions && P.started && !b.ask && !P.done) {
-    for (const [t, line] of TIMINGS[b.id].cues) { if (t + (b.pre || 0) > P.t + .05) break; text = line; }
+  // a question's caption shows while its narration plays, clear of the cards; a full-screen card already shows the
+  // question, so it has none
+  const asking = !!b.ask;
+  if (P.started && !P.done && !(asking && (P.waiting || $('ui').querySelector('.card.screen')))) {
+    // a cue is [start, line], [start, line, end] or [start, line, end, 1]: with an end, the caption clears once its
+    // words are over; a 1 marks a line in another language, whose subtitle shows even with captions off
+    for (const [t, line, end, forced] of TIMINGS[b.id].cues) {
+      if (t + (b.pre || 0) > P.t + .05) break;
+      text = (captions || forced) && !(end != null && P.t > end + (b.pre || 0)) ? line : '';
+    }
   }
   if (text !== capText) { capText = text; $('caption').textContent = text; $('caption').hidden = !text; }
+  if (text) placeCaption(asking);
+}
+// Above a bottom band, or centred left of a card in the bottom right; elsewhere the caption keeps its place.
+let capAt = '';
+function placeCaption(asking) {
+  const c = asking ? $('ui').querySelector('.card.band, .card.side') : null;
+  let at = '';
+  if (c?.classList.contains('band')) at = `${SH + 60 - c.offsetTop + 12}||`;
+  else if (c && c.offsetLeft > 800 && c.offsetTop + c.offsetHeight > 700) at = `|${c.offsetLeft / 2}|${c.offsetLeft - 60}`;
+  if (at === capAt) return;
+  capAt = at;
+  const [bottom, left, width] = at.split('|'), s = $('caption').style;
+  Object.assign(s, { bottom: bottom && bottom + 'px', left: left && left + 'px', maxWidth: width && width + 'px' });
 }
 let captions = false, capText = '';
 try { captions = localStorage.getItem('captions') === '1'; } catch {}
-function setCaptions(on) {
+function setCaptions(on, save = true) {
   captions = on;
   $('bCC').setAttribute('aria-pressed', String(on));
-  try { localStorage.setItem('captions', on ? '1' : '0'); } catch {}
+  if (save) try { localStorage.setItem('captions', on ? '1' : '0'); } catch {}
 }
-setCaptions(captions);
-function hideCover() { P.started = true; $('cover').hidden = true; }
+setCaptions(captions, false);   // only the reader's own choice is stored, so a book can still pick the first-time default
+function hideCover() {
+  P.started = true; $('cover').hidden = true;
+  // a question that ?beat=N opened before the start (its box waited unfocused, so Space started) now takes the typing
+  if (BEATS[P.i].ask) $('ui').querySelector('input.box:not(:disabled)')?.focus({ preventScroll: true });
+}
 function togglePlay() {
   if (!P.started) { hideCover(); return setPlaying(true); }
-  if (P.waiting || P.done) return;
+  if (P.done) return restart();   // the end of a film (or of a chapter whose last step is a question): play again
+  if (P.waiting) return;
   setPlaying(!P.playing);
 }
 const back1 = () => seek(P.t > 2.5 || P.i === 0 ? P.i : P.i - 1);
@@ -2041,7 +1566,7 @@ $('cover').onclick = togglePlay;
 $('stage').addEventListener('click', e => {
   if (e.target.closest('a.cite')) { if (P.playing && !P.waiting) setPlaying(false); return; }   // opening a source pauses the lesson
   const b = BEATS[P.i];
-  if (!b.ask && !e.target.closest('.qlayer')) togglePlay();
+  if (!b.ask && !P.done && !e.target.closest('.qlayer')) togglePlay();   // a tap on a finished film's last frame does nothing
 });
 const citeObs = new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) autoCite(n); });
 citeObs.observe(scene, { childList: true, subtree: true });
@@ -2095,7 +1620,7 @@ document.addEventListener('keydown', e => {
   if ((k === 'Enter' || k === ' ') && e.target.closest?.('button, [tabindex], a')) return;  // a Tab-focused control acts itself
   if (!P.started) { if (k === ' ' || k === 'Enter') { e.preventDefault(); togglePlay(); } return; }
   if (P.keys && !e.shiftKey && P.keys(e)) { e.preventDefault(); return; }
-  const free = e.shiftKey || !P.keys;
+  const free = e.shiftKey || !P.keys || P.done;   // after the end no question holds the arrows
   let used = true;
   if (k === ' ') togglePlay();
   else if (k === 'ArrowLeft' && free) back1();
@@ -2111,7 +1636,7 @@ document.addEventListener('keydown', e => {
 // Mouse clicks should not leave focus on a control, so Enter and Space keep meaning "check" and "play".
 $('frame').addEventListener('mousedown', e => { if (e.target.closest('button, [tabindex]')) e.preventDefault(); });
 $('bHelp').onclick = toggleHelp;
-const fit = () => document.documentElement.style.setProperty('--k', Math.min(innerWidth / 1640, (innerHeight - (innerWidth <= 700 ? 120 : 0)) / 1000));
+const fit = () => document.documentElement.style.setProperty('--k', Math.min(innerWidth / (SW + 40), (innerHeight - (innerWidth <= 700 ? 120 : 0)) / (SH + 100)));
 addEventListener('resize', fit);
 fit();
 
@@ -2133,12 +1658,18 @@ function boot() {
   $('bHome').href = `../#ch${String(CHAPTER.number).padStart(2, '0')}`;
   progress(p => { p.last = CHAPTER.number; });
   document.getElementById('stage').setAttribute('aria-label', translate('stageLabelTitled', { title: CHAPTER.title }));
-  $('coverMeta').textContent = translate('aboutMinutes', { n: num(CHAPTER.minutes) });
+  const film = !!CHAPTER.film || !BEATS.some(b => b.ask);   // a picture book or a film: no "lesson" or "quick checks" on its cover
+  if (film) {   // the help lists no question keys and needs no column titles
+    $('coverGo').textContent = translate('startFilm');
+    const shift = [...$('help').querySelectorAll('dt')].find(e => e.textContent.startsWith('Shift'));
+    for (const e of [$('help').querySelector('.help-cols > :last-child'), $('help').querySelector('h3'), shift, shift.nextElementSibling]) e.hidden = true;
+  }
+  $('coverMeta').textContent = translate(film ? 'aboutMinutesFilm' : 'aboutMinutes', { n: num(CHAPTER.minutes) });
   buildSegs();
   const qs = new URLSearchParams(location.search);
   if (qs.has('beat')) {
     $('cover').hidden = true;
-    seek(+qs.get('beat'), false);
+    seek(Math.max(0, Math.min(BEATS.length - 1, qs.get('beat') | 0)), false);
     P.t = +(qs.get('t') || 0);
     evalTo(P.t);
     if (P.audio) P.audio.currentTime = Math.max(0, P.t - (BEATS[P.i].pre || 0));
