@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Papermorph — The animated bookshelf</title>
 <meta name="description" content="A little library of books brought to life. Watch animated lessons, explore the ideas, and try them yourself.">
+<link rel="canonical" href="https://papermorph.diamonddoge.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Papermorph">
+<meta property="og:title" content="Papermorph — The animated bookshelf">
+<meta property="og:description" content="A little library of books brought to life. Watch animated lessons, explore the ideas, and try them yourself.">
+<meta property="og:url" content="https://papermorph.diamonddoge.org/">
+<meta property="og:image" content="https://papermorph.diamonddoge.org/assets/bookshelf.webp">
+<meta property="og:image:alt" content="A wooden bookshelf of animated books">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231d2b27'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='48' fill='%23f0b45a'%3E∞%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="lib/bookshelf.css">
 <script src="lib/bookshelf.js" defer></script>
@@ -12,32 +21,48 @@
 <body>
 <main id="shelf" aria-labelledby="shelf-title">
   <header class="shelf-top">
-    <h1 id="shelf-title"><a class="shelf-brand" href="#"><span aria-hidden="true">∞</span> Papermorph</a></h1>
+    <h1 id="shelf-title"><a class="shelf-brand" href="./"><span aria-hidden="true">∞</span> Papermorph</a></h1>
     <p>Animated books · A growing collection</p>
   </header>
-  <figure class="photo-shelf" aria-label="Three shelves: STEM, picture books for children, and curious books">
-    <img class="shelf-photo" src="assets/bookshelf.png" width="1086" height="1448" alt="A wooden bookshelf. Math and physics books on the top shelf, illustrated children's stories on the middle shelf, and philosophy and history books on the bottom shelf. The lower two shelves are marked Coming Soon, and a GitHub emblem is on the drawer." fetchpriority="high">
+  <figure class="photo-shelf" aria-label="Three shelves: STEM, picture books for children, and video essays">
+    <img class="shelf-photo" src="assets/bookshelf.webp" width="1086" height="1448" alt="A wooden bookshelf. Algebra, mathematics and physics books on the top shelf marked STEM; picture books on the middle shelf: The Three Little Pigs, Little Red Riding Hood and Joke Collection; philosophy and history books on the bottom shelf marked Video Essay, among them Shooting an Elephant; two drawers below, marked GitHub and YouTube." fetchpriority="high">
     <div id="shelf-books">
       <section class="shelf-tier" aria-labelledby="stem-title">
         <h2 class="visually-hidden" id="stem-title">STEM · Mathematics</h2>
         <a class="book-hotspot algebra-book" data-book="elementary-algebra" href="elementary-algebra/" aria-label="Open Elementary Algebra, 68 narrated chapters">
           <span class="book-caption"><strong>Elementary Algebra <span aria-hidden="true">↗</span></strong><small>68 narrated chapters</small></span>
         </a>
-        <a class="book-hotspot math-book" data-book="math-notebook" href="math-notebook/" aria-label="Open Elementary Mathematics, 22 narrated chapters">
-          <span class="book-caption"><strong>Elementary Mathematics <span aria-hidden="true">↗</span></strong><small>22 narrated chapters</small></span>
+        <a class="book-hotspot math-book" data-book="math-notebook" href="math-notebook/" aria-label="Open Elementary Mathematics, 23 narrated chapters">
+          <span class="book-caption"><strong>Elementary Mathematics <span aria-hidden="true">↗</span></strong><small>23 narrated chapters</small></span>
         </a>
-        <a class="book-hotspot physics-book" data-book="science" href="science/" aria-label="Open Elementary Physics, 3 narrated chapters">
-          <span class="book-caption"><strong>Elementary Physics <span aria-hidden="true">↗</span></strong><small>3 narrated chapters</small></span>
+        <a class="book-hotspot physics-book" data-book="science" href="science/" aria-label="Open Elementary Physics, 9 narrated chapters and 2 sample chapters">
+          <span class="book-caption"><strong>Elementary Physics <span aria-hidden="true">↗</span></strong><small>9 narrated chapters · 2 samples</small></span>
         </a>
       </section>
       <section class="shelf-tier" aria-labelledby="picture-title">
-        <h2 class="visually-hidden" id="picture-title">Picture books for children · Coming soon</h2>
+        <h2 class="visually-hidden" id="picture-title">Picture books for children · Three series</h2>
+        <a class="book-hotspot pigs-book" data-book="three-little-pigs" href="three-little-pigs/" aria-label="Open The Three Little Pigs, an animated picture book experiment and how it was made">
+          <span class="book-caption"><strong>The Three Little Pigs <span aria-hidden="true">↗</span></strong><small>An experiment · how it was made</small></span>
+        </a>
+        <a class="book-hotspot red-book" data-book="little-red-riding-hood" href="little-red-riding-hood/" aria-label="Open Little Red Riding Hood, a paper-cutout stop-motion picture book and how it was made">
+          <span class="book-caption"><strong>Little Red Riding Hood <span aria-hidden="true">↗</span></strong><small>Paper-cutout stop motion · how it was made</small></span>
+        </a>
+        <a class="book-hotspot joke-book" data-book="joke-collection" href="joke-collection/" aria-label="Open Joke Collection, short animated jokes, seven episodes">
+          <span class="book-caption"><strong>Joke Collection <span aria-hidden="true">↗</span></strong><small>7 episodes · how they were made</small></span>
+        </a>
       </section>
       <section class="shelf-tier" aria-labelledby="curious-title">
-        <h2 class="visually-hidden" id="curious-title">Curious books · Coming soon</h2>
+        <h2 class="visually-hidden" id="curious-title">Video essays · Documentaries</h2>
+        <a class="book-hotspot foucault-book" data-book="madness" href="madness/" aria-label="Open Madness and Civilization, a ten-minute documentary on Michel Foucault's book">
+          <span class="book-caption"><strong>Madness and Civilization <span aria-hidden="true">↗</span></strong><small>A documentary · Michel Foucault</small></span>
+        </a>
+        <a class="book-hotspot elephant-book" data-book="shooting-an-elephant" href="shooting-an-elephant/" aria-label="Open Shooting an Elephant, an interactive documentary of George Orwell's essay">
+          <span class="book-caption"><strong>Shooting an Elephant <span aria-hidden="true">↗</span></strong><small>An interactive documentary · George Orwell</small></span>
+        </a>
       </section>
     </div>
     <a class="github-drawer" href="https://github.com/DozenTwelve/Papermorph" target="_blank" rel="noopener noreferrer" aria-label="Papermorph on GitHub: source and Skills"></a>
+    <a class="youtube-drawer" href="https://www.youtube.com/@AnotherGameDoge" target="_blank" rel="noopener noreferrer" aria-label="The films on YouTube"></a>
     <noscript><p class="shelf-noscript">Book links work without JavaScript. The animated lessons require JavaScript.</p></noscript>
   </figure>
   <footer class="shelf-footer">
@@ -50,7 +75,7 @@
     <p class="about-kicker">A note from the bookshelf</p>
     <h2 id="shelf-about-title">About Papermorph</h2>
     <p>An independent, noncommercial educational project. Not affiliated with the authors or publishers of the reference books. Book titles and original materials belong to their respective owners.</p>
-    <p>Lessons may contain errors; corrections are welcome. Reading progress stays in your browser. Books on the future shelves are previews, not available lessons.</p>
+    <p>Lessons may contain errors; corrections are welcome. Reading progress stays in your browser; the site counts visits anonymously (Cloudflare Web Analytics, no cookies). Books on the future shelves are previews, not available lessons.</p>
     <p>Explore the source and book-making Skill on <a href="https://github.com/DozenTwelve/Papermorph" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
   </dialog>
 </main>

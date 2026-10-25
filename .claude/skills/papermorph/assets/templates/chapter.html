@@ -9,6 +9,7 @@
 </head>
 <body>
 <script src="../lib/engine.js"></script>
+<!-- <script src="../lib/math.js"></script>  a chapter that uses the maths helpers (number lines, tiles, planes, sorter, ...) -->
 <script src="../refs.js"></script><!-- the book's sources for cite(); built by scripts/refs.py -->
 <!-- <script src="items.js"></script>  choice questions for mcq(id); built by scripts/items.py from books/<book>/items/chNN.items.json -->
 <script src="audio/en/timings.js"></script>
@@ -16,6 +17,7 @@
 'use strict';
 // A starting skeleton, not a design. Replace every beat; keep the shape: intro, lesson beats with
 // quick checks between them, a summary, full-screen practice, finish. Beat ids match narration.en.json.
+// <html lang> sets the interface text, language the audio folder: keep both, and the timings path above, in the book's language.
 const CHAPTER = { number: 1, title: 'CHAPTER TITLE', minutes: 8, language: 'en', refs: [] };   // match the audio folder; set next once the next chapter exists; refs: REFS keys to list on the finish card besides those drawn with cite()
 
 /* ---------- chapter drawing helpers ---------- */

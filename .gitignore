@@ -2,27 +2,30 @@
 .venv/
 __pycache__/
 
-# Reference book: internal only, never published. book_pages/ is regenerated from the PDF by split_book.py.
+# Reference books: internal only, never published.
 *.pdf
-book_pages/
 .wrangler/
-
-# Extracted references for books in their own folders.
-books/*/pages/
 
 # Local production state and unused artwork; publish the Skill and finished site.
 /CLAUDE.md
 /plan.md
-/sections.json
-/3.png
 /img/*
 !/img/readme/
 /img/readme/*
 !/img/readme/logo.png
 !/img/readme/logo_light.png
-!/img/readme/papermorph-preview.gif
+!/img/readme/papermorph-preview.webp
 !/img/readme/papermorph-preview.mp4
-/scripts/
+!/img/readme/physics-pulleys.webp
+!/img/readme/joke-collection.webp
 /books/
 /content/
 /tools/
+
+# Shooting an Elephant: test pages and pictures the film does not use, kept locally
+/site/shooting-an-elephant/lab/
+/site/shooting-an-elephant/img/chased.webp
+/site/shooting-an-elephant/img/jeer[0-7].webp
+/site/shooting-an-elephant/img/monks-alms.webp
+/site/shooting-an-elephant/img/moulmein-1846.webp
+/site/shooting-an-elephant/img/moulmein-pagoda.webp
