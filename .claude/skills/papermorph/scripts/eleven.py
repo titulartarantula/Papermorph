@@ -281,7 +281,7 @@ for beat, voice, sub, clean, marks, shown, cached, fresh, af in beats:
         n = len([w for w in tokens(spoken[s0:s1]) if norm(w)])
         if n: cues.append([round(times[i], 3) if i < len(times) else 0, re.sub(r"\s+", " ", spoken[s0:s1]).strip()]); i += n
     if cues: cues[0][0] = min(cues[0][0], .1)
-    timings[beat] = {"dur": dur, "marks": mark_times(clean, marks, words), "cues": [[0, sub]] if sub else respell(cues, shown)}
+    timings[beat] = {"dur": dur, "marks": mark_times(clean, marks, words), "cues": [[0, sub]] if sub else respell(cues, shown, beat)}
     if sub: timings[beat]["forced"] = True
     wcache[beat] = {"dur": dur, "words": [[t, w] for t, w in words], "lag": 0}   # heard times: no Edge lead to correct
     moved = [f"{k} {old[beat]['marks'][k]} -> {v}" for k, v in timings[beat]["marks"].items()

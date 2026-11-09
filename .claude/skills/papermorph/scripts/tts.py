@@ -249,11 +249,17 @@ def mark_times(clean, marks, words):
     return out
 
 
-def respell(cues, shown):
-    """Show each {{shown|spoken}} pair's written form in the captions."""
+def respell(cues, shown, beat=""):
+    """Show each {{shown|spoken}} pair's written form in the captions. A spoken form that no single caption holds
+    whole (split by a sentence end) is named, since that caption keeps the spoken form."""
     for spoken, written in shown:
-        pat = re.compile(r"(?<!\w)" + re.escape(spoken) + r"(?!\w)")
-        cues = [[t, pat.sub(written, text)] for t, text in cues]
+        pat, hit = re.compile(r"(?<!\w)" + re.escape(spoken) + r"(?!\w)"), False
+        for cue in cues:
+            cue[1], n = pat.subn(written, cue[1])
+            hit = hit or n > 0
+        if not hit:
+            print(f"{beat}: WARNING {{{{{written}|{spoken}}}}} is in no caption whole, so the captions show {spoken!r}",
+                  file=sys.stderr)
     return cues
 
 
@@ -399,7 +405,7 @@ async def main(src, out_dir):
                 shutil.copyfile(clip, plain)
                 treat(clip, af, beat, *((44100, "128k") if engine == "elevenlabs" else (24000, "64k")))   # ElevenLabs gives 44.1 kHz, Edge and Kokoro 24 kHz
             entry = {"key": key, "dur": duration(clip), "words": words,
-                     "marks": mark_times(clean, marks, words), "cues": [[0, sub]] if sub else respell(caption_cues(clean, words), shown)}
+                     "marks": mark_times(clean, marks, words), "cues": [[0, sub]] if sub else respell(caption_cues(clean, words), shown, beat)}
             if af:
                 entry["af"] = af
             # a line in another language than the book's (its voice's locale differs): the page shows its subtitle even
