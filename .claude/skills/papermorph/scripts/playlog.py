@@ -14,17 +14,24 @@ time with its label (four a row):
     scene1     1.12  line   Every afternoon, the old man plays chess in the park.
     scene1     8.41  sfx    clack   vol 0.50
 
+    scene1     0.00  music  theme in   gain 0.40
+    scene7    33.20  music  theme out (MUSIC_OFF)   gain 0.40
+
 voice/sfx/bgm: an audio file started playing (its folder under audio/ names the kind; vol is the element's volume
-when it started, the slider at 1). line: the caption changed (captions are switched on for the run). An effect
+when it started, the slider at 1). music: a track of the engine's music() came in under the film or went out (a beat
+outside its list, or a MUSIC_OFF moment), with its music() gain; the engine ducks it to 30 % under a beat, 70 % in a
+MUSIC_UP_IN_PRE lead-in and while a film waits for the reader. line: the caption changed (captions are switched on for
+the run). An effect
 listed twice at one moment plays twice. Look at each frame: is the clack on the frame where the piece lands, the
 slurp where the cup is at the mouth, the line where that character's mouth moves? Effects fire only in normal
 playback, never on a seek, which is why this plays the chapter instead of seeking it. Chromium; if it cannot play
-sound, the engine runs on wall time and the log says so (times are then still beat times).
+sound, the engine runs on wall time and the log says so (times are then still beat times). Exit status 1 on a page
+error, or when playback stalled before the end (a page waiting for the reader is said, but is not a failure).
 """
 import argparse, asyncio, io, sys
 from pathlib import Path
 from playwright.async_api import async_playwright
-from browsers import exe
+from browsers import answers, exe
 from PIL import Image, ImageDraw
 
 HOOK = r"""
@@ -33,7 +40,8 @@ try { localStorage.setItem('captions', '1'); } catch {}
 const play0 = HTMLMediaElement.prototype.play;
 HTMLMediaElement.prototype.play = function () {
   try {
-    if (this.paused && !this.muted && typeof P !== 'undefined' && P.playing) {   // a real start (not a resume of a playing clip, not the silent unlock)
+    const engineMusic = typeof SND !== 'undefined' && SND.bgm.some(m => m.a === this);   // logged below, from its state
+    if (this.paused && !this.muted && !engineMusic && typeof P !== 'undefined' && P.playing) {   // a real start (not a resume of a playing clip, not the silent unlock)
       const src = decodeURI(new URL(this.currentSrc || this.src, location.href).pathname).replace(/^.*?\/audio\//, '');
       __log.push({ kind: /^sfx\//.test(src) ? 'sfx' : /^bgm\//.test(src) ? 'bgm' : 'voice', what: src.replace(/^(sfx|bgm)\//, '').replace(/\.mp3$/, ''),
                    i: P.i, t: P.t, vol: this.volume });
@@ -47,6 +55,22 @@ AudioBufferSourceNode.prototype.start = function () {
   try { if (this._sfx && P.playing) __log.push({ kind: 'sfx', what: this._sfx, i: P.i, t: P.t, vol: this._vol }); } catch {}
   return start0.apply(this, arguments);
 };
+// the engine's music (music()): its element starts once and plays on (the first, muted play() unlocks it), so each
+// track is logged when it comes in under the film or goes out, a MUSIC_OFF moment included
+const musicWas = new Map();
+setInterval(() => {
+  try {
+    if (typeof SND === 'undefined' || !P.playing) return;
+    const id = BEATS[P.i]?.id, off = !!window.MUSIC_OFF?.[id]?.(P.t);
+    for (const m of SND.bgm) {
+      const on = !!m.cur;
+      if (on === (musicWas.get(m) || false)) continue;
+      musicWas.set(m, on);
+      const name = decodeURI(new URL(m.n, location.href).pathname).replace(/^.*\//, '').replace(/\.mp3$/, '');
+      __log.push({ kind: 'music', what: `${name} ${on ? 'in' : 'out'}${!on && off ? ' (MUSIC_OFF)' : ''}`, i: P.i, t: P.t, vol: m.gain });
+    }
+  } catch {}
+}, 40);
 addEventListener('DOMContentLoaded', () => {
   const c = document.getElementById('caption'); if (!c) return;
   let last = '';
@@ -66,8 +90,10 @@ async def main(a):
         errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
         await pg.add_init_script(HOOK)
         url = f"{a.url}{a.chapter}/index.html"
+        answers(url)
         await pg.goto(url); await pg.wait_for_timeout(1000)
         ids = await pg.evaluate("BEATS.map(b => b.id)")
+        cw, ch = 400, round(400 * await pg.evaluate("SH / SW"))   # a frame 400 wide, in the stage's shape (upright too)
         def beat(s):
             if s.isdigit() and int(s) < len(ids): return int(s)
             if s in ids: return ids.index(s)
@@ -79,11 +105,16 @@ async def main(a):
         await pg.keyboard.press("Space"); await pg.wait_for_timeout(200)   # a real key press: the browser lets it start sound
         if a.rate != 1: await pg.evaluate(f"typeof setSpeed === 'function' ? setSpeed({a.rate}) : (P.rate = {a.rate})")
         print(f"playing {a.chapter} from {ids[first]} to {ids[last]}, about {total / a.rate:.0f} s", flush=True)
-        waited, stop = 0, f"P.done || P.waiting || P.i > {last}"
+        waited, stop, stalled = 0, f"P.done || P.waiting || P.i > {last}", False
         while not await pg.evaluate(stop) and waited < total / a.rate + 30:
             await pg.wait_for_timeout(250); waited += .25
         log, afail = await pg.evaluate(f"[__log.filter(e => e.i <= {last}), P.afail]")
-        if not await pg.evaluate(f"P.done || P.i > {last}"): print(f"did not reach the end of {ids[last]} (a question waits, or it stalled)")
+        if not await pg.evaluate(f"P.done || P.i > {last}"):
+            i, wait = await pg.evaluate("[P.i, !!P.waiting]"); stalled = not wait
+            print(f"stopped in {ids[i]}, before the end of {ids[last]}: " + (
+                f"the page waits for the reader there (a question, a film's ask such as a listen-and-find stop); "
+                f"--from {ids[i + 1]} plays on after it" if wait and i + 1 < len(ids) else
+                "the page waits for the reader there" if wait else "it stalled (the clock stopped moving)"))
         # the frames: each beat rebuilt once and its clock run forward, as playback reaches it
         shots = []
         await pg.add_style_tag(content=".paused-mark { display: none !important; }")   # the frames are taken paused
@@ -92,21 +123,21 @@ async def main(a):
                 await pg.evaluate(f"seek({e['i']}, false)")
             await pg.evaluate(f"P.t = {e['t']}; evalTo({e['t']})"); await pg.wait_for_timeout(120)
             r = await pg.evaluate("(() => { const r = document.getElementById('stage').getBoundingClientRect(); return {x: r.x, y: r.y, width: r.width, height: r.height}; })()")
-            shots.append((e, Image.open(io.BytesIO(await pg.screenshot(clip=r))).convert("RGB").resize((400, 225))))
+            shots.append((e, Image.open(io.BytesIO(await pg.screenshot(clip=r))).convert("RGB").resize((cw, ch))))
         await b.close()
-    lines = [f"{ids[e['i']]:10} {e['t']:6.2f}  {e['kind']:5}  {e['what']}" + (f"   vol {e['vol']:.2f}" if e['kind'] == 'sfx' else '') for e, _ in shots]
+    lines = [f"{ids[e['i']]:10} {e['t']:6.2f}  {e['kind']:5}  {e['what']}" + (f"   vol {e['vol']:.2f}" if e['kind'] == 'sfx' else f"   gain {e['vol']:.2f}" if e['kind'] == 'music' else '') for e, _ in shots]
     if afail: lines.append("note: sound did not play in this browser; the clock ran on wall time")
     (a.out / f"{a.chapter}_playlog.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
     if shots:
-        S = Image.new("RGB", (1600, 225 * ((len(shots) + 3) // 4)), (20, 30, 27))
+        S = Image.new("RGB", (4 * cw, ch * ((len(shots) + 3) // 4)), (20, 30, 27))
         for k, (e, im) in enumerate(shots):
             d = ImageDraw.Draw(im); label = f"{ids[e['i']]} {e['t']:.2f} {e['kind']} {e['what'][:40]}"
             d.rectangle((0, 0, 7 * len(label) + 8, 16), fill=(0, 0, 0)); d.text((4, 3), label, fill=(255, 230, 120))
-            S.paste(im, ((k % 4) * 400, (k // 4) * 225))
+            S.paste(im, ((k % 4) * cw, (k // 4) * ch))
         S.save(a.out / f"{a.chapter}_playlog.jpg", quality=84)
     print(f"{len(shots)} events | log and frames in {a.out}" + (f" | PAGE ERRORS: {errs[:5]}" if errs else ""))
-    return 1 if errs else 0
+    return 1 if errs or stalled else 0
 
 
 if __name__ == "__main__":

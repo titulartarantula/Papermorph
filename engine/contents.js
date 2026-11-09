@@ -13,7 +13,7 @@ const Contents = (() => {
   const TRANSLATIONS = {
     en: {
       open: 'Open the book', toCover: 'Back to the cover', resume: 'Continue · Chapter {n}', unit: 'Unit {n}', minutes: '{n} min',
-      meta: '{chapters}{samples} · {units} · with sound', metaChapters: { one: '{n} chapter', other: '{n} chapters' },
+      meta: '{chapters}{samples}, {units}, with sound', metaChapters: { one: '{n} chapter', other: '{n} chapters' },
       metaUnits: { one: '{n} unit', other: '{n} units' }, metaSamples: { one: ' + {n} sample', other: ' + {n} samples' }, samples: 'Sample chapters, another look',
       chapterCount: { one: '{n} chapter', other: '{n} chapters' }, finished: '{done} of {n} finished',
       doneMark: '✓ Finished · ', lastMark: ' · Last opened',
@@ -25,7 +25,7 @@ const Contents = (() => {
     },
     ru: {
       open: 'Открыть книгу', toCover: 'К обложке', resume: 'Продолжить · Глава {n}', unit: 'Раздел {n}', minutes: '{n} мин',
-      meta: '{chapters}{samples} · {units} · со звуком',
+      meta: '{chapters}{samples}, {units}, со звуком',
       metaChapters: { one: '{n} глава', few: '{n} главы', many: '{n} глав', other: '{n} главы' },
       metaUnits: { one: '{n} раздел', few: '{n} раздела', many: '{n} разделов', other: '{n} раздела' },
       metaSamples: { one: ' + {n} пробная', few: ' + {n} пробные', many: ' + {n} пробных', other: ' + {n} пробной' },
@@ -40,7 +40,7 @@ const Contents = (() => {
     },
     zh: {
       open: '打开这本书', toCover: '返回封面', resume: '继续 · 第 {n} 章', unit: '第 {n} 单元', minutes: '{n} 分钟',
-      meta: '{chapters}{samples} · {units} · 有配音', metaChapters: '{n} 章', metaUnits: '{n} 个单元',
+      meta: '{chapters}{samples}，{units}，有配音', metaChapters: '{n} 章', metaUnits: '{n} 个单元',
       metaSamples: ' + {n} 个示例章', samples: '示例章，另一种风格',
       chapterCount: '{n} 章', finished: '已完成 {done} / {n}',
       doneMark: '✓ 已完成 · ', lastMark: ' · 上次打开',
@@ -51,7 +51,7 @@ const Contents = (() => {
     },
     ja: {
       open: '本を開く', toCover: '表紙に戻る', resume: '続きから · 第{n}章', unit: '単元 {n}', minutes: '{n}分',
-      meta: '{chapters}{samples} · {units} · 音声つき', metaChapters: '{n}章', metaUnits: '{n}単元',
+      meta: '{chapters}{samples}、{units}、音声つき', metaChapters: '{n}章', metaUnits: '{n}単元',
       metaSamples: ' + サンプル{n}章', samples: 'サンプル章（別のスタイル）',
       chapterCount: '{n}章', finished: '{n}章中 {done}章 完了',
       doneMark: '✓ 完了 · ', lastMark: ' · 最後に開いた章',
@@ -60,9 +60,28 @@ const Contents = (() => {
       ackSources: '出典', ackMade: 'この本の作り方',
       refsCount: '授業で引用した著作 {n} 件', refsAllLinked: '、すべて出典へのリンクつき', refsSomeLinked: '、うち {n} 件は出典へのリンクつき',
     },
+    // Arabic plurals: one 1, two 2, few 3–10, many 11–99, other 100+. Arrows point the way the page reads (right to left).
+    ar: {
+      open: 'افتح الكتاب', toCover: 'العودة إلى الغلاف', resume: 'تابع · الفصل {n}', unit: 'الوحدة {n}',
+      minutes: { one: 'دقيقة', two: 'دقيقتان', few: '{n} دقائق', many: '{n} دقيقة', other: '{n} دقيقة' },
+      meta: '{chapters}{samples}، {units}، مع الصوت',
+      metaChapters: { one: 'فصل واحد', two: 'فصلان', few: '{n} فصول', many: '{n} فصلاً', other: '{n} فصل' },
+      metaUnits: { one: 'وحدة واحدة', two: 'وحدتان', few: '{n} وحدات', many: '{n} وحدة', other: '{n} وحدة' },
+      metaSamples: { one: ' + فصل تجريبي واحد', two: ' + فصلان تجريبيان', few: ' + {n} فصول تجريبية', many: ' + {n} فصلاً تجريبياً', other: ' + {n} فصل تجريبي' },
+      samples: 'فصول تجريبية بأسلوب آخر',
+      chapterCount: { one: 'فصل واحد', two: 'فصلان', few: '{n} فصول', many: '{n} فصلاً', other: '{n} فصل' }, finished: 'اكتمل {done} من {n}',
+      doneMark: '✓ مكتمل · ', lastMark: ' · آخر ما فُتح',
+      references: 'المراجع', viewAll: 'عرض الكل ←', backToContents: '→ المحتويات',
+      refsLead: 'كل الأعمال المستشهد بها في الدروس. يفتح كل رابط معرّف DOI للعمل أو سجله في المكتبة في علامة تبويب جديدة؛ والأعمال التي ليس لها سجل موثوق على الإنترنت مذكورة دون رابط.',
+      refsCount: { one: 'عمل واحد مستشهد به في الدروس', two: 'عملان مستشهد بهما في الدروس', few: '{n} أعمال مستشهد بها في الدروس',
+        many: '{n} عملاً مستشهداً به في الدروس', other: '{n} عمل مستشهد به في الدروس' },
+      refsAllLinked: '، وكلها مرتبطة بمصادرها', refsSomeLinked: '، منها {n} مرتبطة بمصادرها',
+    },
   };
   // the same lookup as translate() in engine.js (the two pages never load each other's file): keep them in step
   const LANGUAGE = (document.documentElement.lang || 'en').toLowerCase().split('-')[0];
+  // right-to-left interface languages, as RTL_LANGUAGES in engine.js: keep them in step
+  if (!document.documentElement.dir && ['ar'].includes(LANGUAGE)) document.documentElement.dir = 'rtl';
   function translate(key, vars = {}) {
     const language = TRANSLATIONS[LANGUAGE]?.[key] !== undefined ? LANGUAGE : 'en';
     let text = TRANSLATIONS[language][key] ?? key;

@@ -6,33 +6,61 @@
     python3 lint.py site/<book> --content content/<book> --brief books/<book>
 
 Errors (exit status 1):
-  global    a top-level name in the chapter or a lib file it loads is also declared by the engine or another of
-            its scripts; a second const/let/class stops the page script, a second function silently replaces one
+  global    a top-level name in the chapter or a lib file it loads (every name of const a = 1, b = 2) is also
+            declared by the engine or another of its scripts; a second const/let/class stops the page script, a
+            second function silently replaces one
+  syntax    a script the page loads, or an inline <script>, does not parse (node --check): a // comment that swallows
+            the rest of a line, a brace left open; the browser runs none of that script. Without Node a warning says
+            nothing was parsed
   math      the chapter uses a maths helper from lib/math.js but does not load it after engine.js
-  beat      a beat id has no entry in audio/<lang>/timings.js or no MP3
+  beat      a beat id has no entry in audio/<lang>/timings.js or no MP3 (a silent beat, { dur: s } in its fourth slot,
+            needs neither)
   mark      m('name') is not a mark of any beat
-  stale     the narration's text or [[marks]] differ from timings.js: run tts.py again
+  stale     the narration's text differs from timings.js, or a narration [[mark]] is missing there: run tts.py again
   style     style.json is not valid JSON or lacks schema, tier, book, words, look or voice
-Warnings: a beat's m('name') not among that beat's own marks (beats built by shared helpers can mislead this);
-  no beats recognised in a chapter; no narration file to check against.
---content defaults to content/<book> (content/ for the first book's legacy layout), --brief to books/<book>.
+  sound     sfx(beat, t, 'name') names an audio/sfx/<name>.mp3 that is missing, or music('file') a file that is (calls
+            in the chapter's own scripts; commented-out calls, names built at run time and a book library's calls are
+            not checked)
+  path      a chapter named on the command line has no index.html; no chNN folder at all stops the run
+  word      a listen-and-find stop (findWords) plays a clip that is missing: a thing's (clip:, else w-<word>), an
+            ask's question (its clip:) and its again (r-<word> by default), the stop's end (q-done) and there (q-there)
+            lines, audio/sfx/chime.mp3 after each find; or an ask's word is no thing's word. Each clip is a narration line, "w-<word>": "<word>", voiced by tts.py
+With no chapters named, every other page of the book that loads engine.js (a banner, a poster, a scratch page) gets
+the global and syntax checks too: such a page stops at load the same way, and shot.py on it names only the first error.
+Warnings: a top-level name of the page that is one of the engine's sound properties on window (sfx music SFX
+  SFX_BED BGM MUSIC_OFF MUSIC_UP_IN_PRE MUSIC_UP MUSIC_LEVELS: const BGM = .4 hides the engine's list from export.py's mix); a chapter that calls findWords() without CHAPTER.film true, or whose things and asks do not write their word
+  and clip as literals (word: 'bird', clip: 'q-bird'; an ask list built with .map does not), whose clips were not
+  checked; a beat's m('name') not among that beat's own marks (beats built by shared helpers can mislead this);
+  a mark in timings.js that the narration lacks (added by hand: the next tts.py or eleven.py run drops it, so a
+  page-only time belongs in the page); no beats recognised in a chapter; no narration file to check against.
+--content defaults to content/<book> (content/ when that is missing and content/chNN exists: the first book's legacy
+layout), --brief to books/<book>. Both folders are git-ignored, so in a git worktree that lacks them they are taken
+from the main checkout (the worktree's git common dir), with a note. ElevenLabs audio tags such as [whispers] are not counted as narration text.
 """
-import argparse, json, re, sys, unicodedata
+import argparse, json, re, shutil, subprocess, sys, tempfile, unicodedata
 from pathlib import Path
 
 DECL = re.compile(r'(?<![\w$.])(?:async\s+)?(function\*?|const|let|var|class)\s+([A-Za-z_$][\w$]*)')
+KW = re.compile(r'(?<![\w$.])(const|let|var)\s+')
+NEXT = re.compile(r',\s*([A-Za-z_$][\w$]*)\s*=(?!=)')   # a later declarator: , name =
 SRC = re.compile(r'<script\s+src="([^"]+)"')
 INLINE = re.compile(r'<script>(.*?)</script>', re.S)
 BEAT = re.compile(r"\[\s*'(\w+)'\s*,\s*(['\"`])(?:\\.|(?!\2).)*\2\s*,\s*(?:\(\s*(?:m\b|\))|m\s*=>)")   # ['id', 'title', (m, D) =>
+SFXCALL = re.compile(r"""(?<![\w$.])sfx\(\s*(?:'[^']*'|"[^"]*"|[\w$.\[\]]+)\s*,\s*[^'"`\n]*?,\s*['"]([\w.-]+)['"]\s*[,)]""")   # a literal name only
+MUSICCALL = re.compile(r"""(?<![\w$.])music\(\s*['"]([^'"]+)['"]""")
 MCALL = re.compile(r"(?<![\w$.])m\(\s*'(\w+)'\s*[,)]")
 MARK = re.compile(r'\[\[(\w+)\]\]')
 SAY = re.compile(r'\{\{([^|{}]+)\|([^{}]+)\}\}')   # {{shown|spoken}}, as in tts.py: captions carry "shown"
+TAG = re.compile(r'(?<!\[)\[[^\[\]]+\](?!\])')   # an ElevenLabs v4 audio tag, [whispers]: performed, not in captions (eleven.py's)
+WINDOW_PROPS = {'sfx', 'music', 'SFX', 'SFX_BED', 'BGM', 'MUSIC_OFF', 'MUSIC_UP_IN_PRE', 'MUSIC_UP', 'MUSIC_LEVELS'}   # set on window by engine.js, not declared
 ENGINE_FILES = {'engine.js', 'math.js', 'volume.js', 'contents.js', 'units.js'}
 LOCAL = re.compile(r'[,(]\s*([A-Za-z_$][\w$]*)\s*=(?![=>])')   # a, name = … or (p, name = 1): declared in a list
 PARAMS = re.compile(r'function\s*[\w$]*\s*\(([^)]*)\)|\(([^()]*)\)\s*=>|([A-Za-z_$][\w$]*)\s*=>')   # parameters
 METHOD = re.compile(r'^\s*([A-Za-z_$][\w$]*)\s*\([^()]*\)\s*\{', re.M)   # name(a, b) { … } in an object
 DESTRUCT = re.compile(r'(?:const|let|var)\s*([\[{][^;]*?[\]}])\s*(?:=|of\b|in\b)')   # const {a, b: c, d = 1} = …, for (const [x, y] of …)
 DKEY = re.compile(r'[A-Za-z_$][\w$]*\s*:|=[^,\]}]*')   # in a pattern, a key (b: c declares c) and a default (= 1) declare nothing
+FIND = re.compile(r'(?<![\w$.])(?<!function )findWords\s*\(')   # a call, not the engine's definition
+OBJ = re.compile(r'\{[^{}]*\}')   # an object literal with no object inside: a thing { g, word: 'bird', … } or an ask
 USE = re.compile(r'(?<![\w$.])([A-Za-z_$][\w$]*)(?![\w$])(?!\s*:)')   # a name, not a property or an object key
 
 
@@ -94,10 +122,35 @@ def depth0(text):
 
 
 def decls(text):
-    """Top-level declarations of a script: name, kind and line."""
+    """Top-level declarations of a script: name, kind and line, every declarator of const a = 1, b = 2 included."""
     code, top = depth0(text)
-    return [(m.group(2), m.group(1), code.count('\n', 0, m.start()) + 1)
-            for m in DECL.finditer(code) if top[m.start()]]
+    out = [(m.group(2), m.group(1), m.start()) for m in DECL.finditer(code) if top[m.start()]]
+    for m in KW.finditer(code):
+        if not top[m.start()]:
+            continue
+        i, n = m.end(), len(code)   # to the statement's end: ';' at depth 0, or a line break not ending in ',' or an operator
+        while i < n and not (top[i] and (code[i] == ';' or code[i] == '\n' and not code[m.end():i].rstrip().endswith(
+                (',', '=', '?', ':', '(', '+', '-', '&&', '||')))):
+            i += 1
+        seg = ''.join(c if top[k] else ' ' for k, c in enumerate(code[m.end():i], m.end()))   # nested code blanked
+        out += [(d.group(1), m.group(1), m.end() + d.start(1)) for d in NEXT.finditer(seg)]
+    return [(name, kind, code.count('\n', 0, at) + 1) for name, kind, at in sorted(out, key=lambda d: d[2])]
+
+
+def slots(code, start):
+    """The top-level slots of the array literal opening at code[start] ('['), in code with strings and comments blanked."""
+    depth, out, last = 0, [], start + 1
+    for k in range(start, len(code)):
+        c = code[k]
+        if c in '([{':
+            depth += 1
+        elif c in ')]}':
+            depth -= 1
+            if depth == 0:
+                return out + [code[last:k]]
+        elif c == ',' and depth == 1:
+            out.append(code[last:k]); last = k + 1
+    return out
 
 
 def timings(path):
@@ -111,17 +164,16 @@ def timings(path):
 
 
 def words(s):
-    s = unicodedata.normalize('NFC', SAY.sub(lambda m: m.group(1), MARK.sub('', s)))
+    s = unicodedata.normalize('NFC', SAY.sub(lambda m: m.group(1), TAG.sub(' ', MARK.sub('', s))))
     return re.sub(r'[^\w]+', ' ', s).lower().split()
 
 
-def lint_chapter(ch, content, out):
-    err = lambda kind, msg: out.append(('E', kind, f'{ch.name}: {msg}'))
-    warn = lambda kind, msg: out.append(('W', kind, f'{ch.name}: {msg}'))
-    html = re.sub(r'<!--.*?-->', '', (ch / 'index.html').read_text(encoding='utf-8'), flags=re.S)   # a commented-out <script> loads nothing
+def page_globals(page, html, err):
+    """Every top-level name of the scripts a page loads, in order: a second declaration is an error. Returns the
+    names seen (name -> (file, kind)), the book's own code (not the engine's) and the files it loaded."""
+    ch = page.parent
     inline = '\n'.join(INLINE.findall(html))
-    # globals: every script the page loads, in order
-    seen, own = {}, [inline]   # own: the chapter's code and the book's scripts, not the engine's
+    seen, own, files = {}, [inline], []   # own: the chapter's code and the book's scripts, not the engine's
     for src in SRC.findall(html) + ['(chapter)']:
         if src == '(chapter)':
             text, name = inline, 'chapter'
@@ -130,6 +182,7 @@ def lint_chapter(ch, content, out):
             if f.suffix != '.js' or not f.exists() or f.name in ('timings.js', 'mathjax.js'):   # MathJax declares no globals
                 continue
             text, name = f.read_text(encoding='utf-8'), f.name
+            files.append(f)
             if (f.parent.name != 'lib' or f.name not in ENGINE_FILES) and not f.name.endswith('.min.js'):   # a vendored library is not the book's code
                 own.append(text)
         for ident, kind, line in decls(text):
@@ -139,6 +192,67 @@ def lint_chapter(ch, content, out):
                 err('global', f'{name}:{line} {what} {ident} from {first}')
             else:
                 seen[ident] = (name, kind)
+    return seen, own, files
+
+
+NODE = {}   # file -> node --check's first message (None when it parses), so a lib file shared by chapters runs once
+
+
+def node_check(f, label, err, warn):
+    """A syntax error stops the whole script in the browser (a stray // that swallows the rest of a line, a brace
+    left open), which the regex checks here cannot see: node --check parses it as the browser would."""
+    if 'node' not in NODE:
+        NODE['node'] = shutil.which('node')
+        if not NODE['node']:
+            warn('syntax', 'node is not installed, so no script was parsed: a syntax error would pass (install Node to check)')
+    if not NODE['node']:
+        return
+    if f not in NODE:
+        r = subprocess.run([NODE['node'], '--check', str(f)], capture_output=True, text=True)
+        lines = [x for x in r.stderr.splitlines() if x.strip()]
+        where = next((x for x in lines if re.search(r':\d+$', x)), '')
+        what = next((x for x in lines if re.match(r'\w*Error\b', x)), lines[-1] if lines else 'does not parse')
+        NODE[f] = None if r.returncode == 0 else f"{what} at line {where.rsplit(':', 1)[-1] or '?'}"
+    if NODE[f]:
+        err('syntax', f'{label}: {NODE[f]}; the browser stops this whole script there')
+
+
+def syntax(page, html, files, err, warn):
+    """node --check on each script the page loads and on each inline <script>."""
+    for f in files:
+        if not f.name.endswith('.min.js'):
+            node_check(f, f.name, err, warn)
+    with tempfile.TemporaryDirectory() as tmp:
+        for k, body in enumerate(INLINE.findall(html)):
+            if body.strip():
+                f = Path(tmp) / f'{k}.js'; f.write_text(body, encoding='utf-8')
+                node_check(f, f'{page.name} <script> #{k + 1}', err, warn)
+                NODE.pop(f, None)   # temp names repeat between pages
+
+
+def lint_page(page, label, out):
+    """A page beside the chapters that loads the engine (a banner, a poster, a scratch page): its globals and syntax."""
+    err = lambda kind, msg: out.append(('E', kind, f'{label}: {msg}'))
+    warn = lambda kind, msg: out.append(('W', kind, f'{label}: {msg}'))
+    html = re.sub(r'<!--.*?-->', '', page.read_text(encoding='utf-8'), flags=re.S)
+    _, _, files = page_globals(page, html, err)
+    syntax(page, html, files, err, warn)
+
+
+def lint_chapter(ch, content, out):
+    err = lambda kind, msg: out.append(('E', kind, f'{ch.name}: {msg}'))
+    warn = lambda kind, msg: out.append(('W', kind, f'{ch.name}: {msg}'))
+    html = re.sub(r'<!--.*?-->', '', (ch / 'index.html').read_text(encoding='utf-8'), flags=re.S)   # a commented-out <script> loads nothing
+    inline = '\n'.join(INLINE.findall(html))
+    seen, own, files = page_globals(ch / 'index.html', html, err)
+    syntax(ch / 'index.html', html, files, err, warn)
+    # the engine's window properties (sound), which a page's own top-level name hides from the engine and export.py
+    if 'engine.js' in {Path(x).name for x in SRC.findall(html)}:
+        for ident in sorted(WINDOW_PROPS & set(seen)):
+            name, kind = seen[ident]
+            if name not in ENGINE_FILES:
+                warn('global', f"{name} declares {ident} ({kind}), a window property of the engine's sound: the engine's "
+                     f"sfx()/music() lists and export.py's mix then miss it (an older book's own player does this on purpose); rename it")
     # maths helpers used without math.js (they left engine.js after the engine-v1 tag)
     math = (ch / '../lib/math.js').resolve()
     loaded = {Path(s).name for s in SRC.findall(html)}
@@ -152,17 +266,30 @@ def lint_chapter(ch, content, out):
         used = sorted({w for c in code for w in USE.findall(c)} & names - local)
         if used:
             err('math', f"uses {', '.join(used)} from lib/math.js: load ../lib/math.js right after engine.js")
+    # sound files the page names: sfx(beat, t, 'name') plays audio/sfx/name.mp3, music('file') a file beside the page
+    # the chapter's own code: a book library's sfx() plays only in the chapters that call its helper
+    here = [inline] + [(ch / x).read_text(encoding='utf-8') for x in SRC.findall(html)
+                       if (ch / x).suffix == '.js' and (ch / x).exists() and (ch / x).resolve().parent == ch.resolve() and Path(x).name != 'timings.js']
+    code = '\n'.join(re.sub(r'(?<![:\\])//[^\n]*', '', re.sub(r'/\*.*?\*/', '', c, flags=re.S)) for c in here)   # not commented out
+    names = {('sfx', f'audio/sfx/{n}.mp3') for n in SFXCALL.findall(code)} | {('music', f) for f in MUSICCALL.findall(code)}
+    for kind, f in sorted(names):
+        if not (ch / f).exists():
+            err('sound', f'{kind}() names {f}, which is missing' + (' (make it with sfx.py)' if kind == 'sfx' else ''))
     # beats, audio, marks
-    lang = (re.search(r"language:\s*'(\w+)'", inline) or [None, 'en'])[1]
+    lang = (re.search(r"""language:\s*['"](\w+)['"]""", inline) or [None, 'en'])[1]
     tpath = ch / 'audio' / lang / 'timings.js'
-    if not tpath.exists():
-        return err('beat', f'no audio/{lang}/timings.js')
-    T = timings(tpath)
     starts = [(m.start(), m.group(1)) for m in BEAT.finditer(inline)]
     ids = [b for _, b in starts]
+    code = depth0(inline)[0]
+    silent = {b for pos, b in starts if len(s := slots(code, pos)) > 3 and re.search(r'\bdur\s*:', s[3])}   # { dur: s }: no clip
+    if not tpath.exists() and not (ids and set(ids) <= silent):
+        return err('beat', f'no audio/{lang}/timings.js')
+    T = timings(tpath) if tpath.exists() else {}
     if not ids:
         warn('beat', "no beats recognised (expected ['id', 'title', (m, D) => …]); marks were not checked")
     for b in ids:
+        if b in silent and b not in T:
+            continue
         if b not in T:
             err('beat', f'beat {b} has no timings')
         elif not (ch / 'audio' / lang / f'{b}.mp3').exists():
@@ -175,18 +302,68 @@ def lint_chapter(ch, content, out):
                 err('mark', f"m('{k}') in beat {b} is not a mark of any beat")
             elif b in T and k not in T[b].get('marks', {}):
                 warn('mark', f"m('{k}') in beat {b} is not one of its marks")
+    # listen and find (findWords): every clip a stop can play exists, and every word asked for is a thing's
+    if any(FIND.search(depth0(c)[0]) for c in own):
+        if not re.search(r'\bfilm\s*[:=]\s*true', inline):
+            warn('word', 'calls findWords() but CHAPTER.film is not true: the chapter plays as a lesson, without music or effects')
+        clips, things, asks, loose = {}, set(), set(), 0   # clip -> what plays it
+        for c in own:
+            code = depth0(c)[0]
+            def lit(at, o, key):   # the string literal after key: in the object o at code[at], or None
+                k = re.search(rf'(?<![\w$.]){key}\s*:\s*([\'"`])', o)
+                return k and c[at + k.end():c.index(k.group(1), at + k.end())]
+            for m in OBJ.finditer(code):   # { … word: … }: a thing (it has g:) or an ask
+                o, at = m.group(0), m.start()
+                if not re.search(r'(?<![\w$.])word\s*:', o):
+                    continue
+                w = lit(at, o, 'word')
+                thing = re.search(r'(?<![\w$.])g\s*:', o)
+                if not w:
+                    loose += 1; continue
+                slug = re.sub(r'[\W_]+', '-', w.lower()).strip('-')   # as the engine names it
+                if thing:
+                    things.add(w)
+                    clips.setdefault(lit(at, o, 'clip') or 'w-' + slug, f'the thing "{w}"')
+                else:   # an ask: its question (no default) and the short one again
+                    asks.add(w)
+                    q = lit(at, o, 'clip')
+                    if q: clips.setdefault(q, f'the ask for "{w}"')
+                    elif re.search(r'(?<![\w$.])clip\s*:', o): loose += 1
+                    else: err('word', f'the ask for "{w}" has no clip: (its question, e.g. clip: \'q-{slug}\')')
+                    clips.setdefault(lit(at, o, 'again') or 'r-' + slug, f'the ask for "{w}" (again)')
+            for m in FIND.finditer(code):   # the stop's own lines: findWords(things, asks, done, { end, there })
+                args = slots(code, m.end() - 1)
+                opts, at = (args[3], m.end() + sum(len(x) + 1 for x in args[:3])) if len(args) > 3 else ('', 0)
+                for key, dflt in (('end', 'q-done'), ('there', 'q-there')):
+                    name = lit(at, opts, key) or dflt
+                    clips.setdefault(name, f'findWords {key}' + (' (default)' if name == dflt else ''))
+        for name, who in clips.items():
+            if not (ch / 'audio' / lang / f'{name}.mp3').exists():
+                err('word', f'{who} plays audio/{lang}/{name}.mp3, which is missing: add "{name}": "<its line>" to the narration and run tts.py')
+        if not (ch / 'audio' / 'sfx' / 'chime.mp3').exists():
+            err('word', 'findWords plays audio/sfx/chime.mp3 after each thing found, which is missing (sfx.py makes effects)')
+        for w in sorted(asks - things) if things and not loose else []:
+            err('word', f'findWords asks for "{w}", but no thing in the chapter has word: \'{w}\'')
+        if loose:
+            warn('word', f"calls findWords() with {loose} thing{'s' if loose != 1 else ''} or ask{'s' if loose != 1 else ''} whose word or clip "
+                         "is not written as a literal (word: 'bird', clip: 'q-bird'): their clips were not checked, nor the asks against the things")
     # narration against the generated audio
     nar = content / ch.name / f'narration.{lang}.json'
     if nar.exists():
         N = json.loads(nar.read_text(encoding='utf-8-sig')).get('beats', {})
         for b, text in N.items():
+            said = text['text'] if isinstance(text, dict) else text   # the marks are in what is said
             if isinstance(text, dict):   # a beat with a speaker; its caption is the subtitle when it has one
                 text = text.get('sub') or text['text']
             if b not in T:
                 err('stale', f'narration beat {b} has no timings')
                 continue
-            if set(MARK.findall(text)) != set(T[b].get('marks', {})):
-                err('stale', f'beat {b}: narration marks differ from timings.js')
+            said_marks, timed = set(MARK.findall(said)), set(T[b].get('marks', {}))
+            if said_marks - timed:
+                err('stale', f"beat {b}: narration marks {', '.join(sorted(said_marks - timed))} are not in timings.js")
+            if timed - said_marks:
+                warn('mark', f"beat {b}: marks {', '.join(sorted(timed - said_marks))} are in timings.js only (added by hand? "
+                             "the next voice run drops them: put a page-only time in the page)")
             cues = ' '.join(c[1] for c in T[b].get('cues', []))
             if cues and words(text) != words(cues):
                 err('stale', f'beat {b}: narration text differs from the generated audio')
@@ -207,6 +384,17 @@ def lint_style(brief, out):
         out.append(('E', 'style', f'style.json lacks {", ".join(missing)}'))
 
 
+def main_checkout(root):
+    """The main checkout when root is a git worktree (its git common dir's parent), else None."""
+    try:
+        d = subprocess.run(['git', '-C', str(root), 'rev-parse', '--path-format=absolute', '--git-common-dir'],
+                           capture_output=True, text=True, check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    m = Path(d).parent
+    return m if m.resolve() != root.resolve() else None
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('book', type=Path, help='the book folder in site/')
@@ -215,13 +403,29 @@ def main():
     ap.add_argument('--brief', type=Path)
     a = ap.parse_args()
     root, slug = a.book.resolve().parent.parent, a.book.resolve().name
-    content = a.content or next((c for c in (root / 'content' / slug, root / 'content') if c.is_dir()), root / 'content' / slug)
+    legacy = not (root / 'content' / slug).is_dir() and any((root / 'content').glob('ch[0-9]*'))   # the first book's content/chNN
+    content = a.content or root / 'content' / ('' if legacy else slug)
+    brief = a.brief or root / 'books' / slug
+    main_root = main_checkout(root) if not (a.content and a.brief) else None
+    for name, d in (('content', content), ('books', brief)):
+        if not d.is_dir() and main_root and (main_root / name / slug).is_dir():   # git-ignored, so absent in a worktree
+            d = main_root / name / slug
+            print(f'note: {name}/{slug} is not in this worktree: using the main checkout\'s {d}')
+            content, brief = (d, brief) if name == 'content' else (content, d)
     chs = [a.book / c for c in a.chapters] if a.chapters else sorted(a.book.glob('ch[0-9]*'))
     out = []
+    if not chs:
+        sys.exit(f'{a.book}: no chNN folders here: is this the book folder in site/?')
     for ch in chs:
         if (ch / 'index.html').exists():
             lint_chapter(ch, content, out)
-    lint_style(a.brief or root / 'books' / slug, out)
+        else:
+            out.append(('E', 'path', f'{ch}: no index.html (a wrong chapter name?)'))
+    if not a.chapters:   # the book's other pages that load the engine: a clash or a syntax error stops them too
+        for page in sorted(a.book.rglob('*.html')):
+            if page.parent not in chs and page != a.book / 'index.html' and 'engine.js' in page.read_text(encoding='utf-8'):
+                lint_page(page, page.relative_to(a.book).as_posix(), out)
+    lint_style(brief, out)
     for level, kind, msg in out:
         print(f'{"error" if level == "E" else "warn "} {kind:6} {msg}')
     n = sum(level == 'E' for level, _, _ in out)

@@ -6,7 +6,7 @@
 .unit .grid { position: relative; }
 .unit::before { content: ""; position: absolute; inset: 0 16px auto; height: 208px; border-radius: 22px; pointer-events: none;
   background: radial-gradient(ellipse 46% 90% at 74% 55%, color-mix(in srgb, var(--c) 11%, transparent), transparent 70%); }
-.unit-art { position: absolute; top: 20px; right: 28px; width: min(580px, 56%); height: auto; overflow: visible; pointer-events: none;
+.unit-art { position: absolute; top: 20px; inset-inline-end: 28px; width: min(580px, 56%); height: auto; overflow: visible; pointer-events: none;
   color: var(--c); fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; opacity: .78; }
 .unit-art text { fill: currentColor; stroke: none; font-family: var(--book); font-style: italic; }
 .unit-art .a { color: var(--chalk); opacity: .55; }
@@ -60,13 +60,13 @@
 @keyframes breathe { from { transform: scaleY(1); } to { transform: scaleY(.35); } }
 /* The label and the title share a line when they fit; a long title wraps below the label instead of running off. */
 .unit h2 .title { min-width: 0; text-wrap: balance; }
-.unit h2 .label { font: 600 14px var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--c); white-space: nowrap; }
+.unit h2 .label { font: 600 16px var(--ui); color: var(--c); white-space: nowrap; }
 /* Keep the sketches cheap: each is its own layer, so its loop repaints only itself, and loops pause while their unit is
    off screen or under the sticky bar (units.js toggles .live), so the bar's blur is not redrawn every frame. */
 .unit-art { will-change: transform; contain: layout style; }
 .unit:not(.live) .unit-art, .unit:not(.live) .unit-art * { animation-play-state: paused; }
 @media (max-width: 560px) {
-  .unit-art { width: calc(100% - 32px); right: 16px; opacity: .32; }
+  .unit-art { width: calc(100% - 32px); inset-inline-end: 16px; opacity: .32; }
   .unit h2 { min-height: 0; padding-top: 104px; font-size: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {

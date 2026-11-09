@@ -42,27 +42,48 @@ const span = (t, a, b) => ease((t - a) / (b - a));
 
 // draw(q, f) runs once per 12 fps frame with q the frame's time; a pure function of time, like every beat clock.
 // It runs to the beat's end, through the engine's hold after D (HOLD s), so a scene poses sensibly for q up to D + HOLD.
+// D is the beat's narration end on its own clock, the scene's pre already in it (the engine passes pre + clip): a
+// moment `pre + D - x` lies past the end and never shows. stopClock draws the first frame as soon as it is called.
 function stopClock(D, draw) { let last = null; clockRun(t => { const f = Math.floor(t * FPS + 1e-6); if (f === last) return; last = f; draw(f / FPS, f); }, D, { tail: true }); }
 
 /* ---------- camera over a baked set ----------
    A view {x, y, z} is the world point at the frame's centre and the zoom. Moves: to(view, t0, dur) eases each given
    key from where the camera is at t0 (zooms keep one world point still, as the engine's camera does); cut(view, t0).
    Layers slide by their parallax factor k against the base view. soft(t0, on) swaps the far layers (k < 1) for their
-   blurred copies: shallow focus on close shots (on = 'all' blurs the puppets' plane too, for a set seen behind a close-up). Puppets go in cam.stage, on the k = 1 plane in front of `after`. */
+   blurred copies: shallow focus on close shots (on = 'all' blurs the puppets' plane too, for a set seen behind a close-up).
+   Puppets go in cam.stage, a k = 1 plane drawn just after the layer named `after`. Without one it is the set's layer
+   marked stage: true in sets.js (bake_sets.py and painted.py keep the mark), else the first layer with k 1, so a set
+   that always needs the same place for its puppets says so once (a river's tree in front of the bank, a house whose
+   front hides whoever is inside). stages: [layer names] adds a plane after each of those layers too, cam.stageAt[name],
+   for things that stand further back: ducks on a pond in front of its water, a grandmother at the window of a house
+   layer drawn over cam.stage. cam.onPlane(name, sx, sy) is where to put a thing on the plane of layer `name` so that
+   it shows at screen point (sx, sy) of the 1600 × 900 frame the last apply() drew: the sun or a far bird on
+   stages: ['clouds'], kept at one spot of the sky while the camera pans (pose it after cam.apply each frame). */
 function paperCam(p, setName, v0 = {}, { after = null, stages = [] } = {}) {
   const root = mk('g', {}, p), view = mk('g', {}, root), world = mk('g', {}, view), layers = [], ops = [], softs = [], shakes = [];
-  let stage = null; const stageAt = {};
-  for (const L of SETS[setName]) {
+  let stage = null; const stageAt = {}, set = SETS[setName];
+  if (!set) throw new Error(`paperCam: no set '${setName}' in img/sets/sets.js (${Object.keys(SETS).join(', ')})`);
+  after ??= (set.find(L => L.stage) || set.find(L => L.k === 1) || set[set.length - 1]).name;
+  for (const n of [after, ...stages]) if (!set.some(L => L.name === n)) console.warn(`paperCam: set '${setName}' has no layer '${n}' (${set.map(L => L.name).join(', ')})`);
+  // A set whose first layer names its paper colour (lift.py's sets: a book's page, narrower than the frame) lies on an
+  // endless sheet of it, so a pan, a zoom out or a shake never sees past the picture.
+  if (set[0]?.paper) mk('rect', { x: -6000, y: -6000, width: 13600, height: 12900, fill: set[0].paper }, world);
+  for (const L of set) {
     const g = mk('g', {}, world), [x, y, width, height] = L.box, img = { x, y, width, height, preserveAspectRatio: 'none' };
     const sharp = mk('image', { href: `../img/sets/${setName}/${L.name}.webp`, ...img }, g);
     const blur = L.soft ? mk('image', { href: `../img/sets/${setName}/${L.name}-soft.webp`, ...img, visibility: 'hidden' }, g) : null;
     layers.push({ g, k: L.k, sharp, blur, name: L.name });
     if (stages.includes(L.name)) layers.push({ g: stageAt[L.name] = mk('g', {}, world), k: L.k });
-    if (L.name === after || (!after && L.k === 1 && !stage)) layers.push({ g: stage = mk('g', {}, world), k: 1 });
+    if (L.name === after) layers.push({ g: stage = mk('g', {}, world), k: 1 });
   }
-  mk('rect', { width: 1600, height: 900, fill: 'url(#vignette)' }, root);
+  if (!stage) layers.push({ g: stage = mk('g', {}, world), k: 1 });   // an unknown `after` (warned above): in front of everything
+  mk('rect', { width: 1600, height: 900, fill: 'url(#vignette)', 'pointer-events': 'none' }, root);   // a tap goes through to the picture
   // Parallax is measured from the set's own framing (base), wherever the beat's first view is.
   const base = { x: 800, y: 450, z: 1 }, start = { ...base, ...v0 };
+  let shown = start;   // the view the last apply() drew
+  let drawn = null;   // the last apply()'s time and pan, so a layer moved after it is placed for the same frame
+  const place = L => { const { q, dx, dy } = drawn;
+    tf(L.g, `translate(${((1 - L.k) * dx).toFixed(1)} ${((1 - L.k) * dy).toFixed(1)})${L.fx ? ' ' + L.fx(Math.floor(q * FPS / 2) * 2 / FPS) : ''}`); };
   function at(t, n = ops.length) {
     const s = { ...start };
     for (let i = 0; i < n && ops[i].t0 <= t; i++) {
@@ -78,23 +99,70 @@ function paperCam(p, setName, v0 = {}, { after = null, stages = [] } = {}) {
     to(v, t0, dur = 1) { ops.push({ v, t0, dur }); ops.sort((a, b) => a.t0 - b.t0); ops.forEach(o => delete o.from); return cam; },
     cut: (v, t0) => cam.to(v, t0, 0),
     show(name, on) { for (const L of layers) if (L.name === name) vis(L.g, on); return cam; },   // swap a set layer (weather)
+    layer: name => layers.find(L => L.name === name)?.g,   // a set layer's group, to move, clip or fade one layer (a pond draining)
+    // move(name, q => transform) adds a transform to a set layer each frame, after its parallax: grass swaying from its
+    // foot (q => `translate(0 860) skewX(${1.5 * Math.sin(q * 1.9)}) translate(0 -860)`), clouds drifting (q => `translate(${q * 6} 0)`).
+    // Set before or after apply() in a frame, it draws that frame: a layer moved after apply() is placed again at once
+    // (a rebuilt beat's first frame is drawn the moment stopClock is called).
+    move(name, fn) { const L = layers.filter(L => L.name === name); if (!L.length) console.warn(`paperCam.move: set '${setName}' has no layer '${name}'`); L.forEach(L => { L.fx = fn; if (drawn) place(L); }); return cam; },
+    onPlane(name, sx, sy) {
+      const L = layers.find(L => L.name === name), s = shown;
+      if (!L) { console.warn(`paperCam.onPlane: set '${setName}' has no layer '${name}'`); return { x: sx, y: sy }; }
+      return { x: (sx - 800) / s.z + s.x - (1 - L.k) * (s.x - base.x), y: (sy - 450) / s.z + s.y - (1 - L.k) * (s.y - base.y) };
+    },
     soft(t0, on) { softs.push([t0, on]); softs.sort((a, b) => a[0] - b[0]); return cam; },
     shake(t0, dur, amp = 10) { shakes.push([t0, dur, amp]); return cam; },
-    apply(q, f) {
-      const s = at(q);
+    apply(q, f, camQ = q) {   // camQ: the time the camera itself is posed at (still.py --hold-cam holds it; layers' move() keep q)
+      const s = shown = at(camQ);
       let sx = 0, sy = 0;
-      for (const [t0, d, amp] of shakes) if (q >= t0 && q < t0 + d) { sx += jit(f, 91) * amp; sy += jit(f, 92) * amp; }
-      view.setAttribute('transform', `translate(${800 + sx} ${450 + sy}) scale(${s.z}) translate(${-s.x} ${-s.y})`);
-      const dx = s.x - base.x, dy = s.y - base.y;
-      let soft = false; for (const [t0, on] of softs) if (q >= t0) soft = on;
+      for (const [t0, d, amp] of shakes) if (camQ >= t0 && camQ < t0 + d) { sx += jit(f, 91) * amp; sy += jit(f, 92) * amp; }
+      tf(view, `translate(${800 + sx} ${450 + sy}) scale(${s.z}) translate(${-s.x} ${-s.y})`);   // tf skips an unchanged value (a repaint in Firefox)
+      drawn = { q, dx: s.x - base.x, dy: s.y - base.y };
+      let soft = false; for (const [t0, on] of softs) if (camQ >= t0) soft = on;
       for (const L of layers) {
-        L.g.setAttribute('transform', `translate(${((1 - L.k) * dx).toFixed(1)} ${((1 - L.k) * dy).toFixed(1)})`);
+        place(L);
         if (L.blur) { const b = soft === 'all' || (soft && L.k < 1); vis(L.blur, b); vis(L.sharp, !b); }   // never 'visible': it would show through a hidden camera
       }
       FLICKER.style.opacity = (.02 + .02 * jit(f, 30)).toFixed(3);   // the exposure flicker of real frames
     },
   };
   return cam;
+}
+
+/* ---------- coverage: wides for what happens, singles for who speaks ----------
+   coverage(cam, shots, { cast, wideOnly, overlays, D }) cuts cam at each shot and returns shot(q): the shot on screen
+   at q, with on(name), whether that puppet shows in it. A shot is { t, kind, who, view }: 'wide' (the whole stage,
+   the set sharp; view defaults to the set's own framing), 'single' or 'close' (the speaker `who` alone, the set behind
+   gone soft; view frames it), or the name of an overlay in `overlays` (an insert or a screen filling the frame, shown
+   only during its shot). In a single only its speaker shows: every other puppet in `cast` ({ name: puppet }) is hidden,
+   and so is every piece in `wideOnly` (props on the puppets' plane, a laptop, a cable, which would stay sharp in front of
+   the soft set). Hidden puppets need no pose: pose only those shot(q).on(name) says show, which Firefox thanks you
+   for. A shot at or past D (the beat's end on its clock, pre included) never shows, and a single of someone not in
+   the cast or an unknown overlay frames nothing: each is named in a console warning, which check.py prints.
+     const shot = coverage(cam, [{ t: 0, kind: 'wide' }, { t: m('s02.ask'), kind: 'single', who: 'kid', view: { x: 640, y: 560, z: 2.2 } },
+       { t: m('s02.look'), kind: 'note' }], { cast: { kid, cat }, wideOnly: [table], overlays: { note: noteInsert.g }, D });
+     stopClock(D, (q, f) => { const s = shot(q); if (s.on('kid')) kid.pose({ ... }, f); if (s.on('cat')) cat.pose({ ... }, f); cam.apply(q, f); }); */
+function coverage(cam, shots, { cast = {}, wideOnly = [], overlays = {}, D = Infinity } = {}) {
+  shots = [...shots].sort((a, b) => a.t - b.t);
+  const framed = k => k === 'single' || k === 'close';
+  for (const s of shots) {
+    if (s.t >= D) console.warn(`coverage: the ${s.kind} shot at ${s.t.toFixed(2)} s is at or past the beat's end (D ${D.toFixed(2)}, pre included): it never shows`);
+    if (framed(s.kind) && !cast[s.who]) console.warn(`coverage: a ${s.kind} of '${s.who}', who is not in the cast (${Object.keys(cast).join(', ') || 'none given'})`);
+    if (s.kind !== 'wide' && !framed(s.kind) && !overlays[s.kind]) console.warn(`coverage: no overlay '${s.kind}' (${Object.keys(overlays).join(', ') || 'none given'})`);
+    if (s.kind === 'wide' || s.view) { cam.cut(s.view || { x: 800, y: 450, z: 1 }, s.t); cam.soft(s.t, s.kind === 'wide' ? false : 'all'); }
+  }
+  let last = null;
+  return q => {
+    let cur = shots[0]; for (const s of shots) if (q >= s.t) cur = s;
+    const wide = cur.kind === 'wide', over = !wide && !framed(cur.kind);
+    if (cur !== last) {   // visibility written only at a cut
+      last = cur;
+      for (const [k, g] of Object.entries(overlays)) vis(g, k === cur.kind);
+      for (const [n, p] of Object.entries(cast)) vis(p.g, wide || !over && cur.who === n);
+      for (const e of wideOnly) vis(e, wide);
+    }
+    return { ...cur, on: n => wide || !over && cur.who === n };
+  };
 }
 
 /* ---------- small live pieces ---------- */
@@ -116,7 +184,8 @@ const mouthAt = (clip, t) => { let m = 'X'; if (t < 0) return m; for (const [at,
    A puppet is paper pieces on brass pins, built at its hip (0, 0) facing right, feet near y 166. pose(o, f) sets the
    whole state for frame f; any key left out keeps its rest value. A profile puppet that turns round squashes its
    side figure, shows its whole front figure through the thin middle of the turn and comes out mirrored (puppets.md). */
-const pinAt = (x, y) => `<circle cx="${x}" cy="${y}" r="3.4" fill="#caa24c" stroke="#7d5f22" stroke-width="1.2"/>`;
+const tack = (x, y) => `<circle cx="${x}" cy="${y}" r="3.4" fill="#caa24c" stroke="#7d5f22" stroke-width="1.2"/>`;   // a brass pin: the title card hangs on one
+const pinAt = (x, y) => window.PUPPET_PINS ? tack(x, y) : '';   // the joints' pins show only where a book sets window.PUPPET_PINS = true
 const tf = (el, s) => { if (el._t !== s) el.setAttribute('transform', el._t = s); };
 const vis = (el, on) => { const v = on ? 'inherit' : 'hidden'; if (el._v !== v) el.setAttribute('visibility', el._v = v); };
 
@@ -228,6 +297,6 @@ function endCard(p, t0, words = 'The End', { x = 800, y = 450, size = 78 } = {})
   if (wide(size) > 1500) size = Math.floor(size * 1500 / wide(size));
   const w = Math.max(480, Math.ceil(wide(size))), h = Math.round(size * 3.08), L = Math.round(x - w / 2), T = Math.round(y - h / 2);
   const g = prop(p, `<g filter="url(#paper)"><rect x="${L}" y="${T}" width="${w}" height="${h}" rx="14" fill="#f3e9d2"/><rect x="${L + 20}" y="${T + 20}" width="${w - 40}" height="${h - 40}" rx="8" fill="none" stroke="#c8322f" stroke-width="5"/></g>
-    <text x="${x}" y="${Math.round(y + size * .36)}" text-anchor="middle" font-family="Georgia, serif" font-size="${size}" font-style="italic" fill="#5a2a1e">${words}</text>${pinAt(x, T + 12)}`);
+    <text x="${x}" y="${Math.round(y + size * .36)}" text-anchor="middle" font-family="Georgia, serif" font-size="${size}" font-style="italic" fill="#5a2a1e">${words}</text>${tack(x, T + 12)}`);
   return q => { const u = (q - t0) * FPS; vis(g, u >= 0); const d = [-60, -20, 8, -3, 0][Math.min(4, Math.max(0, Math.floor(u / 2)))]; tf(g, `translate(0,${d})`); };
 }

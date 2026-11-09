@@ -5,7 +5,7 @@
 
 The bank is the source of truth for the chapter's choice questions: write and lint it with the
 mcq-item-writer skill, then build. The page loads items.js after engine.js and asks with
-mcq('ID') (engine.md, Questions). Lint first; this script only refuses what the engine can't show:
+mcq('ID') (references/lessons/questions.md). Lint first; this script only refuses what the engine can't show:
 
   - multiple-response items, data tables and media (draw data in the picture and ask about it);
   - an item without exactly one correct option.
@@ -13,7 +13,9 @@ mcq('ID') (engine.md, Questions). Lint first; this script only refuses what the 
 Ordered-MC items become ordinary choice questions (the engine has no partial credit). Options keep
 their authored order, since the engine doesn't shuffle, so spread key positions in the bank. The
 engine prefixes "Correct." / "Not quite.", so a leading verdict in feedback is dropped. Items that
-aren't approved yet are listed as a warning.
+aren't approved yet are listed as a warning. Inline maths written \\( ... \\) in a stem, option or feedback becomes a
+LaTeX part ({"m": [{"tex": ...}]}, what $tex() makes), so the card draws it with MathJax; the chapter then loads
+lib/mathjax.js (engine.py <book> --latex). Text without \\( stays a plain string, as before.
 """
 import argparse
 import json
@@ -24,8 +26,24 @@ from pathlib import Path
 VERDICT = re.compile(r"^\s*(correct|incorrect|not quite|not correct|right|wrong|yes|no)\s*[.!:,—–-]\s*", re.I)
 
 
+TEX = re.compile(r"\\\((.*?)\\\)", re.S)
+
+
+def parts(text):
+    """Rich text for the card: the string itself, or text and TeX parts when it holds \\( ... \\)."""
+    if not TEX.search(text):
+        return text
+    out = []
+    for i, piece in enumerate(TEX.split(text)):
+        if i % 2:
+            out.append({"m": [{"tex": piece}]})
+        elif piece:
+            out.append(piece)
+    return out
+
+
 def feedback(text):
-    return VERDICT.sub("", text.strip(), count=1)
+    return parts(VERDICT.sub("", text.strip(), count=1))
 
 
 def convert(item, problems):
@@ -46,8 +64,8 @@ def convert(item, problems):
     right = keys[0]
     prompt = " ".join(t.strip() for t in (stem.get("scenario"), stem.get("lead_in")) if t and t.strip())
     return {
-        "prompt": prompt,
-        "opts": [[o["text"].strip()] for o in opts],
+        "prompt": parts(prompt),
+        "opts": [[p] if isinstance(p := parts(o["text"].strip()), str) else p for o in opts],
         "right": right,
         "why": feedback(opts[right].get("feedback", "")),
         "no": [None if i == right else feedback(o.get("feedback", "")) for i, o in enumerate(opts)],

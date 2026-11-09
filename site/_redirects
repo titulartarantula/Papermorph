@@ -138,3 +138,7 @@
 /ch66/* /elementary-algebra/ch66/:splat 301
 /ch67/* /elementary-algebra/ch67/:splat 301
 /ch68/* /elementary-algebra/ch68/:splat 301
+
+# Shorts have no page of their own; their home button lands on the series page.
+/madness-shorts/ /madness/#shorts 302
+/pandemic-shorts/ /pandemic/#shorts 302

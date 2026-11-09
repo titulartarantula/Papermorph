@@ -15,6 +15,7 @@
 }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 90px; }
+html, body { overflow-x: clip; }
 body { margin: 0; min-height: 100svh; background: var(--board); color: var(--chalk); font: 18px/1.5 var(--ui); }
 /* Chalkboard: the same grain and vignette as the lesson stage. The grain is dark: it never lightens the board below the
    palette's contrast. */
@@ -23,7 +24,7 @@ body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-even
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .02 0 0 0 0 .05 0 0 0 0 .14 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23g)'/%3E%3C/svg%3E"); }
 a { color: inherit; }
 a:focus-visible { outline: 3px solid var(--task); outline-offset: 3px; }
-.kicker { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--quiz); }
+.kicker { margin: -6px 0 24px; font-size: 18px; font-weight: 600; color: var(--quiz); }   /* under the title, a subtitle */
 
 /* ---------- cover ---------- */
 #cover { position: relative; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -35,16 +36,16 @@ body:not(.refsview) #refpage, .refsview #cover, .refsview #contents { display: n
 body:not(.ackview) #ackpage, .ackview #cover, .ackview #contents { display: none; }
 #cover > * { animation: rise .8s var(--ease) backwards; }
 #cover .mascot { animation: none; margin-bottom: 26px; view-transition-name: guide; }
-#cover .kicker { animation-delay: .9s; }
 #cover h1 { animation-delay: 1s; }
+#cover .kicker { animation-delay: 1.06s; }
 #cover .lede { animation-delay: 1.12s; }
 #cover .acts { animation-delay: 1.24s; }
 #cover .meta { animation-delay: 1.36s; }
 h1 { margin: 14px 0 18px; font: 500 clamp(44px, 8.4vw, 92px)/1.02 var(--book); letter-spacing: -.01em; view-transition-name: book; }
-h1 i { color: var(--task); font-style: italic; }
+h1 i, .home strong i { font-style: normal; }   /* the whole title one face and one colour; <i> left in older covers */
 .lede { max-width: 34em; margin: 0 0 34px; color: var(--dim); font-size: clamp(17px, 2.2vw, 20px); text-wrap: balance; }
 .acts { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-.btn { display: inline-flex; align-items: center; gap: 12px; padding: 14px 30px; border-radius: 999px; font-weight: 600; font-size: 19px; text-decoration: none;
+.btn { display: inline-flex; align-items: center; gap: 12px; padding: 12px 28px; border-radius: 999px; font-weight: 600; font-size: 19px; text-decoration: none;
   transition: transform .25s var(--ease), background-color .25s, border-color .25s; }
 .btn[hidden] { display: none; }
 .btn:hover { transform: translateY(-2px); }
@@ -52,7 +53,7 @@ h1 i { color: var(--task); font-style: italic; }
 .btn.quiet { border: 1.5px solid var(--faint); color: var(--chalk); }
 .btn.quiet:hover { border-color: var(--dim); }
 .btn svg { width: 15px; height: 15px; fill: currentColor; }
-.meta { margin: 30px 0 0; color: var(--dim); font-size: 15px; letter-spacing: .04em; }
+.meta { margin: 30px 0 0; color: var(--dim); font-size: 15px; }   /* --faint read below 3:1 */
 /* Faint chalk notes around the edges of the board. */
 .chalk { position: absolute; inset: 0; z-index: -1; pointer-events: none; animation: none !important; }
 .chalk span { position: absolute; font: italic 400 clamp(22px, 3vw, 38px) var(--book); color: var(--chalk); opacity: 0; white-space: nowrap;
@@ -82,13 +83,12 @@ h1 i { color: var(--task); font-style: italic; }
 .home { display: flex; align-items: center; gap: 12px; text-decoration: none; border-radius: 10px; }
 .home .mascot { view-transition-name: guide; }
 .home strong { font: 500 22px/1.1 var(--book); view-transition-name: book; }
-.home strong i { color: var(--task); }
-.prog { margin-left: auto; color: var(--dim); font-size: 15px; white-space: nowrap; }
+.prog { margin-inline-start: auto; color: var(--dim); font-size: 15px; white-space: nowrap; }
 .prog b { color: var(--good); font-weight: 600; }
 main#contents { padding-bottom: 80px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 12px; }
 .ch { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: 1fr auto; column-gap: 16px; row-gap: 8px; min-height: 112px;
-  padding: 16px 18px 14px 16px; border-radius: 16px; background: var(--panel); border: 1.5px solid var(--edge); border-left: 6px solid var(--c);
+  padding: 16px 18px 14px 16px; border-radius: 16px; background: var(--panel); border: 1.5px solid var(--edge); border-inline-start: 6px solid var(--c);
   text-decoration: none; transition: transform .3s var(--ease), border-color .3s, box-shadow .3s; }
 .ch:hover { transform: translateY(-3px); border-color: var(--c); box-shadow: 0 14px 34px var(--lift); }
 .ch b { grid-row: span 2; min-width: 1.15em; font: 500 42px/1 var(--book); color: var(--c); font-variant-numeric: lining-nums tabular-nums; }
@@ -107,7 +107,7 @@ main#contents { padding-bottom: 80px; }
 .refs-more a:hover { border-color: var(--dim); }
 .refs-more b { font: 500 22px/1.2 var(--book); }
 .refs-more span { color: var(--dim); font-size: 15px; }
-.refs-more i { margin-left: auto; font-style: normal; color: var(--quiz); font-weight: 600; font-size: 15px; }
+.refs-more i { margin-inline-start: auto; font-style: normal; color: var(--quiz); font-weight: 600; font-size: 15px; }
 #refpage, #ackpage { padding-bottom: 80px; }
 .refs-more + .refs-more { margin-top: 14px; }
 .ack h2 { margin: 34px 0 10px; font: 500 26px/1.2 var(--book); color: var(--chalk); }
@@ -118,13 +118,13 @@ main#contents { padding-bottom: 80px; }
 .ack dd { margin: 0; color: var(--dim); }
 @media (max-width: 560px) { .ack dl { grid-template-columns: 1fr; gap: 2px; } .ack dd { margin-bottom: 12px; } }
 .top .back { display: inline-flex; align-items: center; gap: 8px; padding: 6px 4px; font-weight: 600; text-decoration: none; color: var(--quiz); border-radius: 8px; }
-.top .rp-book { margin-left: auto; font: 500 18px/1.2 var(--book); color: var(--dim); }
+.top .rp-book { margin-inline-start: auto; font: 500 18px/1.2 var(--book); color: var(--dim); }
 .top .rp-book i { color: var(--task); }
 .refs { max-width: 1212px; margin: 32px auto 0; padding: 0 16px; }
 .refs h1 { margin: 0 0 8px; font: 500 clamp(32px, 5vw, 44px)/1.1 var(--book); view-transition-name: none; }
 .refs .lead { margin: 0 0 26px; max-width: 46em; color: var(--dim); }
 .refs ol { margin: 0; padding: 0; list-style: none; color: var(--dim); font-size: 16px; line-height: 1.5; }
-.refs li { margin: 0 0 10px; padding-left: 2em; text-indent: -2em; }
+.refs li { margin: 0 0 10px; padding-inline-start: 2em; text-indent: -2em; }
 .refs a { color: var(--chalk); text-underline-offset: 3px; overflow-wrap: anywhere; }
 .refs a:hover { color: var(--quiz); }
 .stagger .top { animation: rise .6s var(--ease) backwards; }
@@ -148,3 +148,12 @@ main#contents { padding-bottom: 80px; }
   *, *::before, ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; transition: none !important; }
   .chalk span { opacity: .075; }
 }
+/* Arabic (contents.js sets <html dir="rtl">): the layout follows through logical properties (border-inline-start, …).
+   Letters join, so no letter spacing; the faces are each system's own, no font file is loaded. A book's own :root
+   theme, after this file, still sets its faces (this rule has the same specificity as :root). */
+:root:where(:lang(ar)) {
+  --ui: "Segoe UI", "SF Arabic", "Geeza Pro", "Noto Sans Arabic", Tahoma, sans-serif;
+  --book: "Noto Naskh Arabic", "Traditional Arabic", "Times New Roman", serif;
+}
+:root:lang(ar) :is(.kicker, .meta, h1, .unit h2 .label) { letter-spacing: 0; }
+[dir="rtl"] .btn.go svg { transform: scaleX(-1); }   /* "open" points the way the page reads */
