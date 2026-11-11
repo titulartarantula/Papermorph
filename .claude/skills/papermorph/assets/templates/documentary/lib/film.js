@@ -11,10 +11,21 @@ const KEY = '"Oswald", "Arial Narrow", sans-serif', SER = '"EB Garamond", Georgi
 // a document's paper, ink on paper, a document's heading
 const CREAM = COL.chalk, SOFT = COL.dim, HOT = bookSetting('--accent') || '#f08a4b', PAPER = bookSetting('--paper') || CREAM,
   INK = bookSetting('--paper-ink') || '#3a2a24', STAMP = bookSetting('--stamp') || '#7a1a20';
+// the captions (C, and export.py --captions) sit in the stage's bottom quarter: words of the film's own stay above
+// this line, as the map kit's labels do (its safe box ends at SH - 230)
+const CAPTION_TOP = SH - 230;
 
+// a picture's [width, height] from ART (img/art.js, from prep.py). A name ART lacks (a picture added or resized by hand)
+// warns once, by name, and stands in at 16:9, so its beat still draws and check.py lists the warning
+const ART_MISSED = new Set();
+function artSize(name) {
+  if (typeof ART !== 'undefined' && ART[name]) return ART[name];   // looked up when a beat builds: art.js may load after the kit
+  if (!ART_MISSED.has(name)) { ART_MISSED.add(name); console.warn(`no '${name}' in ART (img/art.js): prep.py writes each picture's size there; one made by hand needs its [width, height]`); }
+  return [1600, 900];
+}
 // a picture from img/: centred on (x, y), h or w in stage px; `at` makes it enter (from offset dx, dy) at that time
 function pic(p, name, { x = 800, y = 450, h = 600, w, r = 0, s = 1, at, from = [0, 40], dur = .9, o = 1, back = false } = {}) {
-  const sz = ART[name];
+  const sz = artSize(name);
   const g = G(p, at === undefined ? { x, y, r, s, o } : { x: x + from[0], y: y + from[1], r, s, o: 0 });
   const k = w ? w / sz[0] : h / sz[1], W = sz[0] * k, H = sz[1] * k;
   if (back) mk('rect', { x: -W / 2 + 4, y: -H / 2 + 4, width: W - 8, height: H - 8, fill: COL.board }, g);   // a solid line drawing (a door)
@@ -79,20 +90,25 @@ function say(p, lines, x, y, t0, t1, { size = 44, fill = CREAM, italic = true, a
   words.forEach((e, i) => { show(e, t1 === t0 ? t0 : t0 + (t1 - t0) * acc / all, .25, lin); acc += chars[i]; });
   return g;
 }
-// a small caption under a picture (a credit or a name tag)
+// a small caption under a picture (a credit or a name tag); one under CAPTION_TOP, where the captions go, is said in
+// the console (check.py lists it): put the credit beside the picture, or the picture higher
 function tag(p, str, x, y, t0, { size = 24, anchor = 'start', fill = SOFT } = {}) {
+  if (y > CAPTION_TOP) console.warn(`tag '${str}' at y ${Math.round(y)}, under the captions (below ${CAPTION_TOP}): move it up or beside its picture`);
   const e = T(p, str, { x, y, size, fill, font: SER, anchor, o: 0 });
   e.setAttribute('font-style', 'italic');
   show(e, t0, .5);
   return e;
 }
-// the era at the top left, like a chapter opener: the year in italic, a hairline, the place or topic in spaced capitals
-function dateChip(p, year, topic, t0 = .2) {
+// the era at the top left, like a chapter opener: the year in italic, a hairline, the place or topic in spaced capitals.
+// Cream on the film's ground; over a paper map give fill: MAP_COL.ink (the year keeps the accent unless `year` is set),
+// or a ground: COL.board for a band of the film's ground behind it
+function dateChip(p, year, topic, t0 = .2, { fill = CREAM, year: yc = HOT, ground, size = 26 } = {}) {
   const g = G(p, { x: 80, y: 112, o: 0 });
-  T(g, year, { size: 72, font: SER, weight: 400, fill: HOT }).setAttribute('font-style', 'italic');
-  const tw_ = wid(topic.toUpperCase(), 26, SER) * 1.3 + 8;   // letter-spacing .28em widens the caps by about 30 %
-  const rule = path(g, `M3 22H${Math.max(220, tw_)}`, { stroke: CREAM, 'stroke-width': 1.4, opacity: .7 }, { d: 0 });
-  T(g, topic.toUpperCase(), { x: 3, y: 58, size: 26, font: SER, weight: 400, fill: CREAM }).setAttribute('letter-spacing', '.28em');
+  const tw_ = wid(topic.toUpperCase(), size, SER) * 1.3 + 8;   // letter-spacing .28em widens the caps by about 30 %
+  if (ground) mk('rect', { x: -28, y: -78, width: Math.max(220, tw_, wid(year, 72, SER, 'italic')) + 56, height: 104 + size * 1.6, fill: ground, opacity: .94 }, g);
+  T(g, year, { size: 72, font: SER, weight: 400, fill: yc }).setAttribute('font-style', 'italic');
+  const rule = path(g, `M3 22H${Math.max(220, tw_)}`, { stroke: fill, 'stroke-width': 1.4 }, { d: 0 });
+  T(g, topic.toUpperCase(), { x: 3, y: 34 + size * .92, size, font: SER, weight: 400, fill }).setAttribute('letter-spacing', '.28em');
   tw(g, { o: 1 }, t0, .6); draw(rule, t0 + .2, .6);
   return g;
 }
@@ -101,7 +117,7 @@ const line = (p, d, t0, dur = .8, w = 3, extra = {}) => { const e = path(p, d, {
 // wavy water lines that flow forever (pure function of the beat clock); amp may be a function of t
 function water(p, y0, D, { rows = 3, amp = 8, len = 1700, x0 = -50, gap = 26, o = .75 } = {}) {
   const g = G(p, { o: 0 }); tw(g, { o }, 0, .6);
-  const ps = [...Array(rows)].map((_, i) => path(g, '', { stroke: CREAM, 'stroke-width': 2.2, opacity: 1 - i * .25 }));
+  const ps = [...Array(rows)].map((_, i) => path(g, '', { stroke: CREAM, 'stroke-width': 2.2 }));
   clockRun(t => { const a = typeof amp === 'function' ? amp(t) : amp; ps.forEach((e, i) => {
     let d = ''; for (let x = 0; x <= len; x += 20) d += `${x ? 'L' : 'M'}${x0 + x} ${(y0 + i * gap * (a / 8) ** .5 + a * Math.sin(x / 70 + t * 1.6 + i)).toFixed(1)}`;
     e.setAttribute('d', d);
@@ -127,12 +143,13 @@ function dots(p, n, box, r, seed, fill = CREAM) {
 // close-ups inside a print as their words are spoken: shots [[mark, fx, fy, label, zoom]], fx/fy the point in the picture
 // (0..1 of the picture inside its border); the view never leaves the picture; a band names each one; back to the whole after
 function closeups(p, g, name, shots, m, tBack, home) {
-  const [W, H] = ART[name], k = g._w / W, iw = (W - 112) * k, ih = (H - 112) * k;   // a print's picture sits 56 px in
+  const [W, H] = artSize(name), k = g._w / W, iw = (W - 112) * k, ih = (H - 112) * k;   // a print's picture sits 56 px in
   const clamp = (v, lim) => Math.max(-lim, Math.min(lim, v));
   shots.forEach(([mark, fx, fy, label, Z = 3], i) => {
     const dx = clamp((fx - .5) * iw, iw / 2 - 800 / Z), dy = clamp((fy - .5) * ih, ih / 2 - 450 / Z), t0 = m(mark) - .15;
     tw(g, { s: Z, x: 800 - Z * dx, y: 450 - Z * dy, r: 0 }, t0, .35, out);
-    const l = G(p, { x: 800, y: fy > .7 ? 130 : 820, o: 0 }), lw = wid(label.toUpperCase(), 72, KEY, '', 600) + 70;   // clear of a low subject
+    // the band at the top for a low subject, else low but above the captions
+    const l = G(p, { x: 800, y: fy > .7 ? 130 : CAPTION_TOP - 40, o: 0 }), lw = wid(label.toUpperCase(), 72, KEY, '', 600) + 70;
     mk('rect', { x: -lw / 2, y: -68, width: lw, height: 92, fill: COL.board }, l);
     T(l, label.toUpperCase(), { y: 0, size: 72, font: KEY, weight: 600, fill: CREAM, anchor: 'middle' });
     show(l, t0, .12);
@@ -161,7 +178,7 @@ function doc(p, label, x, y, r, t0, seed) {
   mk('rect', { x: -150, y: -200, width: 300, height: 400, fill: PAPER, stroke: '#cdbfa6' }, g);
   for (let i = 0; i < 13; i++) {
     const yy = -130 + i * 24, ww = 160 + R() * 70;
-    path(g, `M-118 ${yy}q${ww / 4} ${-3 + R() * 6} ${ww / 2} 0t${ww / 2} 0`, { stroke: INK, 'stroke-width': 2, opacity: .7 });
+    path(g, `M-118 ${yy}q${ww / 4} ${-3 + R() * 6} ${ww / 2} 0t${ww / 2} 0`, { stroke: INK, 'stroke-width': 2 });
   }
   T(g, label.toUpperCase(), { y: -160, size: 22, font: KEY, weight: 600, fill: STAMP, anchor: 'middle' }).setAttribute('letter-spacing', '.06em');
   tw(g, { x, o: 1 }, t0, .8, out);

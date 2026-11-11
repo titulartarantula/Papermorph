@@ -17,7 +17,7 @@ const HL = { yellow: '#fff06a', pink: '#f7a8c8', green: '#c5e15a', blue: '#8fd3f
 
 // Fonts must be ready before anything is measured or drawn: call nbBoot() instead of boot().
 function nbBoot() {
-  Promise.all(['40px "Patrick Hand"', '40px "Luckiest Guy"'].map(f => document.fonts.load(f))).finally(boot);
+  return Promise.all(['40px "Patrick Hand"', '40px "Luckiest Guy"'].map(f => document.fonts.load(f))).finally(boot);
 }
 
 // Text in the hand font (o: 0 unless shown later).
@@ -34,9 +34,9 @@ const handW = (str, size, font = HAND) => { ctx2d.font = `${size}px ${font}`; re
 
 // A highlighter swipe from x to x + w with its middle at y, drawn on left to right at t0.
 // Slightly tilted and ragged like a real marker. Create it before the text it sits behind.
-function swipe(p, x, y, w, { h = 44, color = HL.yellow, t0 = 0, dur = .45, o = .9 } = {}) {
+function swipe(p, x, y, w, { h = 44, color = HL.yellow, t0 = 0, dur = .45 } = {}) {
   const d = `M${x} ${y + 3}C${x + w * .3} ${y - 1} ${x + w * .7} ${y + 2} ${x + w} ${y - 2}`;
-  const s = path(p, d, { stroke: color, 'stroke-width': h, 'stroke-linecap': 'butt', opacity: o }, { d: 0 });
+  const s = path(p, d, { stroke: color, 'stroke-width': h, 'stroke-linecap': 'butt' }, { d: 0 });
   tw(s, { d: 1 }, t0, dur, out);
   return s;
 }

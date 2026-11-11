@@ -1,13 +1,11 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="img/readme/logo_light.png">
-    <source media="(prefers-color-scheme: light)" srcset="img/readme/logo.png">
-    <img src="img/readme/logo.png" alt="Papermorph" width="600">
-  </picture>
+  <a href="https://papermorph.diamonddoge.org/">
+    <img src="img/readme/bookshelf.webp" alt="The Papermorph bookshelf: lessons, picture books, documentaries and interactive pages on a birch shelf" width="420">
+  </a>
 </p>
 
 <p align="center">
-  <strong>A Claude Code Skill that turns textbooks into narrated, interactive web lessons,<br>stories into paper-puppet films, and books into narrated documentaries.</strong>
+  <strong>An agent skill that turns textbooks into narrated, interactive web lessons,<br>stories into paper-puppet films, and books into documentaries, upright shorts and pages you explore.</strong>
 </p>
 
 > **About this fork.** This is a fork of [DozenTwelve/Papermorph](https://github.com/DozenTwelve/Papermorph), maintained by [Jordan Holmes](https://orcid.org/0000-0003-0917-4616) (University of Toronto). The Skill in `.claude/skills/papermorph` and the engine in `engine/` add:
@@ -25,101 +23,91 @@
 <p align="center">
   <a href="https://papermorph.diamonddoge.org/">Open the live bookshelf →</a>
   ·
-  <a href=".claude/skills/papermorph/SKILL.md">Read the Skill</a>
+  <a href=".claude/skills/papermorph/SKILL.md">Read the Skill →</a>
+  ·
+  <a href="https://papermorph.diamonddoge.org/work/">Work with us</a>
 </p>
 
-<p align="center">
-  <a href="https://papermorph.diamonddoge.org/">
-    <img src="img/readme/papermorph-preview.webp" alt="Pulleys in Elementary Physics, a quiz answered wrong and then right, and paper puppets with subtitled lines from Joke Collection" width="880">
-  </a>
-</p>
-
-## What you can make
-
-| You give it | You get | On the shelf |
-|---|---|---|
-| A textbook PDF (maths) | Lessons where formulas and diagrams change step by step as the narration explains, with quick checks and chapter practice that grade the maths, not the string | [Elementary Algebra](https://papermorph.diamonddoge.org/elementary-algebra/) (68 chapters), [Elementary Mathematics](https://papermorph.diamonddoge.org/math-notebook/) (23) |
-| A textbook PDF (science) | Illustrated scenes with acting characters and camera work, plus the same quizzes | [Elementary Physics](https://papermorph.diamonddoge.org/science/) (9 chapters and a sample) |
-| A story, a joke or a fairy tale | A short film of paper puppets in front of sets drawn in code or painted by an image model, with voices, subtitles, sound effects and music | [Joke Collection](https://papermorph.diamonddoge.org/joke-collection/) (7 episodes), [Little Red Riding Hood](https://papermorph.diamonddoge.org/little-red-riding-hood/) |
-| A book or an idea | A narrated documentary of public-domain engravings, paintings and maps, moved in step with the voice, with music | [Madness and Civilization](https://papermorph.diamonddoge.org/madness/) (10 minutes) |
-
-<p align="center">
-  <a href="https://papermorph.diamonddoge.org/science/ch12/"><img src="img/readme/physics-pulleys.webp" alt="Elementary Physics: one fixed pulley changes the direction of the pull; two pulleys halve the force" width="49%"></a>
-  <a href="https://papermorph.diamonddoge.org/joke-collection/ch03/"><img src="img/readme/joke-collection.webp" alt="Joke Collection: paper puppets on a painted farm, foreign lines with English subtitles" width="49%"></a>
-</p>
+> **1,000 stars.** Thank you to everyone who starred Papermorph, tried the Skill, filed issues and sent pull requests. The first roadmap is done; the next is [below](#roadmap).
 
 Everything is a static web page: no server, no database, no account. A book is a folder you can host anywhere.
 
+## On the shelf
+
+### Lessons, from a textbook PDF
+
+Formulas, diagrams and scenes change step by step as the narration explains, with quick checks and chapter practice that grade the maths, not the string.
+[Elementary Algebra](https://papermorph.diamonddoge.org/elementary-algebra/) (68 chapters) · [Linear Algebra](https://papermorph.diamonddoge.org/linear-algebra/) (40, planes you can drag in 3D) · [Elementary Mathematics](https://papermorph.diamonddoge.org/math-notebook/) (23) · [Elementary Physics](https://papermorph.diamonddoge.org/science/) (9)
+
+<p align="center">
+  <a href="https://papermorph.diamonddoge.org/linear-algebra/ch12/"><img src="img/readme/linear-algebra.webp" alt="Linear Algebra: three equations become three planes in 3D, drawn in one by one" width="49%"></a>
+  <a href="https://papermorph.diamonddoge.org/science/ch12/"><img src="img/readme/physics.webp" alt="Elementary Physics: one fixed pulley changes the direction of the pull; two pulleys halve the force" width="49%"></a>
+</p>
+
+### Picture books, from a story, a joke or a fairy tale
+
+Paper puppets in front of sets drawn in code or painted by an image model, with acted voices, subtitles, sound effects, music and camera work. For children who can't read yet, the film stops for a game: a character asks for one thing at a time, the child touches it in the picture, and nothing is ever called wrong. A scanned picture book can bring its own art: the figures, sets and hand lettering are cut from the pages and moved as puppets.
+[The Little Horse Crosses the River](https://papermorph.diamonddoge.org/little-horse/) (小马过河) · [Little Red Riding Hood](https://papermorph.diamonddoge.org/little-red-riding-hood/) · [Millions of Cats](https://papermorph.diamonddoge.org/millions-of-cats/) (Wanda Gág, 1928, cut from the book's own pages) · [Joke Collection](https://papermorph.diamonddoge.org/joke-collection/) (7 episodes)
+
+<p align="center">
+  <a href="https://papermorph.diamonddoge.org/little-horse/ch01/"><img src="img/readme/little-horse.webp" alt="The Little Horse Crosses the River: by the river the foal asks for the bird; a tap on the ox says 'ox', a tap on the bird finds it" width="49%"></a>
+  <a href="https://papermorph.diamonddoge.org/little-red-riding-hood/ch01/"><img src="img/readme/red-riding-hood.webp" alt="Little Red Riding Hood: the wolf in Grandma's cap and glasses, closer with every question, then the lunge" width="49%"></a>
+</p>
+
+### Documentaries and upright shorts, from a book or an idea
+
+Public-domain engravings, paintings, maps and charts, moved in step with the voice, with music. A documentary can be recut as a series of upright shorts for a phone feed.
+[Madness and Civilization](https://papermorph.diamonddoge.org/madness/) (10 minutes, and 4 shorts) · [The Pandemic](https://papermorph.diamonddoge.org/pandemic/) (7 minutes, 6 shorts and a scroll story)
+
+<p align="center">
+  <a href="https://papermorph.diamonddoge.org/pandemic/ch01/"><img src="img/readme/pandemic.webp" alt="The Pandemic: a world map and charts of cases and deaths as the Delta wave rises" width="73%"></a>
+  <a href="https://papermorph.diamonddoge.org/pandemic-shorts/ch01/"><img src="img/readme/pandemic-short.webp" alt="The Pandemic as a short: Wuhan closes at 10:00 while a clock and a counter run" width="23%"></a>
+</p>
+
+### Pages you play
+
+A film can stop and hand the reader the next move, a map can be walked a year at a time, and a story can unfold as the reader scrolls. The Skill makes all three: explorable maps and scroll stories have their own starting kits.
+[Shooting an Elephant](https://papermorph.diamonddoge.org/shooting-an-elephant/) (Orwell's essay; you hold the rifle) · [Explorable maps](https://papermorph.diamonddoge.org/maps/): [Time of the Magicians](https://papermorph.diamonddoge.org/time-of-the-magicians/) (Europe 1919–1929, four philosophers on the map) and [The Map Redrawn](https://papermorph.diamonddoge.org/meiji/) (Japan 1868–1878) · [The Pandemic as a scroll story](https://papermorph.diamonddoge.org/pandemic-scroll/)
+
+<p align="center">
+  <a href="https://papermorph.diamonddoge.org/shooting-an-elephant/"><img src="img/readme/elephant.webp" alt="Shooting an Elephant: where to aim, then the view through the rifle sight, click to fire" width="49%"></a>
+  <a href="https://papermorph.diamonddoge.org/time-of-the-magicians/"><img src="img/readme/magicians.webp" alt="Time of the Magicians: a map of Europe in 1919, the four philosophers walking their routes" width="49%"></a>
+</p>
+
 ## Get started
 
-Install the Skill in your project:
+Install the Skill in your project, for Claude Code or OpenCode:
 
 ```bash
-npx skills add DozenTwelve/Papermorph --skill papermorph --agent claude-code
+npx skills add DozenTwelve/Papermorph --skill papermorph --agent claude-code   # or --agent opencode
 ```
 
-Then, in Claude Code:
+Then type `/papermorph`. It finds the PDF in your project (or asks for your story), tells you what kind of book it is, suggests a chapter to try first and how much animation it needs, and offers a recommended option at every step. Your choices are saved in `style.json`, so every later chapter is made to the same style.
 
-```text
-/papermorph
-```
+In OpenCode, a clone of this repository already has the command (`.opencode/commands/papermorph.md`) and the Skill; with a global install, copy that file to `~/.config/opencode/commands/`.
 
-It finds the PDF in your project (or asks for your story), tells you what kind of book it is, suggests a chapter to try first and how much animation it needs, and offers a recommended option at every step. Your choices are saved in `style.json`, so every later chapter is made to the same style.
-
-You need [uv](https://docs.astral.sh/uv/), ffmpeg, and Playwright's browsers (`uv run --with playwright playwright install chromium firefox`). Narration uses Edge TTS (online) or Kokoro (local), free. A few steps are paid, optional and need an API key: painted sets for picture books (OpenRouter or OpenAI), and ElevenLabs narration and clips made from a still for documentaries ([OpenRouter](https://openrouter.ai/)). Everything else runs without one.
+You need [uv](https://docs.astral.sh/uv/), ffmpeg, and Playwright's browsers (`uv run --with playwright playwright install chromium firefox`). Narration uses Edge TTS (online) or Kokoro (local), free. A few steps are paid, optional and need an API key: acted ElevenLabs voices for picture books and documentaries, clips made from a still ([OpenRouter](https://openrouter.ai/)), and painted sets for picture books (OpenRouter or OpenAI). The newest picture books cost under $0.45 each in voices.
 
 ## How it works
 
-**Textbooks:** the PDF is split into chapters → each chapter gets a beat plan and narration → the narration is voiced, and every word gets a time → the picture is laid out as a storyboard first, then animated in time with those words → quizzes go between the steps → the model watches its own output (contact sheets, overlap and blank-frame checks, end-to-end tests) and fixes what it sees.
+A book is planned before it is drawn: chapters or scenes, then a script, then a storyboard. The narration is voiced and every word gets a time, and the picture is animated to those times. The model then watches its own output (contact sheets, overlap and blank-frame checks, end-to-end tests, a director's review against approved books) and fixes what it sees. Large chapters are made by a team of subagents, each step on the model you choose ([core/team.md](.claude/skills/papermorph/references/core/team.md)). The books on the shelf were made with Opus 5.5, GPT-6.1-Sol and Sonnet 5.5; an illustrated physics chapter costs about $10–18 of model usage.
 
-**Picture books:** your telling becomes a script and a shot list → puppets and sets are built (or painted) once and reused across episodes → voices, mouth shapes, sound effects and music are made and joined per scene → scenes are filmed in parallel → review rounds (a director, picture reviewers and a sound reviewer) send scenes back until they hold up next to approved episodes.
+Every book plays in the same player: pause anywhere, step back and forth, speed, captions, keyboard shortcuts, and progress saved per book, with the interface in English, Russian, Chinese, Japanese or Arabic (right to left). The player lives in [`engine/`](engine) and every book keeps its own copy, so a book never breaks when the engine changes; `scripts/engine.py site` updates them from the latest release (`--from you/your-fork@main` from your own).
 
-**Documentaries:** the source becomes an argument, a script and a storyboard → public-domain pictures are found, their licences recorded, and treated to one look → the narration is voiced and music laid under it → the beats are built in step with the words → a director pass checks every beat against the narration.
-
-Large chapters can be made by a team of subagents, each step on the model that suits it ([team.md](.claude/skills/papermorph/references/team.md)).
-
-## The player
-
-Every book plays in the same player: pause anywhere, step back and forth, click a step to jump there, speed control, captions, keyboard shortcuts, and progress saved per book. Interface text follows the book's language (`<html lang>`: English, Russian, Chinese and Japanese are built in); foreign lines in a film are subtitled. Formulas can be written in LaTeX (MathJax, copied only into the books that use it).
-
-The player engine lives in [`engine/`](engine), apart from the Skill, and every book keeps its own copy, so a book never breaks when the engine changes. To update the books, or to use your own fork:
-
-```bash
-python3 .claude/skills/papermorph/scripts/engine.py site                          # sync every book in site/
-python3 .claude/skills/papermorph/scripts/engine.py site --from you/your-fork@main
-```
-
-Engine versions are tags (`engine-v2`, `engine-v2.1`, …); a new major number means a book may need a change, described in its [release notes](https://github.com/DozenTwelve/Papermorph/releases). Outside this repository, `engine.py` syncs from the latest compatible release, now `engine-v2.4`. Since `engine-v2` the maths helpers (number lines, tiles, planes, the number-set diagram) are in `lib/math.js`: a chapter that uses them loads `../lib/math.js` right after `engine.js`, and `lint.py` names the chapters that need it. `--from DozenTwelve/Papermorph@engine-v1` keeps the earlier engine.
-
-## Video and LMS export
-
-With the site served locally, any chapter or episode renders to a 1080p MP4 with an `.srt`:
-
-```bash
-uv run --with playwright --with numpy .claude/skills/papermorph/scripts/export.py ch12 \
-  --url http://localhost:8765/science/ --link https://papermorph.diamonddoge.org/science/ch12/
-```
-
-Frames are rendered from the lesson clock, so the video matches the page exactly; quizzes stay in the interactive version, and the video ends by pointing there.
-
-For courses, a book can also be packaged for an LMS as SCORM 1.2 or 2004 (`scripts/scorm.py`), and a book can opt in to verified citation links and reviewed question banks ([authoring.md](.claude/skills/papermorph/references/authoring.md)). None of this is on by default.
-
-## Models and cost
-
-The Skill is not tied to one model: the books on the shelf were made with Opus 5.5, GPT-6.1-Sol and Sonnet 5.5.
-
-An illustrated physics chapter costs about $10–18 of model usage. The painted sets of a picture-book episode cost under $0.20.
+Any chapter or episode also renders to a 1080p MP4 with an `.srt`, frame by frame from the lesson clock (`scripts/export.py`), and a book can be packaged for an LMS as SCORM (`scripts/scorm.py`, [courses.md](.claude/skills/papermorph/references/lessons/courses.md)).
 
 ## Roadmap
 
-Ticked items are in the Skill today. The Skill currently goes as far as widescreen documentaries.
+The first roadmap is done: maths books, science books, picture books, a model of your choice for every step, documentaries, and upright shorts. So are picture books for children who can't read yet: layered paper sets, four-legged puppets and listen-and-find games, in *The Little Horse* and the second *Little Red Riding Hood*; and a picture book cut from a scanned book's own pages, *Millions of Cats*. A rifle, explorable maps and a scroll story came along the way, and the Skill now makes the maps and scroll stories too. Next:
 
-- [x] **Maths books:** formulas and diagrams that change step by step, with quizzes.
-- [x] **Science books:** illustrated scenes, acting characters, camera work.
-- [x] **Picture books:** paper-puppet films from a story, a joke or a fairy tale.
-- [ ] **Choosing the model for every step**, with defaults that depend on how much animation a book needs.
-- [x] **Documentaries:** narrated films of public-domain pictures about a book or an idea. *Madness and Civilization* on the shelf is the reference film.
-- [ ] **Vertical shorts** of documentaries.
+- **More from a PDF of pictures.** *Millions of Cats* cut its figures into puppets; next, tap to hear names over the painting and layers that drift in parallax. For your own books or a publisher's; our own examples use public-domain books or pictures we draw.
+- **Lessons with their own examples.** The textbook sets what is taught, in what order and how hard; the Skill writes new worked examples and exercises, with answers computed in code, so nothing is copied from the book.
+- **One source, every shape.** A single Wikipedia article made into a documentary, shorts, an interactive page and a scroll story, side by side.
+- **Elementary Physics, remade** with what the newer books can do.
+
+## Working with us
+
+The shelf is a set of examples: the shapes that suit a maths book, a language course, a picture book or a documentary, and one source can take several of them (*The Pandemic* is a film, six shorts and a scroll story). For publishers, schools and studios we build the pipeline around your own titles and your own style. See [the work page](https://papermorph.diamonddoge.org/work/), or write to [a972848363@gmail.com](mailto:a972848363@gmail.com) with what the titles are, who they are for, and how many you have in mind.
 
 ## FAQ
 
@@ -129,18 +117,16 @@ Ticked items are in the Skill today. The Skill currently goes as far as widescre
 
 ## Contributing
 
-Fixes to the Skill and the player are welcome. Please don't open pull requests that add a copyrighted book, its PDF, or lessons made from one.
+Fixes to the Skill and the player are welcome. Please don't open pull requests that add a copyrighted book, its PDF, or lessons made from one. Agents and people changing the repository: start with [AGENTS.md](AGENTS.md).
 
-## Try the examples locally
+To try the examples locally:
 
 ```bash
 git clone --depth 1 https://github.com/DozenTwelve/Papermorph.git
 cd Papermorph
-python3 .claude/skills/papermorph/scripts/serve.py 8765 site
+python3 .claude/skills/papermorph/scripts/serve.py 8765 site   # then open http://localhost:8765/
 ```
-
-Then open [localhost:8765](http://localhost:8765/). (The full history is large; `--depth 1` skips it.)
 
 ## License
 
-[MIT](LICENSE). The bundled MathJax (`engine/vendor/mathjax`) is under the Apache License 2.0.
+[MIT](LICENSE). The bundled MathJax (`engine/vendor/mathjax`) is under the Apache License 2.0. The MIT licence covers the code. Pictures, recordings and data under `site/` keep their own licences, listed beside them (for example `site/pandemic/img/SOURCES.md`); toned copies of CC BY-SA pictures stay CC BY-SA.

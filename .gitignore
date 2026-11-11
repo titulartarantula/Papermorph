@@ -14,10 +14,7 @@ __pycache__/
 /img/readme/*
 !/img/readme/logo.png
 !/img/readme/logo_light.png
-!/img/readme/papermorph-preview.webp
-!/img/readme/papermorph-preview.mp4
-!/img/readme/physics-pulleys.webp
-!/img/readme/joke-collection.webp
+!/img/readme/*.webp
 /books/
 /content/
 /tools/
@@ -29,3 +26,4 @@ __pycache__/
 /site/shooting-an-elephant/img/monks-alms.webp
 /site/shooting-an-elephant/img/moulmein-1846.webp
 /site/shooting-an-elephant/img/moulmein-pagoda.webp
+.impeccable/

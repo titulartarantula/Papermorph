@@ -21,7 +21,12 @@ Respell a word for the voice with {{shown|spoken}} (any engine): the voice says 
 The spoken text alone keys the audio cache, so adding a respelling around already-spoken text is free.
 
 A book with several speakers lists them under "voices" ({name: {"voice", "rate", "pitch"}}) and writes a
-beat as {"speaker": name, "text": ...}; plain string beats use the file's own voice. Pitch is Edge only ("+20Hz").
+beat as {"speaker": name, "text": ...}; plain string beats (and beats without a speaker) use the file's own voice. Pitch is Edge only ("+20Hz").
+A speaker may also have "af", an ffmpeg audio filter (a filter graph when it has [labels]) run on each of its clips,
+as eleven.py does: "asetrate=24000*1.22,aresample=24000,atempo=1/1.22" raises a voice with its length kept (both
+engines give 24 kHz). The words and marks come from the untreated take, kept as .tts/<narration>.<beat>.mp3 beside
+the narration file; the cache records the filter, so a rerun never treats a clip twice and a changed filter treats
+the kept take again with no new request. A filter that changes the length by more than 0.06 s is named.
 
 Narration text may contain [[mark]] tags placed before a word. The output
 timings.js records each clip's duration and the time (seconds) at which the
@@ -46,6 +51,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -243,37 +249,85 @@ def mark_times(clean, marks, words):
     return out
 
 
-def respell(cues, shown):
-    """Show each {{shown|spoken}} pair's written form in the captions."""
+def respell(cues, shown, beat=""):
+    """Show each {{shown|spoken}} pair's written form in the captions. A spoken form that no single caption holds
+    whole (split by a sentence end) is named, since that caption keeps the spoken form."""
     for spoken, written in shown:
-        pat = re.compile(r"(?<!\w)" + re.escape(spoken) + r"(?!\w)")
-        cues = [[t, pat.sub(written, text)] for t, text in cues]
+        pat, hit = re.compile(r"(?<!\w)" + re.escape(spoken) + r"(?!\w)"), False
+        for cue in cues:
+            cue[1], n = pat.subn(written, cue[1])
+            hit = hit or n > 0
+        if not hit:
+            print(f"{beat}: WARNING {{{{{written}|{spoken}}}}} is in no caption whole, so the captions show {spoken!r}",
+                  file=sys.stderr)
     return cues
 
 
-SENTENCE_END = re.compile(r"[.?!]\s+|[。！？]\s*")
+# tts.py and eleven.py split narration with these, so their captions and marks cannot drift apart
+SENTENCE_END = re.compile(r"(?<!\.\.)[.?!؟]\s+|[。！？]\s*")   # ؟ is the Arabic question mark; "I... I can't" is one line
+CLAUSE_END = re.compile(r"(?<!\.\.)[.?!؟:]\s+|[。！？：]\s*")   # eleven.py's cues: a clause after a colon too
 ABBREV = re.compile(r"(?<![\w.])(?:Mr|Mrs|Ms|Dr|Prof|St|vs|approx|e\.g|i\.e|cf)\.$")
+CJK = "　-ヿ㐀-䶿一-鿿豈-﫿＀-￯"   # kana, ideographs, CJK and full-width punctuation
+TOKEN = re.compile(rf"[{CJK}]|[^\s{CJK}]+")
+
+
+def tokens(text):
+    """A text's words: the runs between spaces, and each Chinese or Japanese character on its own (those scripts put
+    no spaces between words, so a character is the unit a mark can sit before and a transcript can be matched by)."""
+    return TOKEN.findall(text)
+
+
+def sentences(text, colon=False):
+    """(start, end) of each sentence in text (with colon, of each clause after a colon too); the space after one goes
+    with it. "Mr. Lee" and "e.g. a lot" go on."""
+    spans, start = [], 0
+    for m in list((CLAUSE_END if colon else SENTENCE_END).finditer(text)) + [None]:
+        if m and ABBREV.search(text, 0, m.start() + 1):
+            continue
+        end = m.end() if m else len(text)
+        if text[start:end].strip():
+            spans.append((start, end))
+        start = end
+    return spans
 
 
 def caption_cues(clean, words):
     """One cue per sentence: [start seconds, sentence]."""
-    at, cues, start = time_at(clean, words, estimate=True), [], 0
-    for m in list(SENTENCE_END.finditer(clean)) + [None]:
-        if m and ABBREV.search(clean, 0, m.start() + 1):   # "Mr. Lee", "e.g. a lot" go on
-            continue
-        end = m.end() if m else len(clean)
-        text = clean[start:end].strip()
-        if text:
-            cues.append([at(start) or 0, text])
-        start = end
-    return cues
+    at = time_at(clean, words, estimate=True)
+    return [[at(s) or 0, clean[s:e].strip()] for s, e in sentences(clean)]
 
 
 def duration(mp3):
+    """An audio file's (or URL's) length in seconds, the one ffprobe reading every script uses; a file ffprobe cannot
+    read stops the run with its name rather than passing on a length of 0."""
     r = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(mp3)],
-        capture_output=True, text=True, check=True)
-    return round(float(r.stdout), 3)
+        capture_output=True, text=True)
+    try:
+        return round(float(r.stdout), 3)
+    except ValueError:
+        raise SystemExit(f"{mp3}: ffprobe read no duration ({r.stderr.strip()[:300] or r.stdout.strip() or 'no output'})") from None
+
+
+def treat(mp3, af, beat, ar=44100, bitrate="128k"):
+    """A speaker's own treatment (its "af" in the narration file's voices), in place, written at ar Hz and bitrate;
+    warns when it changes the length, since the marks come from the untreated clip. eleven.py and tts.py share it."""
+    tmp, d0 = mp3.with_suffix(".part"), duration(mp3)
+    flt = ["-filter_complex", af] if "[" in af else ["-af", af]   # a chain with labels is a filter graph
+    r = subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(mp3), *flt, "-ar", str(ar), "-b:a", bitrate, "-f", "mp3", str(tmp)],
+                       capture_output=True, text=True)
+    if r.returncode: sys.exit(f"{beat}: its speaker's \"af\" did not run in ffmpeg: {r.stderr.strip().splitlines()[-1] if r.stderr.strip() else 'no output'}")
+    tmp.replace(mp3)
+    if abs((d1 := duration(mp3)) - d0) > .06:
+        print(f"{beat}: WARNING its treatment changed the length {d0:.2f} -> {d1:.2f} s: the marks and captions, aligned on the "
+              "untreated clip, drift by that much (pitch with asetrate and give the length back with atempo)", file=sys.stderr)
+
+
+def js_object(path):
+    """The one object a data file such as timings.js or mouths.js assigns (window.TIMINGS = {...};), read as JSON from
+    its first { to its last }, so a comment before it does no harm."""
+    t = Path(path).read_text(encoding="utf-8")
+    return json.loads(t[t.index("{"):t.rindex("}") + 1])
 
 
 def write_atomic(path, text):
@@ -302,11 +356,16 @@ async def main(src, out_dir):
     live = {b: public(v) for b, v in cache.items()
             if {"dur", "marks", "cues"} <= v.keys() and (out_dir / f"{b}.mp3").exists()}
     timings_path = out_dir / "timings.js"
+    plain_dir = Path(src).parent / ".tts"   # a treated speaker's untreated clips, kept out of the site
     for beat, raw in spec["beats"].items():
-        who = voices[raw["speaker"]] if isinstance(raw, dict) else spec
+        name = raw.get("speaker") if isinstance(raw, dict) else None
+        if name is not None and name not in voices:
+            raise SystemExit(f"{beat}: speaker {name!r} is not under the narration file's \"voices\"")
+        who = voices[name] if name is not None else spec   # no speaker: the file's own voice
         sub = raw.get("sub") if isinstance(raw, dict) else None   # the line's subtitle, one cue for the whole clip
         raw = raw["text"] if isinstance(raw, dict) else raw
         voice, rate, pitch = who["voice"], who.get("rate", "+0%"), who.get("pitch", "+0Hz")
+        af = who.get("af") if name is not None else None   # the speaker's own treatment, an ffmpeg filter
         if pitch != "+0Hz" and engine != "edge":
             raise SystemExit(f"{beat}: pitch is Edge only")
         mp3 = out_dir / f"{beat}.mp3"
@@ -322,28 +381,41 @@ async def main(src, out_dir):
         # then save its spoken-text key so future mark edits do not regenerate audio.
         legacy_key = hashlib.sha1(f"{tag}|{raw}".encode()).hexdigest()
         reusable = old and old.get("key") in (key, legacy_key if engine != "kokoro" else key) and "words" in old and mp3.exists() and mp3.stat().st_size > 0
+        plain = plain_dir / f"{Path(src).stem}.{beat}.mp3"   # this beat's take before its treatment
+        treated = old.get("af") if reusable else None   # the treatment the clip in out_dir already has
+        if treated and treated != af and not plain.exists():
+            print(f"{beat}: its untreated clip {plain} is gone, so its changed \"af\" needs it voiced again", file=sys.stderr)
+            reusable, treated = False, None
         tmp = None
         if reusable:
             words = old["words"]
-            clip = mp3
-        else:
+        if not reusable or treated != af:   # a new take, or a treatment added, changed or taken off
             with tempfile.NamedTemporaryFile(dir=out_dir, prefix=f".{beat}-", suffix=".mp3", delete=False) as f:
                 tmp = Path(f.name)
-            clip = tmp
+        clip = tmp or mp3
         try:
             if not reusable:
                 words = (kokoro_beat(clean, voice, rate, clip) if engine == "kokoro"
                          else elevenlabs_beat(clean, voice, model, settings, clip) if engine == "elevenlabs"
                          else await edge_beat(beat, clean, voice, rate, clip, out_dir, pitch))
+            elif tmp:
+                shutil.copyfile(plain if treated else mp3, clip)   # the take as voiced, without its old treatment
+            if tmp and af:   # the words came from the untreated take, so the marks hold if the length does
+                plain_dir.mkdir(exist_ok=True)
+                shutil.copyfile(clip, plain)
+                treat(clip, af, beat, *((44100, "128k") if engine == "elevenlabs" else (24000, "64k")))   # ElevenLabs gives 44.1 kHz, Edge and Kokoro 24 kHz
             entry = {"key": key, "dur": duration(clip), "words": words,
-                     "marks": mark_times(clean, marks, words), "cues": [[0, sub]] if sub else respell(caption_cues(clean, words), shown)}
+                     "marks": mark_times(clean, marks, words), "cues": [[0, sub]] if sub else respell(caption_cues(clean, words), shown, beat)}
+            if af:
+                entry["af"] = af
             # a line in another language than the book's (its voice's locale differs): the page shows its subtitle even
             # with captions off, as films do with foreign dialogue
             if sub and "-" in voice and voice.split("-")[0].lower() != Path(src).stem.split(".")[-1].lower():
                 entry["forced"] = True
             if tmp:
                 tmp.replace(mp3)
-                print(f"{beat}: synthesized")
+                print(f"{beat}: synthesized{' and treated' if af else ''}" if not reusable else
+                      f"{beat}: {'treated' if af else 'treatment taken off'}, no new request (level it again if it was levelled)")
             # Edge has returned clips that stop a sentence early: the last spoken word should end the text
             ends = re.findall(r"[A-Za-z][\w'-]*", clean[-40:])
             if words and ends and clean.isascii() and words[-1][1].strip(".,;:!?\"'") != ends[-1]:

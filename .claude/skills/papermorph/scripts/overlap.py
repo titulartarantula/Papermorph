@@ -9,10 +9,11 @@ box of each visible text (getBBox trimmed to the glyph band, tested in the text'
 Text pairs count when their ink boxes overlap by more than 4 px on every axis. Hits are merged into time ranges per
 beat and element pair; look at those frames with strip.py. Runs in Firefox.
 A lesson tool: picture-book scenes have no SVG text or arrows (captions are HTML, signs are painted), so a
-picture-book chapter (paper.js loaded) is skipped with a note.
+picture-book chapter (paper.js loaded) is skipped with a note. Exit status 1 when it finds an overlap or a page error.
 """
 import argparse, asyncio, json, sys
 from playwright.async_api import async_playwright
+from browsers import answers, firefox
 
 MEASURE = r"""
 ([i, step]) => {
@@ -51,7 +52,7 @@ MEASURE = r"""
       const m = inv.multiply(el.getScreenCTM()), sc = Math.hypot(m.a, m.b);
       const q = [[b.x + 1, top], [b.x + b.width - 1, top], [b.x + b.width - 1, bot], [b.x + 1, bot]].map(([x, y]) => f(x, y));
       const xs = q.map(p => p[0]), ys = q.map(p => p[1]);
-      if (Math.max(...xs) < 0 || Math.min(...xs) > 1600 || Math.max(...ys) < 0 || Math.min(...ys) > 900) continue;
+      if (Math.max(...xs) < 0 || Math.min(...xs) > SW || Math.max(...ys) < 0 || Math.min(...ys) > SH) continue;   // off the stage (upright too)
       // q: the ink box corners on stage (rotated text stays a rotated box); mi maps stage points back to text space
       texts.push({ s, q, mi: m.inverse(), x0: b.x + 1, x1: b.x + b.width - 1, top, bot, sc });
     }
@@ -113,8 +114,10 @@ async def main():
     ap.add_argument("--step", type=float, default=.25); ap.add_argument("--json"); ap.add_argument("--beat", action="append", default=[])
     o = ap.parse_args()
     args, step, jout, only, base = o.chapters, o.step, o.json, set(o.beat), o.url.rstrip("/") + "/"
+    for ch in args:
+        answers(f"{base}{ch}/")
     async with async_playwright() as p:
-        b = await p.firefox.launch(firefox_user_prefs={"media.autoplay.default": 0})
+        b = await p.firefox.launch(**firefox())
         pg = await b.new_page(viewport={"width": 1440, "height": 900})
         errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
         allres = {}
@@ -133,6 +136,7 @@ async def main():
         await b.close()
         if errs: print("PAGE ERRORS:", errs)
         if jout: json.dump(allres, open(jout, "w"), indent=1)
+    return 1 if errs or any(allres.values()) else 0
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    sys.exit(asyncio.run(main()))

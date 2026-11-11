@@ -1,4 +1,4 @@
-/* Website-only book navigation. The picture, links and hotspot positions live in index.html/bookshelf.css. */
+/* Website-only bookshelf behaviour: old root links, the About note, and a "Continue" note on books the reader has started. */
 'use strict';
 (() => {
   // Old root hashes referred to the first book before each book had its own folder.
@@ -12,14 +12,14 @@
   };
   legacyBook();
   addEventListener('hashchange', legacyBook);
-  const about = document.getElementById('shelf-about');
-  document.getElementById('shelf-about-button').addEventListener('click', () => about.showModal());
   const books = [
     { id: 'elementary-algebra', key: 'progress', chapterBase: 'elementary-algebra/', chapters: 68 },
     { id: 'math-notebook', key: 'animebook:progress:' + new URL('math-notebook/', location.href).pathname,
       chapterBase: 'math-notebook/', chapters: 23 },
     { id: 'science', key: 'animebook:progress:' + new URL('science/', location.href).pathname,
       chapterBase: 'science/', chapters: 19 },
+    { id: 'linear-algebra', key: 'animebook:progress:' + new URL('linear-algebra/', location.href).pathname,
+      chapterBase: 'linear-algebra/', chapters: 40 },
   ];
   for (const book of books) {
     const cover = document.querySelector(`[data-book="${book.id}"]`);
@@ -29,10 +29,11 @@
     if (!saved || !Number.isInteger(saved.last) || saved.last < 1 || saved.last > book.chapters) continue;
     const resume = document.createElement('a');
     resume.className = 'resume-label';
-    resume.textContent = `Continue · Chapter ${saved.last} →`;
+    resume.textContent = `Continue: Chapter ${saved.last}`;
     resume.href = `${book.chapterBase}ch${String(saved.last).padStart(2, '0')}/`;
-    resume.style.left = { 'elementary-algebra': '11%', 'math-notebook': '40.8%', science: '67.7%' }[book.id];
-    resume.style.top = '5.7%';
-    document.getElementById('shelf-books').append(resume);
+    const slot = document.createElement('div');   // a link can't hold a link: the note sits beside the cover, over it
+    slot.className = 'book-slot';
+    cover.replaceWith(slot);
+    slot.append(cover, resume);
   }
 })();
